@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200" role="img" aria-label="[ Hamburg · 2024 ]">
+  <defs>
+    <pattern id="h" width="36" height="36" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+      <rect width="36" height="36" fill="#efece6"/>
+      <rect width="18" height="36" fill="#e6e2db"/>
+    </pattern>
+  </defs>
+  <rect width="900" height="1200" fill="url(#h)"/>
+  <text x="450" y="600" text-anchor="middle" dominant-baseline="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="35" letter-spacing="1.40" fill="#8a877f">[ Hamburg · 2024 ]</text>
+</svg>

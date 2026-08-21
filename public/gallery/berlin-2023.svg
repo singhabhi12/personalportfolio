@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="1100" viewBox="0 0 1100 1100" role="img" aria-label="[ Berlin · 2023 ]">
+  <defs>
+    <pattern id="h" width="44" height="44" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+      <rect width="44" height="44" fill="#eeeae3"/>
+      <rect width="22" height="44" fill="#e5e1d9"/>
+    </pattern>
+  </defs>
+  <rect width="1100" height="1100" fill="url(#h)"/>
+  <text x="550" y="550" text-anchor="middle" dominant-baseline="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="42" letter-spacing="1.68" fill="#8a877f">[ Berlin · 2023 ]</text>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000" viewBox="0 0 800 1000" role="img" aria-label="[ B&amp;W portrait ]">
+  <defs>
+    <pattern id="h" width="32" height="32" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+      <rect width="32" height="32" fill="#ededed"/>
+      <rect width="16" height="32" fill="#e4e4e4"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="1000" fill="url(#h)"/>
+  <text x="400" y="500" text-anchor="middle" dominant-baseline="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="31" letter-spacing="1.24" fill="#999999">[ B&amp;W portrait ]</text>
+</svg>

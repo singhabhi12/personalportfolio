@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1050" viewBox="0 0 1400 1050" role="img" aria-label="[ Speicherstadt · 2024 ]">
+  <defs>
+    <pattern id="h" width="56" height="56" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+      <rect width="56" height="56" fill="#ece9e2"/>
+      <rect width="28" height="56" fill="#e3dfd7"/>
+    </pattern>
+  </defs>
+  <rect width="1400" height="1050" fill="url(#h)"/>
+  <text x="700" y="525" text-anchor="middle" dominant-baseline="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="40" letter-spacing="1.60" fill="#8a877f">[ Speicherstadt · 2024 ]</text>
+</svg>

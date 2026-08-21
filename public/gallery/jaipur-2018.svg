@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1250" viewBox="0 0 1000 1250" role="img" aria-label="[ Jaipur · 2018 ]">
+  <defs>
+    <pattern id="h" width="40" height="40" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+      <rect width="40" height="40" fill="#efeae2"/>
+      <rect width="20" height="40" fill="#e6e1d8"/>
+    </pattern>
+  </defs>
+  <rect width="1000" height="1250" fill="url(#h)"/>
+  <text x="500" y="625" text-anchor="middle" dominant-baseline="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="38" letter-spacing="1.52" fill="#8a877f">[ Jaipur · 2018 ]</text>
+</svg>
