@@ -253,10 +253,82 @@ export const tools: Tool[] = [
   { name: "Xcode", icon: "/tools/xcode.png" },
 ];
 
+/* The contact page is a writing desk: a typewriter you type into, the sheet it
+   feeds, and the letterbox the sheet is posted to. Every string the studio can
+   show lives here — including the ones only a failed send ever reveals. */
 export const contact = {
   label: "Let's collaborate",
   line: "A project, a role, or an idea worth building — I'd like to hear it.",
   cta: "Book an intro call",
+
+  /* Printed on the sheet itself, above the salutation. */
+  dateline: "Hamburg",
+  salutation: "Dear Abhishek,",
+  placeholder:
+    "A project, a role, or an idea worth building. Tell me what it is and what you need from me.",
+
+  fields: {
+    name: { label: "From", placeholder: "your name" },
+    email: { label: "Reply to", placeholder: "you@somewhere.com" },
+    message: { label: "Your letter", srOnly: "Write your message" },
+  },
+
+  send: "Seal and send",
+  sending: "Posting…",
+
+  /* The button before the letter is finished.
+
+     A sheet of paper has no labelled fields, so the button carries the
+     instructions instead: it names the next blank rather than offering to send
+     an empty letter, and pressing it puts the cursor there. Only once the
+     letter is actually finished does it become "Seal and send" — by which
+     point that is the only thing left to do. */
+  prompts: {
+    message: "Typed your message?",
+    sign: "Add your name and email",
+  },
+
+  /* Caption-sized, under the blank that earned them. */
+  errors: {
+    message: "Write something first",
+    name: "Needs a name",
+    email: "Needs a reply address",
+    emailShape: "That address looks wrong",
+  },
+
+  /* The stage is decorative — the form beneath it does the work — so both props
+     are labelled for screen readers and nothing else. */
+  sceneAlt:
+    "A typewriter with a sheet in the platen, and a letterbox standing beside it.",
+
+  delivered: {
+    label: "Posted",
+    line: "It's in the box. I read everything, and reply to most of it.",
+    again: "Write another",
+  },
+
+  /* Shown when there is no form endpoint configured, so the box was the end of
+     the animation and not the end of the journey. Offered rather than taken:
+     opening a mail client is the visitor's decision, and doing it for them
+     throws a window over the send they were watching. */
+  handoff: {
+    label: "Sealed",
+    line: "The last step is your mail app, with the letter already written.",
+    open: "Open it in your mail app",
+    again: "Write another",
+  },
+
+  /* Shown when the form endpoint turned the letter down. The letter is never
+     lost: it comes back out of the box with every word still in it. */
+  failed: {
+    label: "Didn't post",
+    line: "The letter came back. Send it the plain way instead —",
+    retry: "Try again",
+  },
+
+  /* Under the ink button: the way out for anyone who would rather not type
+     into a typewriter. */
+  aside: "or just email me",
 };
 
 export const stamp = {

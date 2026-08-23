@@ -43,5 +43,10 @@ next-env.d.ts
 
 # raw image originals — inputs only, never served
 /raw
+# Sketchfab downloads for the contact studio — 252MB of source formats (.usdz,
+# .fbx, 4K textures) that scripts/build-models.mjs reduces to the 203KB in
+# public/models. Inputs only: the browser never sees them, and GitHub refuses
+# files this size. Keep them locally to re-run `node scripts/build-models.mjs`.
+/3d Model
 # duplicate of raw/gallery — the served derivatives live in public/gallery
 /Gallery

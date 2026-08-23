@@ -160,6 +160,53 @@
   --lift-3: -22px;
   --lift-4: -8px;
 
+  /* Contact studio — the typewriter, the sheet, and the box it posts to.
+     The stage holds one shape so the composition the camera solves for is the
+     same on every screen; the sheet is sized in real pixels and *scaled*
+     into the scene by the projection, which is what keeps the typed text at a
+     readable size on a phone and crisp at rest on a desktop. */
+  --studio-ratio: 19 / 10;
+  --studio-h-min: 400px;
+  --studio-h-max: 620px;
+  --letter-w: 420px;
+  --letter-h: 474px;
+  --letter-pad: 34px;
+  /* The same sheet, sized for the scene. In the scene the paper has to fit the
+     typewriter's platen between its paper guides, and the platen is not as wide
+     as a form would like to be — so the scene trades characters-per-line for
+     type size: a narrower sheet and a slightly larger letter face, so that
+     after the projection scales the page down onto the platen the type lands
+     at very nearly the size the flat form shows it. The w/h ratio must match
+     LETTER_RATIO in lib/desk-scene.ts — the projection scales one box into
+     the other. */
+  --letter-scene-w: 330px;
+  --letter-scene-h: 372px;
+  --letter-scene-pad: 26px;
+  --letter-scene-text: 15px;
+  /* Paper has corners. 24px of card radius here would read as a UI panel
+     photographed on a desk rather than as a sheet in a roller. */
+  --radius-sheet: 2px;
+  --shadow-sheet: 0 1px 2px rgba(31, 31, 31, 0.1), 0 12px 28px rgba(31, 31, 31, 0.13);
+  /* The crease. A folded flap sits one paper-thickness proud of the sheet
+     under it, and that gap is the whole reason the fold reads as physical. */
+  --seal-lift: 1.5px;
+  --shadow-crease: 0 3px 8px rgba(31, 31, 31, 0.2);
+  /* Folded paper is not flat white. A faint darkening that fades away from the
+     crease is what stops the sealed letter reading as a blank card. */
+  --fold-sheen: linear-gradient(rgba(31, 31, 31, 0.05), rgba(31, 31, 31, 0) 45%);
+  --text-letter: 14px;   --leading-letter: 1.9;
+  /* The fold is a hinge, so it eases like one: slow to break the crease, quick
+     through the swing, settling onto the sheet rather than stopping dead. */
+  --seal-persp: 900px;
+  --dur-fold: 400ms;
+  --ease-fold: cubic-bezier(0.66, 0, 0.2, 1);
+  --letter-blank: 150px;
+  /* The type-here cue blinks at a caret's cadence — same order as the native
+     caret it stands in for, slow enough to invite rather than alarm. */
+  --dur-cue: 1.1s;
+  --studio-gap: 28px;
+  --field-underline: 1px;
+
   /* Motion */
   --ease: ease-out;
   --dur-fast: 150ms;
@@ -210,6 +257,17 @@ ul { list-style: none; }
   box-shadow: var(--shadow-card);
 }
 .skip-link:focus { left: var(--space-4); top: var(--space-4); }
+
+/* Labels the design draws as part of the artwork — a ruled blank on a letter,
+   a salutation standing in for a legend — still have to be spoken. */
+.sr-only {
+  position: absolute;
+  width: var(--hairline);
+  height: var(--hairline);
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 
 /* ---------- Page frame ---------- */
 
@@ -863,27 +921,504 @@ main > .contact:first-child { margin-top: 0; }
 
 /* ---------- Contact ---------- */
 
-.contact { max-width: var(--reading-max); margin-top: var(--section-gap-lg); }
+/* The contact page is a writing desk. Two props are rendered in WebGL — a
+   typewriter and the box it posts to, both recoloured to §7's palette — and the
+   letter between them is not: it is the real <form>, a real <textarea>, parked
+   in front of the canvas and moved by projecting a world-space anchor through
+   the same camera every frame. Text in a WebGL texture would lose focus rings,
+   selection, spellcheck, and its own sharpness, and would buy nothing.
 
-.contact-card {
-  background: var(--color-card);
-  border-radius: var(--radius-card);
-  padding: var(--space-12);
-  box-shadow: var(--shadow-card);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+   Which means the form works before any of that arrives. `data-mode="plain"` is
+   the served state: no canvas, the sheet in ordinary flow, every field usable.
+   components/ContactStudio.tsx switches the stage to `scene` only once three.js
+   has loaded and a WebGL context actually exists. */
+
+.contact { max-width: var(--page-max); margin-top: var(--section-gap-lg); }
+
+/* One screen, no scroll.
+
+   Everywhere else on this site a page is a stack of sections and scrolling is
+   how you read it. /contact is not that: the machine, the sheet, the box and
+   the button are one apparatus, and the send carries a letter from one end of
+   it to the other. Split across a fold, the flight leaves the screen halfway
+   and the acknowledgement lands somewhere nobody is looking.
+
+   So the frame becomes a column exactly one viewport tall and the stage takes
+   whatever is left after the fixed parts have had their share. `svh`, not
+   `vh`: on mobile browsers `vh` is the tallest the viewport ever gets, which
+   is the one measurement guaranteed to overflow while the address bar is
+   showing.
+
+   Guarded on both axes because both have to hold. Under either threshold the
+   scene is not built at all (SCENE_QUERY in lib/desk-scene.ts, which carries
+   the same two numbers) and the page falls back to the flat form, where
+   scrolling is the right answer. */
+@media (min-width: 820px) and (min-height: 760px) {
+  .frame[data-page='contact'] {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: var(--space-8);
+  }
+  .frame[data-page='contact'] > main {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+  }
+  /* The chain has to be unbroken: every box between the frame and the stage
+     passes the height down, or the stage falls back to its floor and the slack
+     collects in whichever ancestor stopped forwarding it. */
+  .frame[data-page='contact'] .contact {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+    /* A full section gap is headroom this page cannot spend twice. */
+    margin-top: var(--space-8);
+  }
+  .frame[data-page='contact'] .studio {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  /* Every gap above and below the stage is height the stage does not get, so
+     each one is cut to the smallest that still separates. The lead is let off
+     its reading measure too: on a page this wide it was wrapping to two lines
+     and charging the desk thirty pixels for the second. */
+  .frame[data-page='contact'] > .nav-wrap { margin-bottom: var(--space-6); }
+  .frame[data-page='contact'] .studio-head {
+    max-width: none;
+    margin-bottom: var(--space-4);
+  }
+  .frame[data-page='contact'] .studio-line { max-width: none; }
+  .frame[data-page='contact'] .studio-foot { margin-top: var(--space-5); }
+  .frame[data-page='contact'] .stamp { margin-top: var(--space-4); }
+
+  /* The stage is the give in the layout: aspect-ratio hands over to the flex,
+     because on this page the height is decided by what is left rather than by
+     the width. The camera fits whatever shape it is handed — see resize() in
+     components/studio-scene.ts — so the composition survives; only the amount
+     of visible desk changes. The floor is where the letter's own type is still
+     comfortably readable after the projection scales it down. */
+  .frame[data-page='contact'] .studio-stage[data-mode='scene'] {
+    flex: 1;
+    min-height: var(--studio-h-min);
+    /* Height now comes from the flex, so the ratio runs the other way: it sets
+       the *width*, and `align-self` is what lets it — a stretched flex item has
+       its cross size imposed and would ignore the ratio entirely.
+
+       Without this the stage spans the full page on a short window while the
+       camera, which fits by whichever edge binds, keeps fitting by height —
+       and the extra width arrives as empty desk down one side rather than as
+       more scene. Centred, so the composition stays in the middle of the page
+       instead of hugging the left. */
+    align-self: center;
+    aspect-ratio: var(--studio-ratio);
+    /* `auto`, emphatically not `100%`: a definite width would make the ratio
+       compute the height and the flex sizing above would be for nothing. */
+    width: auto;
+    max-width: 100%;
+  }
 }
 
-.contact-line {
+.studio-head { max-width: var(--reading-max); margin-bottom: var(--space-8); }
+
+.studio-line {
   font-size: var(--text-lead);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-lead);
   letter-spacing: var(--tracking-lead);
   color: var(--color-ink);
   max-width: var(--contact-max);
-  margin-bottom: var(--space-8);
 }
+
+/* ---------- The stage ---------- */
+
+.studio-stage { position: relative; }
+
+/* Served state: no scene, so the stage is nothing but the room the sheet needs. */
+.studio-stage[data-mode='plain'] {
+  display: flex;
+  justify-content: center;
+}
+
+/* A fixed 3:2 — the composition the camera was framed for, held at every
+   width, so the letterbox never drifts out of frame on a short window.
+
+   The letter tokens are re-pointed at their scene sizes here, at the stage,
+   so every consumer — the sheet, the fold bands, the gauge — picks up the
+   narrower paper together and the flat form keeps its full width. */
+.studio-stage[data-mode='scene'] {
+  aspect-ratio: var(--studio-ratio);
+  min-height: var(--studio-h-min);
+  max-height: var(--studio-h-max);
+  --letter-w: var(--letter-scene-w);
+  --letter-h: var(--letter-scene-h);
+  --letter-pad: var(--letter-scene-pad);
+  --text-letter: var(--letter-scene-text);
+}
+
+.studio-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* Every pointer event belongs to the letter in front of it — the scene is
+     looked at, never operated. */
+  pointer-events: none;
+}
+
+/* ---------- The sheet ---------- */
+
+.letter {
+  position: relative;
+  width: var(--letter-w);
+  height: var(--letter-h);
+  max-width: 100%;
+  perspective: var(--seal-persp);
+}
+
+/* Under the scene the sheet is placed by the projection, not by layout: JS owns
+   `transform` outright and writes it every frame, so nothing here may set one. */
+.studio-stage[data-mode='scene'] .letter {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+/* The live layer: what someone types into. The sealed layer below is a still
+   copy of it, and the two are identical by construction — same classes, same
+   metrics — because the swap between them happens in a single frame. */
+.letter-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-card);
+  border-radius: var(--radius-sheet);
+  padding: var(--letter-pad);
+  box-shadow: var(--shadow-sheet);
+}
+/* Child combinator on purpose: the sealed layer renders .letter-face again,
+   three times over, and a descendant selector would hide those too. Hidden
+   rather than transparent, so the fields under the fold leave the tab order
+   with them. */
+.letter[data-state='sealing'] > .letter-face,
+.letter[data-state='delivered'] > .letter-face { opacity: 0; visibility: hidden; }
+
+/* Mono, and the only place on the site besides an unwritten case-study section
+   that uses it. A typewriter sets one letterform width; Inter would make the
+   sheet a text field with a machine drawn behind it. */
+.letter-dateline {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-micro);
+  color: var(--color-muted);
+  text-transform: uppercase;
+  text-align: right;
+  margin-bottom: var(--space-6);
+}
+
+.letter-salutation {
+  font-family: var(--font-mono);
+  font-size: var(--text-letter);
+  line-height: var(--leading-letter);
+  color: var(--color-ink);
+}
+
+/* Grows into whatever the dateline and signature leave. No resize handle: the
+   sheet is a fixed size, the way a sheet is. */
+.letter-body {
+  flex: 1;
+  min-height: var(--letter-blank);
+  width: 100%;
+  border: none;
+  background: none;
+  resize: none;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-letter);
+  line-height: var(--leading-letter);
+  color: var(--color-ink);
+  caret-color: var(--color-accent);
+}
+.letter-body:focus { outline: none; }
+.letter-body::placeholder { color: var(--color-muted); }
+
+/* Where the next letter will land.
+
+   A sheet of paper offers no affordance — nothing on it looks like a field —
+   so before anyone has clicked, a block cursor blinks on the first character
+   cell of the message, the way a terminal shows where typing goes. It is the
+   native caret's understudy: shown only while the message is empty and
+   unfocused, and the moment either changes the real caret blinks on in the
+   same cell.
+
+   The wrapper is the cue's positioning context; it takes over the textarea's
+   share of the column and hands all of it straight back. */
+.letter-writing {
+  position: relative;
+  flex: 1;
+  display: flex;
+  min-height: var(--letter-blank);
+}
+.letter-writing .letter-body { min-height: 0; }
+
+/* Sized off the letter's own type: one character cell of the mono face,
+   nudged down to sit on the first line the way its glyphs do. */
+.letter-cue {
+  position: absolute;
+  left: 0;
+  top: calc(var(--text-letter) * (var(--leading-letter) - 1.3) / 2);
+  width: calc(var(--text-letter) * 0.62);
+  height: calc(var(--text-letter) * 1.3);
+  background: var(--color-accent);
+  pointer-events: none;
+  animation: cue-blink var(--dur-cue) linear infinite;
+}
+.letter-body:focus + .letter-cue,
+.letter-body:not(:placeholder-shown) + .letter-cue { display: none; }
+
+/* Abrupt, not faded: a caret switches, it does not glow. */
+@keyframes cue-blink {
+  0%, 55% { opacity: 1; }
+  56%, 100% { opacity: 0; }
+}
+
+/* The gauge. Not content — a ruler. It holds whatever is in the message field
+   (or the placeholder, while the field is empty) at the message field's own
+   width and metrics, with nothing constraining its height, so its height is the
+   height of the writing and the scene can ask how far to feed the paper. A
+   textarea cannot answer that question about itself: `scrollHeight` is floored
+   at the element's own height, and this one is stretched down the sheet.
+
+   Everything below it is there to make it weigh nothing: out of flow so it
+   cannot move the form, hidden so it cannot be seen, inert so it cannot be
+   tabbed to, read out, or found by ⌘F. Left and right are set to the sheet's
+   own padding, which is where the message field's edges are. */
+.letter-gauge {
+  position: absolute;
+  left: var(--letter-pad);
+  right: var(--letter-pad);
+  top: 0;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  font-family: var(--font-mono);
+  font-size: var(--text-letter);
+  line-height: var(--leading-letter);
+}
+
+/* The sheet has no focus ring of its own — the whole sheet lights instead, so
+   the ring never crops against the paper's edge. */
+.letter-face:focus-within { box-shadow: var(--shadow-sheet), var(--ring-dot); }
+
+.letter-sign {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  justify-content: flex-end;
+  margin-top: var(--space-5);
+}
+.letter-dash {
+  font-family: var(--font-mono);
+  font-size: var(--text-letter);
+  line-height: var(--leading-letter);
+  color: var(--color-muted);
+}
+.letter-blanks { display: flex; flex-direction: column; align-items: flex-start; }
+
+/* Fill-in-the-blank, not a form field: a ruled line and nothing else. */
+.letter-blank {
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-letter);
+  line-height: var(--leading-letter);
+  color: var(--color-ink);
+  border-bottom: var(--field-underline) solid var(--color-line);
+  caret-color: var(--color-accent);
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.letter-blank:focus { outline: none; border-bottom-color: var(--color-accent); }
+.letter-blank::placeholder { color: var(--color-muted); }
+.letter-blank[aria-invalid='true'] { border-bottom-color: var(--color-status); }
+
+/* Caption-sized semantic red, which is the one place §7 allows it. */
+.letter-error {
+  font-family: var(--font-label);
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-micro);
+  color: var(--color-status);
+  text-transform: uppercase;
+  margin-top: var(--space-1);
+}
+
+/* ---------- The fold ---------- */
+
+/* A letter fold, done the way a letter is folded: bottom third up over the
+   middle, then top third down over both. Each flap is hinged on the crease it
+   shares with the middle, so the motion is a hinge and not a slide.
+
+   Every band shows the same sheet through a window one third tall, offset by
+   its own share — which is why the text does not move while the paper does.
+   `backface-visibility` does the rest: turn a flap past 90° and its printed
+   side stops being drawn, leaving the band's own paper white facing out. */
+.letter-seal {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+.letter[data-state='sealing'] .letter-seal,
+.letter[data-state='delivered'] .letter-seal { opacity: 1; }
+
+.seal-mid,
+.seal-flap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: calc(var(--letter-h) / 3);
+  background: var(--color-card);
+  transform-style: preserve-3d;
+}
+
+.seal-mid { top: calc(var(--letter-h) / 3); box-shadow: var(--shadow-sheet); }
+
+.seal-flap--lower { top: 100%; transform-origin: top center; }
+.seal-flap--upper { bottom: 100%; transform-origin: bottom center; }
+
+/* The flap's own face — what is left showing once the printed side has turned
+   away — shades toward the crease it is hinged on. */
+.seal-flap { background: var(--fold-sheen), var(--color-card); }
+
+/* Folded. The lift is one paper thickness — without it the two flaps land in
+   the same plane as the middle and the crease disappears into a seam.
+
+   The lift is written *before* the rotation and that order is load-bearing.
+   CSS applies transform functions right to left, so `translateZ() rotateX()`
+   turns the flap and then lifts the turned flap toward the viewer. Written the
+   other way round the lift is applied in the flap's own frame — which the half
+   turn has just pointed away from the camera — and every flap folds neatly
+   behind the sheet it is supposed to be covering. */
+.letter[data-fold='lower'] .seal-flap--lower,
+.letter[data-fold='both'] .seal-flap--lower {
+  transform: translateZ(var(--seal-lift)) rotateX(180deg);
+  box-shadow: var(--shadow-crease);
+}
+.letter[data-fold='both'] .seal-flap--upper {
+  transform: translateZ(calc(var(--seal-lift) * 2)) rotateX(-180deg);
+  box-shadow: var(--shadow-crease);
+}
+
+.seal-flap { transition: transform var(--dur-fold) var(--ease-fold), box-shadow var(--dur-fold) var(--ease); }
+
+/* The window each band looks through. `overflow` flattens 3D inside it, which
+   is exactly right — a printed page has no depth of its own. */
+.seal-clip { position: absolute; inset: 0; overflow: hidden; backface-visibility: hidden; }
+.seal-page {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: var(--letter-h);
+}
+.seal-page[data-band='0'] { top: 0; }
+.seal-page[data-band='1'] { top: calc(var(--letter-h) / -3); }
+.seal-page[data-band='2'] { top: calc(var(--letter-h) / -3 * 2); }
+
+/* The still copy carries no shadow and no rounding: the band it sits in owns
+   both, or every third of the letter would draw its own drop shadow. */
+.seal-page .letter-face { box-shadow: none; border-radius: 0; opacity: 1; visibility: visible; }
+
+/* With no scene to fly across, the sealed letter still has to leave. It goes
+   the only way a folded letter can go on a flat page: up and out. */
+.studio-stage[data-mode='plain'] .letter {
+  transition: transform var(--dur-slide) var(--ease), opacity var(--dur-slide) var(--ease);
+}
+.studio-stage[data-mode='plain'] .letter[data-state='delivered'] {
+  transform: translateY(calc(var(--letter-h) / -4)) scale(0.88);
+  opacity: 0;
+}
+
+/* ---------- Below the stage ---------- */
+
+.studio-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--studio-gap);
+  margin-top: var(--space-8);
+}
+
+.btn-ink[disabled] { opacity: 0.55; cursor: default; }
+
+/* While the button is asking for a blank rather than offering to send, it wears
+   the outline of the filled button rather than its weight — the one solid mass
+   on the site is reserved for the one action that finishes the letter. */
+.btn-ink[data-prompting] {
+  background: none;
+  color: var(--color-ink);
+  border: var(--hairline) solid var(--color-line);
+}
+.btn-ink[data-prompting]:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.studio-aside { font-size: var(--text-body); color: var(--color-muted); }
+.studio-aside .contact-email { margin-top: 0; margin-left: var(--space-2); }
+
+/* The answer, in the place the button was standing — and in the *shape* the
+   button was standing in: one filled action, one line of type beside it.
+
+   That shape is structural, not tidiness. On the fitted layout the stage is
+   sized from whatever the fixed parts leave behind, so a panel that runs three
+   lines tall in one state and one line in another would resize the desk
+   underneath it: press send and the machine would visibly step backwards,
+   which is the one moment nothing should move but the letter. */
+.studio-note {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--studio-gap);
+}
+.studio-note .studio-aside { max-width: var(--contact-max); }
+
+/* The label reads as a stamp on the line rather than a heading above it. */
+.studio-note-label {
+  font-family: var(--font-label);
+  font-size: var(--text-label);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-ink);
+  margin-right: var(--space-2);
+}
+.studio-note[data-tone='failed'] .studio-note-label { color: var(--color-status); }
+
+/* The handoff is the one ending that offers a second way out. */
+.studio-note-row { display: flex; align-items: center; gap: var(--studio-gap); }
+
+.studio-again {
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  color: var(--color-ink);
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: var(--underline-weight);
+  text-underline-offset: var(--underline-offset);
+}
+.studio-again:hover { color: var(--color-accent); }
 
 /* The only filled button on the entire site. */
 .btn-ink {
@@ -891,11 +1426,14 @@ main > .contact:first-child { margin-top: 0; }
   align-items: center;
   height: var(--btn-height);
   padding: 0 var(--btn-pad-x);
+  border: none;
   border-radius: var(--radius-pill);
   background: var(--color-ink);
   color: var(--color-on-dark);
+  font-family: var(--font-sans);
   font-size: var(--text-body);
   font-weight: var(--weight-medium);
+  cursor: pointer;
 }
 .btn-ink:hover { color: var(--color-on-dark); }
 
@@ -1351,9 +1889,35 @@ main > .contact:first-child { margin-top: 0; }
 
 /* Rotation here is static layout, not motion — only transitions are suppressed. */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
   .work-card:hover .shot-frame .hover-media { opacity: 0; }
+
+  /* One hole, for the fold.
+
+     Everything above is decoration being asked to hold still, and it does. The
+     creases are not: on /contact the letter folding *is* the page, and a sheet
+     that snaps from flat to folded between two frames has not been calmed, it
+     has been broken. The reasoning is at STILL_FLAG in lib/desk-scene.ts.
+
+     `?motion=still` closes the hole again — it is the switch for anyone who
+     wants the quiet ending, and the JS reads the same attribute to skip the
+     journey, so the two halves of that decision cannot drift apart. */
+  :root:not([data-motion='still']) .seal-flap {
+    transition-duration: var(--dur-fold) !important;
+  }
+  :root:not([data-motion='still']) .studio-stage[data-mode='plain'] .letter {
+    transition-duration: var(--dur-slide) !important;
+  }
+
+  /* And one for the type-here cue, unconditionally: it is a caret, and native
+     carets blink under reduced motion in every browser. Flattened to 0.01ms it
+     would not hold still — it would flicker, which is worse than either. */
+  .letter-cue {
+    animation-duration: var(--dur-cue) !important;
+  }
 }

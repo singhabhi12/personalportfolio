@@ -17,7 +17,11 @@ export default function PageFrame({
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <div className="frame">
+      {/* `data-page` lets a route ask for a shell of its own without a second
+          frame component. /contact is the one that does: it is a single
+          composition rather than a stack of sections, and it has to fit the
+          screen it is looked at on. */}
+      <div className="frame" data-page={active}>
         {/* Phase 2 cursor-play hook. Harmless static text until then — the
             pointer is what makes it read as the cursor's own aside. */}
         <span className="whisper" data-whisper aria-hidden="true">
