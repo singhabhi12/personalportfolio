@@ -1,11 +1,15 @@
 import Link from "next/link";
 
-/* Nav is Home · Work · Life · Contact. Each item is its own route — no
-   home-page anchors. Life is the About page plus the photo gallery. */
+/* Nav is Home · Work · Life · Canvas · Contact. Each item is its own route —
+   no home-page anchors. Life is the About page plus the photo gallery.
+
+   Canvas sits fourth rather than last: Contact is the one thing the site is
+   asking for, so it keeps the end of the row. */
 const items = [
   { key: "home", label: "Home", href: "/" },
   { key: "work", label: "Work", href: "/work" },
   { key: "life", label: "Life", href: "/life" },
+  { key: "canvas", label: "Canvas", href: "/canvas" },
   { key: "contact", label: "Contact", href: "/contact" },
 ] as const;
 

@@ -331,6 +331,60 @@ export const contact = {
   aside: "or just email me",
 };
 
+/* The Canvas: the one page that gives the desk back to the visitor. Sheet,
+   pens, and a wall to pin the results to. Everything the page can say lives
+   here — including the states only an empty wall or a full one ever show. */
+export const canvas = {
+  label: "The Canvas",
+  /* One line in the lead face, the way /contact opens. Not "seven pens": a
+     phone is offered four, and copy that contradicts the toolbar in front of
+     it is worse than copy that undercounts. Where a drawing goes is explained
+     by the wall and the privacy note, not by a second sentence here. */
+  line: "A sheet, a handful of pens, and nobody watching.",
+
+  /* The sheet is decorative to a screen reader; the buttons under it do the
+     work, so it gets a name and nothing else. */
+  surfaceLabel: "Drawing surface",
+
+  pin: "Pin to the wall",
+  /* The pin button's own receipt, for a second and a half. */
+  pinned: "Pinned ✓",
+  download: "Download PNG",
+  /* Base filename for the export; Drawesome adds the extension. */
+  downloadName: "canvas",
+
+  /* The wall under the sheet. */
+  wall: {
+    label: "The wall",
+    empty: "Nothing pinned yet. The wall fills up as you draw.",
+    open: "Put back on the sheet",
+    remove: "Take down",
+    /* Shown once the wall is at WALL_MAX and the oldest is being dropped. */
+    full: "The wall holds twelve. Pinning a thirteenth takes the oldest down.",
+
+    /* Putting a pin back overwrites the sheet and its undo history, so an
+       unpinned drawing gets asked about first. */
+    confirm: "There's something on the sheet that isn't pinned.",
+    replace: "Replace it",
+    keep: "Keep drawing",
+  },
+
+  /* Nothing here leaves the browser, and a visitor should not have to guess
+     that from the word "save". */
+  privacy: "Pinned drawings live in this browser only — nothing is uploaded.",
+
+  /* Drawesome is doing the actual drawing. Credit belongs on the page, not in
+     a comment nobody reads. */
+  credit: {
+    lead: "Pens, ink, and toolbar by",
+    name: "Drawesome",
+    href: "https://github.com/benjitaylor/drawesome",
+    author: "Benji Taylor",
+    authorHref: "https://benji.org/drawesome",
+    licence: "MIT",
+  },
+};
+
 export const stamp = {
   /* Phase 2 makes the time live; see components/StampTime.tsx. */
   place: "HAM",

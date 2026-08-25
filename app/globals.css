@@ -207,6 +207,28 @@
   --studio-gap: 28px;
   --field-underline: 1px;
 
+  /* The Canvas — the desk handed over. The stage is the table, the board
+     Drawesome letterboxes inside it is the paper, and the wall below holds
+     what has been pinned.
+
+     `--canvas-sheet` is read by components/CanvasStudio.tsx as well as used
+     here: it is painted into the exported SVG, which travels away from this
+     stylesheet and cannot carry a var() with it. Declared once, consumed in
+     both places — never written a second time in the component. */
+  --canvas-sheet: #ffffff;
+  /* The wall's column. Two pins across at a size a scribble still reads at,
+     and wide enough that a pin's caption — a short date and the button that
+     takes it down — stays on one line. */
+  --wall-col: 312px;
+  /* The sheet's floor in the one-screen layout, and its height in the stacked
+     one — where the toolbar is a 491px rail and has to stand inside it. */
+  --canvas-stage-min: 380px;
+  /* The floor is the rail's 491px plus its inset top and bottom: on a short
+     phone the sheet cannot be smaller than the toolbar standing in it. */
+  --canvas-stage-h: clamp(535px, 66vh, 620px);
+  --pin-min: 130px;
+  --shadow-sheet-flat: 0 1px 2px rgba(31, 31, 31, 0.08), 0 6px 18px rgba(31, 31, 31, 0.08);
+
   /* Motion */
   --ease: ease-out;
   --dur-fast: 150ms;
@@ -403,7 +425,8 @@ sup.marker { font-size: var(--text-label); }
    frame's top padding already sets it off the nav. Applies to /work and
    /contact, where the section is the whole page. */
 main > .section:first-child,
-main > .contact:first-child { margin-top: 0; }
+main > .contact:first-child,
+main > .canvas:first-child { margin-top: 0; }
 
 .shot {
   border-radius: var(--radius-image);
@@ -1445,6 +1468,310 @@ main > .contact:first-child { margin-top: 0; }
 }
 .contact-email:hover { color: var(--color-accent); }
 
+/* ---------- The Canvas ---------- */
+
+/* The one page that hands the desk over.
+
+   Built like /contact and not like /work: an apparatus rather than a stack of
+   sections, so it opens with the same head in the same classes, it fits one
+   screen, and the wall stands beside the sheet instead of below it. What you
+   have already drawn should be in sight while you draw the next one — a wall
+   you have to scroll to is a folder, not a wall.
+
+   Drawesome's own chrome is scoped to `.sd` and carries its own tokens. Only
+   `--workspace` is set from here, and only so that the surface can never show
+   a colour this page did not choose. */
+
+.canvas { max-width: var(--page-max); margin-top: var(--section-gap-lg); }
+
+.canvas-head { max-width: var(--reading-max); margin-bottom: var(--space-6); }
+
+/* The lead face, exactly as /contact sets it — same size, same weight, same
+   measure. Two pages that are built the same way should read the same way. */
+.canvas-line {
+  font-size: var(--text-lead);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-lead);
+  letter-spacing: var(--tracking-lead);
+  color: var(--color-ink);
+  max-width: var(--contact-max);
+}
+
+/* Sheet and wall. Stacked by default and side by side only where there is
+   genuinely room for both — see the one-screen block at the foot of this
+   section for what "room" means here. */
+.canvas-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--card-gap);
+  align-items: stretch;
+}
+
+.canvas-desk {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* The sheet itself — a white card, like every other object on this site. The
+   board matches the element, so there is nothing behind the paper to see; the
+   radius is inherited by Drawesome's root, which is why it is set here rather
+   than on an inner wrapper. */
+.canvas-stage {
+  --workspace: var(--canvas-sheet);
+  height: var(--canvas-stage-h);
+  background: var(--color-card);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  /* The toolbar is dragged around inside this box; a text selection picked up
+     mid-drag is never what was meant. */
+  user-select: none;
+}
+
+/* The same foot /contact puts under its stage: the one ink button, a quiet
+   companion, and a note that is not asking to be read first. */
+.canvas-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--studio-gap);
+  margin-top: var(--space-5);
+}
+
+/* Pinning is the page's one filled button. Confirmed, it goes accent for a
+   second and a half — the receipt is the button itself, not a toast. */
+.btn-ink[data-confirmed] { background: var(--color-accent); }
+
+/* Everything beside the ink button: a real button that carries no weight. */
+.canvas-quiet {
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  color: var(--color-body);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease);
+}
+.canvas-quiet:hover { color: var(--color-accent); }
+.canvas-quiet[disabled] { color: var(--color-muted); cursor: default; }
+.canvas-quiet[disabled]:hover { color: var(--color-muted); }
+
+/* Nothing leaves the browser, and nobody should have to infer that from the
+   word "pin". Sits at the far end of the foot, out of the way. */
+.canvas-privacy {
+  margin-left: auto;
+  font-family: var(--font-label);
+  font-size: var(--text-label);
+  line-height: var(--leading-label);
+  color: var(--color-muted);
+  text-align: right;
+}
+
+/* ---------- The wall ---------- */
+
+/* A panel, not a card: a flat surface one value step below the paper, with the
+   white pins floating on top of it. The panel carries no shadow — the objects
+   inside it do, and that is what makes it read as a surface. */
+.canvas-wall {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: var(--panel-pad-lg);
+  background: var(--color-panel);
+  border-radius: var(--radius-panel);
+}
+.canvas-wall > .widget-label { margin-bottom: var(--space-4); }
+
+/* The question asked before a pin overwrites an unpinned sheet. One bar for
+   the whole wall — there is only ever one sheet to lose. */
+.canvas-confirm {
+  flex: none;
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  background: var(--color-card);
+  border-radius: var(--radius-icon);
+  box-shadow: var(--shadow-card);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-ink);
+}
+.canvas-confirm-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
+.canvas-empty {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-muted);
+}
+/* Below the pins rather than instead of them: this one is the wall telling you
+   it is full, and it should not push the pins out of view to say so. */
+.canvas-pins + .canvas-empty { margin-top: var(--space-4); }
+
+/* As many across as the row allows while the wall is a full-width band under
+   the sheet. In the side column it becomes exactly two — see the one-screen
+   block. */
+.canvas-pins {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--pin-min), 1fr));
+  gap: var(--space-4);
+  align-content: start;
+  min-height: 0;
+  /* The gutter is padded rather than margined so a hovering pin's lift is not
+     clipped once this becomes a scroll box. */
+  margin-inline: calc(var(--space-2) * -1);
+  padding-inline: var(--space-2);
+  padding-block: var(--space-1);
+}
+
+.pin-open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+.pin-open:focus-visible { outline: none; }
+.pin-open:focus-visible .pin-shot {
+  box-shadow: 0 0 0 var(--focus-ring) var(--color-accent), var(--shadow-sheet-flat);
+}
+
+/* The thumbnail is the drawing rebuilt from its strokes, so a pin and an
+   export are the same picture. The paper under it is painted here as well as
+   in the SVG — a transparent gap at the edges would read as a hole. */
+.pin-shot {
+  width: 100%;
+  height: auto;
+  background: var(--canvas-sheet);
+  border-radius: var(--radius-image);
+  box-shadow: var(--shadow-sheet-flat);
+  transition: transform var(--dur-fast) var(--ease);
+}
+.pin-open:hover .pin-shot { transform: translateY(var(--lift-4)); }
+
+/* One line, always: two labels that wrap onto four is what a caption in a
+   narrow column does if nothing stops it. */
+.pin-caption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  white-space: nowrap;
+}
+
+.pin-remove {
+  border: none;
+  background: none;
+  padding: 0;
+  font-family: var(--font-label);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-micro);
+  letter-spacing: var(--tracking-micro);
+  text-transform: uppercase;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease);
+}
+.pin-remove:hover { color: var(--color-status); }
+
+/* Credit, on the page rather than in a comment. Drawesome is doing the part of
+   this page that is actually hard. Sized like the stamp it sits above, because
+   that is where a colophon belongs. */
+.canvas-credit {
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: var(--hairline) solid var(--color-line);
+  font-family: var(--font-label);
+  font-size: var(--text-label);
+  line-height: var(--leading-label);
+  color: var(--color-muted);
+}
+.canvas-credit a { color: var(--color-body); text-decoration: underline; }
+.canvas-credit a:hover { color: var(--color-accent); }
+
+/* One screen, no scroll — the same treatment /contact gets, and for the same
+   reason: this is one apparatus rather than a stack of sections, and a wall
+   you have to scroll to is a folder. The long note above the /contact block
+   carries the argument and the `svh` reasoning; only the two thresholds differ,
+   because this page is bound by a different thing.
+
+   Width: the toolbar is a fixed 633px and is clipped by the sheet it lies on,
+   so the sheet needs 673px with its inset. The wall takes 312px and the gap
+   24px, and the frame takes 80px off the viewport before any of them — which
+   puts the floor at 1089px. 1120px, so it is not decided by a rounding error.
+
+   Height: below this the sheet is pushed to its 380px floor and the column
+   overflows anyway, which is a scroll with extra steps.
+
+   Under either threshold the wall comes down off the side, the sheet takes the
+   full width, and the page scrolls like every other page here — which is the
+   right answer once the composition no longer fits.
+
+   The chain has to be unbroken: every box between the frame and the stage
+   passes the height down, or the stage falls back to its floor and the slack
+   collects in whichever ancestor stopped forwarding it. */
+@media (min-width: 1120px) and (min-height: 800px) {
+  .frame[data-page='canvas'] {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: var(--space-8);
+  }
+  .frame[data-page='canvas'] > main {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+  }
+  .frame[data-page='canvas'] .canvas {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    margin-top: var(--space-8);
+  }
+  /* Every gap above and below the sheet is height the sheet does not get, so
+     each one is cut to the smallest that still separates. */
+  .frame[data-page='canvas'] > .nav-wrap { margin-bottom: var(--space-6); }
+  .frame[data-page='canvas'] .canvas-head {
+    max-width: none;
+    margin-bottom: var(--space-4);
+  }
+  .frame[data-page='canvas'] .canvas-line { max-width: none; }
+
+  /* The wall takes its column, and the sheet takes whatever is left on both
+     axes. A fixed column, because a wall that grows with the window is a wall
+     whose pins change size for no reason. */
+  .frame[data-page='canvas'] .canvas-grid {
+    flex: 1;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) var(--wall-col);
+  }
+  .frame[data-page='canvas'] .canvas-stage {
+    flex: 1;
+    height: auto;
+    min-height: var(--canvas-stage-min);
+  }
+  .frame[data-page='canvas'] .canvas-wall { padding: var(--card-padding); }
+
+  /* Exactly two across, and the column scrolls itself once there are more than
+     fit. The scroll lives here so the page never gains one. */
+  .frame[data-page='canvas'] .canvas-pins {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow-y: auto;
+  }
+
+  .frame[data-page='canvas'] .stamp { margin-top: var(--space-4); }
+}
+
 /* ---------- Footer stamp ---------- */
 
 .stamp {
@@ -1868,6 +2195,25 @@ main > .contact:first-child { margin-top: 0; }
   .section, .contact { margin-top: var(--section-gap); }
 }
 
+/* The Canvas, below the width its toolbar can lie down in.
+
+   Drawesome's bar is a fixed 633px with everything on it, and it is clipped by
+   the surface it sits on — so under this width it stands up as a rail on the
+   right instead. That is a JS decision (the placement prop), and this is the
+   CSS half of it: a rail is 491px tall, so the sheet has to be taller than
+   that. Must stay in step with RAIL_QUERY in components/CanvasStudio.tsx.
+   820px is where the bar stops fitting with room to spare: the frame gives the
+   stage 80px less than the viewport, and the bar wants 673px of it.
+
+   By this width the page is already the stacked, scrolling version — the
+   one-screen layout gives up at 1120px, well above here. All that is left to
+   do is give the foot's three items somewhere to go: on a phone the row wraps,
+   and a note pushed to the far end of a wrapped row lands nowhere. */
+@media (max-width: 820px) {
+  .canvas-foot { gap: var(--space-4) var(--space-6); }
+  .canvas-privacy { margin-left: 0; flex-basis: 100%; text-align: left; }
+}
+
 @media (max-width: 640px) {
   :root {
     --frame-pad-x: 24px;
@@ -1878,6 +2224,9 @@ main > .contact:first-child { margin-top: 0; }
   .frame { padding-bottom: var(--space-16); }
   .nav-wrap { margin-bottom: var(--space-12); }
   .nav-capsule { padding: 0 var(--space-5); }
+  .canvas-pins {
+    --pin-min: 96px;
+  }
   .widget--lg { padding: var(--card-padding); }
   .contact-card { padding: var(--space-8); }
   .lightbox { padding: var(--space-5); }
