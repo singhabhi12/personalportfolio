@@ -9,8 +9,8 @@ import {
   manifestoFootnote,
   portrait,
   projectHref,
-  quotes,
 } from "@/lib/content";
+import DeskQuote from "./DeskQuote";
 import ToolsRow from "./ToolsRow";
 
 /* The desk: the manifesto panel at left, arranged objects at right.
@@ -24,8 +24,6 @@ const footnoteMark = manifestoFootnote.startsWith("*");
 const footnoteText = manifestoFootnote.replace(/^\*\s*/, "");
 
 export default function Desk() {
-  const quote = quotes[0];
-
   return (
     <div className="desk-grid">
       {/* LEFT — the manifesto panel, sticky so the voice follows the visitor.
@@ -102,7 +100,26 @@ export default function Desk() {
               <span aria-hidden="true">⁕</span>
             </Link>
           </div>
-          <figcaption className="portrait-caption">{portrait.caption}</figcaption>
+          {/* Annotated onto the print rather than set under it: the words arrive
+              left to right the way they were written, then an arrow is drawn up
+              into the photo they are about, and the pair loops. Pure CSS — the
+              timing is at .caption-mark in globals.css. */}
+          <figcaption className="portrait-caption">
+            <span className="caption-mark">
+              <span className="caption-ink">{portrait.caption}</span>
+              <svg
+                className="caption-arrow"
+                viewBox="0 0 40 54"
+                aria-hidden="true"
+                focusable="false"
+              >
+                {/* pathLength normalises each stroke to a length of 1, so the
+                    draw is a dashoffset from 1 to 0 and nothing is measured. */}
+                <path className="caption-arrow-shaft" pathLength="1" d="M5 50C11 41 27 37 30 9" />
+                <path className="caption-arrow-head" pathLength="1" d="M23 15L30 9L34 17" />
+              </svg>
+            </span>
+          </figcaption>
         </figure>
 
         {/* The one gradient surface on this page. Carries the availability signal. */}
@@ -119,6 +136,9 @@ export default function Desk() {
           <img
             className="shot"
             src={featured.image}
+            srcSet={featured.srcSet}
+            /* token-exempt: media conditions, same as @media — CSS vars don't apply */
+            sizes="(max-width: 820px) 92vw, 620px"
             alt={`${featured.title} — product screenshot`}
             width={featured.width}
             height={featured.height}
@@ -127,11 +147,9 @@ export default function Desk() {
           <p className="card-outcome">{featured.outcome}</p>
         </a>
 
-        <figure className="desk-quote">
-          <p className="micro-label">Kind words</p>
-          <blockquote className="quote-text">{quote.text}</blockquote>
-          <figcaption className="quote-attribution">{quote.attribution}</figcaption>
-        </figure>
+        {/* The one object here that moves on its own: it cycles the kind words
+            rather than picking one. Client-side, so it is its own component. */}
+        <DeskQuote />
 
         <div className="desk-tools">
           <p className="micro-label">On the desk</p>

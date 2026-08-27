@@ -50,3 +50,8 @@ next-env.d.ts
 /3d Model
 # duplicate of raw/gallery — the served derivatives live in public/gallery
 /Gallery
+# folder-animation reference: frames pulled off the Figma spec and a screen
+# recording, used to measure the /work drawer's geometry and colour. Inputs
+# only — the browser never sees them, and the drawer is built now.
+/Animation Frames
+/Video Animation Frames

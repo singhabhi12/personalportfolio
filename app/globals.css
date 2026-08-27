@@ -229,6 +229,228 @@
   --pin-min: 130px;
   --shadow-sheet-flat: 0 1px 2px rgba(31, 31, 31, 0.08), 0 6px 18px rgba(31, 31, 31, 0.08);
 
+  /* Work — the drawer. Five states, measured off the Figma frames.
+
+     Every one of them is the same stack at a different card height. Read down:
+
+       shut     3px   the pages inside one closed folder, a white edge only
+       spines   26px  tabs and folder stock — the drawer put away
+       open     84px  a readable page, which is 10% of its own width in the
+                      reference and is the whole resting state
+       expand  420px  one page opened wide, in place
+
+     Nothing translates. Folders hold their positions and their pages grow, the
+     way a page actually comes out of a folder — so the fan, the tab steps and
+     the stacking order are decided once and every state inherits them.
+
+     Stock is manila rather than the reference's blue, deepened a step from the
+     first pass: the folders are the largest objects on this page and a tan that
+     barely clears the paper cannot carry them. */
+  /* The ramp. Sampled off state five, where every folder is a different blue and
+     they lighten toward the front — #4872e1 at the back through #6f93f1 at the
+     nearest, a 60% climb in luminance. It is what lets four bands of the same
+     hue read as four objects.
+
+     Sampled straight off the reference and used as measured. An earlier pass
+     ran the whole ramp darker to keep white notch labels above 4.5:1; these are
+     the real values, and the contrast that comes with them is noted below.
+
+     The four sampled folders are the ramp's ends — ours interpolates six across
+     the same span, so a seventh project would space itself too.
+
+     The front folder is off the ramp, and darker than the folder behind it: it
+     is the one folder whose *front* panel you are looking at, where the rest
+     show you their backs.
+
+     CONTRAST, measured: white on these blues runs 4.40:1 at the back of the
+     stack down to 3.21:1 at the front, and 3.64:1 on the front folder. The
+     32px headline clears the 3:1 that large text needs. The 10px notch labels
+     and the 14px line under the headline do not clear the 4.5:1 that small text
+     needs — the reference does not either. Darkening `--color-folder-front` a
+     step, or giving those two a deep navy ink instead of white, fixes it
+     without touching the ramp. */
+  --color-folder-far: #4872e1;
+  --color-folder-near: #658cee;
+  --color-folder-front: #5780f1;
+  --color-folder-ink: #ffffff;
+  /* The line under the headline on the front folder. White at three quarters,
+     which is the reference's own second voice on blue. */
+  --color-folder-ink-muted: rgba(255, 255, 255, 0.82);
+
+  /* The page inside the folder, and the page picked up out of it. The stack is
+     flush, so six resting shadows sit edge to edge — light enough that they do
+     not read as six grey rules, and heavy only on the one being held. */
+  /* Folders cast upward, onto the one behind them — which is the only direction
+     that shows, since what is below any folder is covered by the next. This is
+     the separation the reference gets between its bands; without it six blues
+     of a single hue run together whatever their tone. */
+  --shadow-stack: 0 -2px 5px rgba(16, 24, 74, 0.13), 0 -8px 20px rgba(16, 24, 74, 0.10);
+  --shadow-page: 0 1px 2px rgba(20, 30, 90, 0.10), 0 2px 6px rgba(20, 30, 90, 0.10);
+  --shadow-page-lift: 0 4px 8px rgba(20, 30, 90, 0.10), 0 16px 32px rgba(20, 30, 90, 0.22);
+  --shadow-folder: 0 1px 2px rgba(20, 30, 90, 0.10), 0 4px 14px rgba(20, 30, 90, 0.12);
+
+  /* The four page heights, and the stock showing above the first folder.
+
+     `--folder-spine-h` is small on purpose. Put away, a folder is mostly
+     *folder*: the Figma's spine is 10px of page edge over 47px of stock, and a
+     stack that collapses to white cards with a tan rim has it exactly backwards
+     — that is a pile of paper, not a drawer of folders. */
+  --folder-shut-h: 3px;
+  --folder-spine-h: 7px;
+  --folder-page-h: 108px;
+  --folder-open-h: 420px;
+  --folder-lip: 12px;
+
+  /* The folder's front panel: stock below the page, and the thing you are
+     actually looking at when the drawer is away. In the open state the next
+     folder's page covers it exactly — which is what `--folder-tuck` is for. Set
+     to the body when the pages should sit flush, and to nothing when the bodies
+     should be what shows. */
+  --folder-body-h: 30px;
+  /* The pages touch. Every folder is pulled up over the last one's body by
+     exactly the body's height, so in the open state no stock shows between one
+     page and the next — the only stock on screen is the lip above the first
+     page and the folder at the front. A band of blue between each pair turns
+     the stack into a row of tabs; these are pages in a folder. */
+  --folder-tuck: var(--folder-body-h);
+
+  --folder-page-pad: 18px;
+  /* How far the page sits inside its folder when only its edge is showing.
+     Measured off state five, where the reference's page edge is consistently
+     18.5px narrower than the body it rises from on a 2032px frame — 12px at
+     our scale. This is the whole of "the page is behind the folder": with the
+     folder wider on both sides, a page has nowhere to pop out to.
+
+     Zero once the drawer is open, because there the page *is* the object and
+     the reference shows paper right to the folder's edge with no blue beside
+     it. Only an edge is inset; a page you are reading is not. */
+  --folder-page-inset: 12px;
+  /* Nothing while the drawer is open; the phases below raise it. */
+  --sheet-inset: 0px;
+  --folder-col: 264px;
+  /* The reference's title is 2.7% of its page's width — several steps above the
+     card title this used to be, and the reason its pages read as chapter
+     openings rather than as rows. Ours lands here against a ~810px page. */
+  --text-folder-title: 26px;
+  --leading-folder-title: 1.15;
+  --folder-radius: 12px;
+
+  /* The fan, and the step the front folder takes on its own.
+
+     Measured off state five against the front folder's widest row: the stack
+     runs 74.1% → 88.2% in even steps of about 4.7%, and then the front folder
+     jumps to 99.7%. That jump is the point. Step the whole way evenly and the
+     front folder is just the next folder along; give it a gap of its own and it
+     reads as the thing the rest are filed behind.
+
+     Scaled to our drawer: 16px a side between folders, and the last of them
+     sitting 66px in from each edge before the front folder takes the rest. */
+  --folder-fan: 16px;
+  --folder-front-gap: 66px;
+  /* The front folder does not run the full width of the drawer. It is still the
+     widest object by a clear step — 94.6% against the stack's 88.2% — but
+     filling the frame edge to edge made it read as a slab rather than a folder
+     lying in front of the others. */
+  --folder-front-inset: 30px;
+
+  /* The tab. Steps right one place per folder so the drawer can be read down
+     its own edge while it is away. The fillet is the concave join where the tab
+     leaves the folder, drawn as a quarter-disc of nothing —
+     `--folder-fillet-in` sits a hair under `--folder-fillet` because the gap
+     between them is the only antialiasing a radial-gradient edge gets. */
+  --folder-tab-h: 25px;
+  --folder-tab-step: clamp(78px, 11.4vw, 148px);
+  /* Clear of the folder's own top-left corner: the radius plus the fillet, or
+     the first tab's fillet is cut by the rounding it sits on. */
+  --folder-tab-base: 28px;
+  --folder-tab-pad-x: 14px;
+  --folder-tab-radius: 9px;
+  --folder-tab-front-w: 200px;
+  --folder-fillet: 13px;
+  --folder-fillet-in: 12.4px;
+
+  /* Hover — "a little pop", and the Figma means little: the page comes up out
+     of the stack, and that is all. It does not scale, it does not change width,
+     and it does not bring its tab with it — the tab would be drawn across the
+     last line of the page above, which is a collision rather than a reveal, and
+     state three of the Figma has no tab in it.
+
+     And it does not move. Translating the page up opens a band below it where
+     the folder body shows through, and scaling it grows the page past the sides
+     of the folder holding it. A page is continuous and a page is inside its
+     folder, so neither is available: the pop is carried by the shadow, which is
+     what reads as forward anyway. See the hover rules for the whole argument. */
+
+  /* The folder's taper. A real folder photographed slightly from above is not a
+     rectangle: its front panel leans in as it comes toward you. Measured off the
+     reference at 5.2 degrees a side, twice — 27px over 300px on the closed
+     folder in state one, 23px over 240px on the front folder in state five.
+
+     Only the tall folders carry it. Scanned across one of the thin spines in
+     state five the width does not move at all (1430px at every height), which
+     is right: a 46px band cannot show a five-degree lean, and faking one on it
+     would read as a wonky rectangle rather than a folder.
+
+     `--slant-r` is the radius the clipped shape draws its own bottom corners
+     with, since `border-radius` belongs to the box and the clip cuts inside it. */
+  --folder-slant: 34px;
+  --slant-r: 22px;
+
+  /* The trapezoid.
+
+     The sides run straight down for the first `--slant-r` and only then begin
+     to lean. That is what leaves the top corners entirely to `border-radius`:
+     start the lean at the very top and the clip shaves the outside of the arc,
+     which puts a small step in a corner that should be one clean curve. The
+     kink where vertical meets lean is five degrees and cannot be seen.
+
+     The bottom corners are drawn in the path, because `border-radius` rounds
+     the box and the clip cuts well inside it — four segments to the arc, which
+     is smooth at this radius. */
+  --folder-shape: polygon(
+    0 0,
+    100% 0,
+    100% var(--slant-r),
+    calc(100% - var(--folder-slant)) calc(100% - var(--slant-r)),
+    calc(100% - var(--folder-slant) - 0.0761 * var(--slant-r)) calc(100% - 0.6173 * var(--slant-r)),
+    calc(100% - var(--folder-slant) - 0.2929 * var(--slant-r)) calc(100% - 0.2929 * var(--slant-r)),
+    calc(100% - var(--folder-slant) - 0.6173 * var(--slant-r)) calc(100% - 0.0761 * var(--slant-r)),
+    calc(100% - var(--folder-slant) - var(--slant-r)) 100%,
+    calc(var(--folder-slant) + var(--slant-r)) 100%,
+    calc(var(--folder-slant) + 0.6173 * var(--slant-r)) calc(100% - 0.0761 * var(--slant-r)),
+    calc(var(--folder-slant) + 0.2929 * var(--slant-r)) calc(100% - 0.2929 * var(--slant-r)),
+    calc(var(--folder-slant) + 0.0761 * var(--slant-r)) calc(100% - 0.6173 * var(--slant-r)),
+    var(--folder-slant) calc(100% - var(--slant-r)),
+    0 var(--slant-r)
+  );
+
+  /* A clipped shape throws away any box-shadow with the box, so the front
+     folder's shadow is a filter, which follows the silhouette it is given. */
+  /* Downward only. The stack casts upward because every folder there is
+     narrower than the one in front of it, so the shadow always lands on stock.
+     The front folder is the widest thing on the page, so any shadow it throws
+     upward lands on paper and draws a grey arc around its own top corners. Not
+     just the upward one: a blur wider than its offset reaches back over the
+     shape, and 6px down with an 18px blur still put twelve pixels of grey above
+     the corner. So every blur here is no larger than the offset carrying it,
+     which is what keeps the shadow strictly below the folder.
+
+     What separates it from the stack is that it is a different blue. */
+  --drop-folder: drop-shadow(0 3px 3px rgba(20, 30, 90, 0.10)) drop-shadow(0 14px 14px rgba(20, 30, 90, 0.11));
+
+  /* The front folder. Sized off the reference's 208px against a 655px folder;
+     the type inside is scaled the same way, which is why the headline sits
+     nearer the display face than the card titles above it. */
+  --folder-front-pad: 68px;
+  --text-folder-headline: 32px;
+  --leading-folder-headline: 1.25;
+
+  /* One duration for every state change, because they are all the same move.
+     Out fast, settling long — a drawer runner, not a fade. */
+  --dur-drawer: 620ms;
+  --stagger-drawer: 55ms;
+  --ease-drawer: cubic-bezier(0.16, 0.84, 0.28, 1);
+
   /* Motion */
   --ease: ease-out;
   --dur-fast: 150ms;
@@ -236,6 +458,36 @@
   /* Longer than the 150–250ms UI range on purpose: this one is a photograph
      dissolving into another, not a control answering a pointer. */
   --dur-slide: 600ms;
+  /* One sentence dissolving into another on the quote card. Slower than a
+     control answering a pointer, quicker than the photograph — nobody pressed
+     anything, but nobody wants to sit through it either. */
+  --dur-quote: 420ms;
+  /* The desk caption: the words are written, an arrow is drawn up at the
+     photograph, the finished annotation is held for two seconds, and then it
+     goes again.
+
+     One cycle length shared by all four moving parts, with each part's timing
+     expressed as a percentage of it. Separate durations and delays would each
+     restart on their own clock and the pieces would walk away from each other
+     within a minute of looping. Read the percentages against these:
+
+       0ms     the pen starts on the first letter
+       780ms   the arrow starts before the last letter is finished, the way a
+               hand runs one stroke into the next
+       900ms   the words are written
+       1500ms  the arrowhead lands
+       3500ms  two full seconds of finished caption have passed
+       3750ms  it fades out, and at the loop boundary it is already invisible —
+               which is the whole reason for the fade: the alternative is a
+               written caption snapping to a blank one for one frame. */
+  --cycle-caption: 3750ms;
+  /* Slow to start, quick through the middle, easing off at the end — the speed
+     a hand actually crosses a short word at. */
+  --ease-write: cubic-bezier(0.5, 0, 0.5, 1);
+  --caption-arrow-w: 34px;
+  --caption-arrow-h: 46px;
+  /* User units inside the arrow's viewBox, not pixels. */
+  --caption-stroke: 2.4;
 }
 
 /* ---------- Base ---------- */
@@ -580,6 +832,96 @@ main > .canvas:first-child { margin-top: 0; }
   margin-top: var(--space-2);
 }
 
+/* The annotation: the words, the arrow, and the one fade that carries the loop
+   over its own seam. inline-block so it is the width of the words — which is
+   what the arrow hangs off and what the wipe's percentages are measured across.
+
+   The arrow inside is absolutely positioned, so the caption keeps exactly the
+   height it had. That is not tidiness: the cooking card below hangs off this
+   figure by a negative margin, and a caption that grew by the height of an
+   arrow would push the bottom half of the collage down with it. */
+.caption-mark {
+  position: relative;
+  display: inline-block;
+  animation: caption-hold var(--cycle-caption) linear infinite both;
+}
+
+@keyframes caption-hold {
+  0%, 93.333% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Written, not faded in. A slanted edge sweeping right is the closest a wipe
+   gets to a nib, and it keeps Caveat's own letterforms — the alternative,
+   hand-drawn SVG letters, would freeze the caption's words into path data and
+   take them out of lib/content.ts, which is where copy is edited. */
+.caption-ink {
+  display: inline-block;
+  animation: caption-write var(--cycle-caption) var(--ease-write) infinite both;
+}
+
+@keyframes caption-write {
+  0% { clip-path: polygon(-20% -25%, 0% -25%, -7% 125%, -20% 125%); }
+  24%, 100% { clip-path: polygon(-20% -25%, 118% -25%, 111% 125%, -20% 125%); }
+}
+
+/* Hangs off the end of the words and rises past them into the frame's bottom
+   corner. Anchored to the text rather than to the middle of the card, so the
+   copy in lib/content.ts can change length and the arrow still starts where the
+   last letter stops. */
+.caption-arrow {
+  position: absolute;
+  left: 100%;
+  bottom: 0;
+  margin-left: var(--space-1);
+  width: var(--caption-arrow-w);
+  height: var(--caption-arrow-h);
+  overflow: visible;
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: var(--caption-stroke);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Drawn rather than revealed — and drawn in two strokes, because a hand does
+   not draw an arrowhead in the same movement as the shaft it caps.
+
+   The gap is twice the path, and the undrawn offset overshoots 1 rather than
+   sitting on it. Both halves of that matter. At an offset of exactly 1 the dash
+   is parked flush against the path's start and its round cap pokes back past
+   zero — a coral dot on the photograph for the second before the arrow exists.
+   Overshooting parks the cap clear, but with a gap of 1 the pattern repeats
+   soon enough that the *next* dash walks in at the far end instead. A gap of 2
+   leaves no second dash to walk in. */
+.caption-arrow path { stroke-dasharray: 1 2; }
+
+.caption-arrow-shaft {
+  animation: caption-shaft var(--cycle-caption) var(--ease) infinite both;
+}
+.caption-arrow-head {
+  animation: caption-head var(--cycle-caption) var(--ease) infinite both;
+}
+
+@keyframes caption-shaft {
+  0%, 20.8% { stroke-dashoffset: 1.05; }
+  34.667%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes caption-head {
+  0%, 34.667% { stroke-dashoffset: 1.05; }
+  40%, 100% { stroke-dashoffset: 0; }
+}
+
+/* The quiet version, and the state everything falls back to if these animations
+   never run at all: no wipe, no draw, no fade — the finished annotation, which
+   is what every one of the rules above ends on anyway. */
+:root[data-motion='still'] .caption-mark,
+:root[data-motion='still'] .caption-ink,
+:root[data-motion='still'] .caption-arrow-shaft,
+:root[data-motion='still'] .caption-arrow-head {
+  animation: none !important;
+}
+
 /* The one gradient surface on this page. */
 .desk-cooking {
   align-self: flex-start;
@@ -634,6 +976,27 @@ main > .canvas:first-child { margin-top: 0; }
   z-index: 2;
 }
 
+/* Every kind word is on the page at once, all of them in the one grid cell, so
+   the card stands at the height of the longest and holds it. A card that resized
+   on each rotation would drag the tools panel — which tucks under it by a
+   negative margin — up and down the collage every four seconds.
+
+   The cross-fade is the only part of this that is motion, and the reduced-motion
+   block at the foot of this file flattens it to a swap. Whether the card rotates
+   at all is decided in components/DeskQuote.tsx, where the reasoning lives. */
+.quote-deck { display: grid; }
+
+.quote-leaf {
+  grid-area: 1 / 1;
+  opacity: 0;
+  /* Faded out, not gone: each leaf keeps its box, so nothing underneath can be
+     clicked through one. The aria-hidden in the component does the same job for
+     a screen reader, which cannot see an opacity. */
+  pointer-events: none;
+  transition: opacity var(--dur-quote) var(--ease);
+}
+.quote-leaf[data-current] { opacity: 1; pointer-events: auto; }
+
 /* A panel, not a card: the white dock inside it needs a surface to sit on. */
 .desk-tools {
   align-self: flex-end;
@@ -665,11 +1028,7 @@ main > .canvas:first-child { margin-top: 0; }
 
 /* ---------- Kind words ---------- */
 
-.quotes {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-8) var(--grid-gutter);
-}
+/* Set by the desk's quote card, which is now the only place they appear. */
 .quote-text {
   font-size: var(--text-body);
   line-height: var(--leading-body);
@@ -786,48 +1145,517 @@ main > .canvas:first-child { margin-top: 0; }
 
 /* ---------- Work ---------- */
 
-.work-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--grid-gutter);
+/* The drawer. Five states, one mechanism: the folders never move and their
+   pages change height. `[data-phase]` on the drawer carries three of those
+   states, `[data-open]` on a folder carries the fourth, and :hover the fifth.
+
+   Read the height table at --folder-shut-h for what each one is. */
+.drawer {
+  position: relative;
+  /* A tab rises above its folder's top line and is not layout, so it would not
+     make room for itself. */
+  padding-top: var(--folder-tab-h);
 }
 
-.work-card {
+.folder {
+  /* This folder's place on the ramp: none of the near blue at the back of the
+     drawer, all of it at the front. */
+  --stock: color-mix(
+    in srgb,
+    /* Divided by the last folder's index, not by the count: the front folder is
+       off the ramp, so dividing by --n would leave the six sharing only five
+       sixths of the spread and waste the part of it you can actually see. */
+    var(--color-folder-near) calc(var(--i) / (var(--n) - 1) * 100%),
+    var(--color-folder-far)
+  );
+  /* Sampled off the reference, a notch is the same blue as the folder it is cut
+     from — #466fda against a #4872e1 body, and identical by the fourth. It
+     reads because it stands on the folder *behind* it, which is a step darker,
+     not because it is lifted off its own. */
+  --lip-stock: var(--stock);
+  /* Distance from the front of the *stack*, in folders, plus the gap the front
+     folder keeps to itself. `--folder--front` overrides this to nothing. */
+  --inset: calc(
+    var(--folder-front-gap) + (var(--n) - 1 - var(--i)) * var(--folder-fan)
+  );
+
+  position: relative;
   display: block;
-  background: var(--color-card);
-  border-radius: var(--radius-card);
-  padding: var(--space-5);
-  box-shadow: var(--shadow-card);
+  width: calc(100% - var(--inset) * 2);
+  margin-inline: auto;
+  padding-bottom: var(--folder-body-h);
+  transition: transform var(--dur-drawer) var(--ease-drawer);
+  transition-delay: calc(var(--i) * var(--stagger-drawer));
 }
-.work-card:hover .card-title { color: var(--color-accent); }
-.work-card .card-outcome { color: var(--color-muted); }
 
-.work-card-head {
+/* The stock, and only where the folder actually is.
+
+   Scanned across the reference at the height of a page edge, the pixels beside
+   it are page background — #f5f5f6, not blue. The folder does not reach up
+   alongside its own page: it begins where the page ends. Painting the whole
+   folder box blue puts a sliver of stock either side of the page edge, and that
+   sliver is what makes the white read as lying *on* the folder rather than
+   behind it.
+
+   So the stock is drawn here, over the body and nothing else. It sits after the
+   page in painting order, but the two never overlap — one is above the other.
+
+   Rounded at the top, square at the foot: a folder's bottom edge is where the
+   next folder begins, so rounding it curls a corner that should simply run off.
+   The front folder is the exception and draws its own shape. */
+.folder:not(.folder--front)::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--folder-body-h);
+  background: var(--stock);
+  border-radius: var(--folder-radius) var(--folder-radius) 0 0;
+  box-shadow: var(--shadow-stack);
+}
+
+/* The tuck. Every folder is pulled up over the last one's body, so with the
+   pages at full height the stack is flush and no stock shows between them. Let
+   the tuck go and the bodies are what the stack is made of — which is the whole
+   difference between the open state and the drawer put away. */
+.folder + .folder {
+  margin-top: calc(var(--folder-tuck) * -1);
+  transition: margin-top var(--dur-drawer) var(--ease-drawer),
+    transform var(--dur-drawer) var(--ease-drawer);
+  transition-delay: calc(var(--i) * var(--stagger-drawer));
+}
+.drawer[data-phase='spines'] {
+  --folder-tuck: 0px;
+  --sheet-inset: var(--folder-page-inset);
+}
+.drawer[data-phase='shut'] {
+  --sheet-inset: var(--folder-page-inset);
+}
+
+/* The one lip in the open state. Only the first folder has stock above it that
+   nothing else covers, so only the first folder is given any.
+
+   Drawn behind the page rather than around it, and inset by one step of the fan
+   on each side — which is the difference between a folder standing behind a
+   page and a blue bar welded to the top of it. Every other folder in the stack
+   is narrower than the page in front of it by exactly this much; the one at the
+   top should be too, and as a pseudo-element it can be, where padding on the
+   folder's own box never could. */
+.folder:first-child::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: var(--folder-fan);
+  right: var(--folder-fan);
+  height: var(--folder-lip);
+  background: var(--stock);
+  border-radius: var(--folder-radius) var(--folder-radius) 0 0;
+  transition: height var(--dur-drawer) var(--ease-drawer);
+}
+/* Shut is one folder, and the lip belongs to a stack that is not out yet. */
+.drawer[data-phase='shut'] .folder:first-child::before { height: 0; }
+
+/* ---- The page ---- */
+
+/* Height is the state. Everything else about a page is the same in all five. */
+.folder-sheet {
+  position: relative;
+  overflow: hidden;
+  height: var(--folder-page-h);
+  margin-inline: var(--sheet-inset);
+  background: var(--color-card);
+  /* Rounded at the top, square at the foot. A page's bottom edge is where the
+     next page begins, so it is never seen — and rounding it cuts two notches
+     that show the folder body behind, which is the wedge of blue that used to
+     sit under every page's bottom corners. */
+  border-radius: var(--folder-radius) var(--folder-radius) 0 0;
+  box-shadow: var(--shadow-page);
+  transition: height var(--dur-drawer) var(--ease-drawer),
+    margin var(--dur-drawer) var(--ease-drawer),
+    box-shadow var(--dur-mid) var(--ease);
+  transition-delay: calc(var(--i) * var(--stagger-drawer)),
+    calc(var(--i) * var(--stagger-drawer)), 0s;
+}
+
+.drawer[data-phase='shut'] .folder-sheet { height: var(--folder-shut-h); }
+.drawer[data-phase='spines'] .folder-sheet { height: var(--folder-spine-h); }
+.folder[data-open] .folder-sheet { height: var(--folder-open-h); }
+
+/* The page face — the whole of it is the button that opens the page. */
+.folder-face {
+  display: grid;
+  grid-template-columns: var(--folder-col) minmax(0, 1fr);
+  gap: var(--space-4) var(--space-8);
+  align-items: center;
+  width: 100%;
+  height: var(--folder-page-h);
+  padding: var(--folder-page-pad) var(--space-6);
+  background: none;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Nothing on the face is legible at 3px or 26px, and half-clipped type behind a
+   folder edge is worse than none. It goes with the height. */
+.drawer[data-phase='shut'] .folder-face,
+.drawer[data-phase='spines'] .folder-face { opacity: 0; }
+.folder-face {
+  transition: opacity var(--dur-drawer) var(--ease-drawer);
+  transition-delay: calc(var(--i) * var(--stagger-drawer));
+}
+
+.folder-lead { display: block; }
+.folder-when {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-3);
-  margin-bottom: var(--space-3);
-  min-height: var(--space-5);
+  margin-bottom: var(--space-2);
+}
+/* Not the site's card title any more. The reference hangs a number over a
+   title several steps larger than anything else in the row, and that size
+   difference is most of why its pages read as pages rather than as list rows. */
+.folder-face .card-title {
+  display: block;
+  margin-bottom: 0;
+  font-size: var(--text-folder-title);
+  line-height: var(--leading-folder-title);
+  letter-spacing: var(--tracking-display);
 }
 
-.work-card .shot { aspect-ratio: 16 / 10; margin-bottom: var(--space-3); }
+/* The number the reference prints over each title. */
+.folder-no {
+  font-family: var(--font-label);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-micro);
+  letter-spacing: var(--tracking-micro);
+  color: var(--color-muted);
+}
+.folder-face .card-outcome { display: block; }
 
-/* Phase 2 hover-media slot: a <video>/<img> layered over the still. Inert until
-   a project supplies `hoverMedia`, and never shown to reduced-motion users. */
-.shot-frame { position: relative; }
-.shot-frame .hover-media {
+/* ---- The tab ---- */
+
+/* Cut from the folder's back panel, which stands proud of the front one and
+   catches the light along its edge — hence a shade lighter than the stock it
+   rises out of.
+
+   Hidden while the drawer is open, because the page above sits exactly where
+   this tab would be and a tab drawn over it is a bump on a card rather than a
+   folder in a drawer. It comes back for the two states that make it true: the
+   drawer put away, and a folder picked up. */
+.folder-tab {
   position: absolute;
-  inset: 0;
+  /* Anchored to the top of the folder *body*, not to the top of the folder —
+     so the notch is cut from the same blue it sits on and reads as attached to
+     it, and the page's edge runs behind the notch rather than under it. It is
+     tall enough to clear that edge and stand proud above it. The page is only
+     ever an edge while the tab is on screen, so the spine height is the exact
+     amount it has to cover. */
+  bottom: var(--folder-body-h);
+  height: calc(var(--folder-tab-h) + var(--folder-spine-h));
+  left: calc(var(--folder-tab-base) + var(--i) * var(--folder-tab-step));
+  display: flex;
+  align-items: center;
+  padding-bottom: var(--folder-spine-h);
+  gap: var(--space-2);
+  padding: 0 var(--folder-tab-pad-x);
+  background: var(--lip-stock);
+  border-radius: var(--folder-tab-radius) var(--folder-tab-radius) 0 0;
+
+  /* No shadow of its own, and nothing else's shadow across it either.
+
+     The notch is cut from the folder, not laid on top of one, so it has nothing
+     to cast onto — the folder and its notch are one piece of card and a shadow
+     between them is a seam that should not exist.
+
+     `z-index` for the second half of that. A pseudo-element `::after` is the
+     last child, so the body's stock — and the upward shadow it throws to
+     separate this folder from the one behind — was painting over the base of
+     the notch and drawing exactly that seam. Lifting the notch a layer puts it
+     back in the same piece of card. Safe: notches only appear with the drawer
+     put away, where no folder overlaps another's notch. */
+  z-index: 1;
+  font-family: var(--font-label);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-micro);
+  letter-spacing: var(--tracking-micro);
+  text-transform: uppercase;
+  color: var(--color-folder-ink);
+  white-space: nowrap;
+  border: 0;
+  opacity: 0;
+  /* Transparent to the pointer unless it is on screen. An invisible notch still
+     hit-tests, and this one overlaps the bottom of the page it belongs to —
+     which quietly made the last thirty pixels of every open page unclickable. */
+  pointer-events: none;
+  transition: opacity var(--dur-drawer) var(--ease-drawer), color var(--dur-fast) var(--ease);
+  transition-delay: calc(var(--i) * var(--stagger-drawer)), 0s;
+}
+/* Put away, the notch is the folder's whole hit target: the page under it is a
+   seven-pixel edge, and nobody should have to aim at that. */
+.drawer[data-phase='spines'] .folder-tab {
+  opacity: 1;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* The folder's place, set apart from its name by weight rather than by fading:
+   a 10px label on manila has no contrast to spare. */
+.folder-tab-no { font-weight: var(--weight-regular); }
+
+/* The fillet: a quarter-disc of nothing, cut out of a square of stock sitting
+   just outside the tab and flush with the folder's top edge. The arc is centred
+   on that square's outer top corner, which puts it tangent to the folder's edge
+   at one end and the tab's at the other — the join a real tab is die-cut with,
+   and the reason two rectangles read as one piece of card. */
+.folder-tab::before,
+.folder-tab::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: var(--folder-fillet);
+  height: var(--folder-fillet);
+}
+.folder-tab::before {
+  left: calc(var(--folder-fillet) * -1);
+  background: radial-gradient(
+    circle at top left,
+    transparent var(--folder-fillet-in),
+    var(--lip-stock) var(--folder-fillet)
+  );
+}
+.folder-tab::after {
+  right: calc(var(--folder-fillet) * -1);
+  background: radial-gradient(
+    circle at top right,
+    transparent var(--folder-fillet-in),
+    var(--lip-stock) var(--folder-fillet)
+  );
+}
+
+/* ---- Picked up ---- */
+
+/* "A little pop" — and the reference means little. The page comes up out of the
+   stack far enough to clear the one above it and bring its own tab into view,
+   and it does not scale or change width doing it. The lift and the tab are one
+   gesture, not a movement with a label attached.
+
+   Suppressed while the folder is open: an expanded page is not something you
+   are still looking for.
+
+   The pop moves nothing. Both geometries were tried and both were wrong: a
+   page translated up opens a band of stock beneath it, and a page scaled up
+   grows past the sides of the folder holding it — a page lives *inside* its
+   folder and has nowhere to the left to go. What is left is the thing that
+   actually reads as forward, which is the shadow: it deepens, and it lands on
+   the page below.
+
+   `z-index` on the page and not on the folder. The folder carries its body
+   below the page, so bringing the whole folder forward would lay 30px of stock
+   over the next page down; bringing only the page forward is what lets the
+   shadow be seen at all.
+
+   Scoped to the open drawer. Put away, a page is a seven-pixel edge tucked
+   behind its folder — there is nothing there to pick up, and bringing that edge
+   forward on hover pulls a sliver of paper out over the whole stack for no
+   reason. It stays where it is and does nothing. */
+.drawer[data-phase='open'] .folder:not([data-open]):has(.folder-face:hover) .folder-sheet {
+  box-shadow: var(--shadow-page-lift);
+  z-index: 2;
+  transition-duration: var(--dur-mid);
+  transition-delay: 0s;
+}
+.drawer[data-phase='open'] .folder-face:hover .card-title { color: var(--color-accent); }
+
+/* Focus is not scoped the same way. A keyboard visitor can reach a page in any
+   state, and an indicator they cannot see is not an indicator — so the ring
+   comes forward even when the page it is on is only an edge.
+
+   It goes on the page rather than the folder: the folder's box is the page plus
+   whatever stock is behind it, and the page is the part that is drawn. */
+.folder-face:focus-visible { outline: none; }
+.folder:has(.folder-face:focus-visible) .folder-sheet {
+  box-shadow: var(--shadow-page-lift);
+  z-index: 2;
+  outline: var(--focus-ring) solid var(--color-accent);
+  outline-offset: var(--focus-ring);
+  transition-duration: var(--dur-mid);
+  transition-delay: 0s;
+}
+.folder-face:focus-visible .card-title { color: var(--color-accent); }
+
+/* ---- Opened wide ---- */
+
+/* State four. The page opens in place rather than throwing a panel over the
+   screen — it is a folder, and what a folder does is open. The shot the old
+   board used to carry is here, at the size it was always meant to be read at. */
+.folder-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
+  gap: var(--space-8);
+  align-items: start;
+  padding: 0 var(--space-6) var(--space-6);
+  animation: page-open var(--dur-drawer) var(--ease) backwards;
+  animation-delay: var(--dur-mid);
+}
+.folder-shot {
   width: 100%;
-  height: 100%;
+  aspect-ratio: 16 / 10;
   object-fit: cover;
   border-radius: var(--radius-image);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--dur-mid) var(--ease);
+  box-shadow: var(--shadow-image);
 }
-.work-card:hover .shot-frame .hover-media { opacity: 1; }
+.folder-facts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.folder-meta {
+  display: grid;
+  gap: var(--space-4);
+}
+.folder-meta dt { margin-bottom: var(--space-1); }
+.folder-meta dd {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-ink);
+}
+.folder-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+.folder-read {
+  font-weight: var(--weight-semibold);
+  color: var(--color-accent);
+  border-bottom: var(--underline-weight) solid var(--color-accent);
+  padding-bottom: var(--space-1);
+}
+.folder-close,
+.folder-tap {
+  background: none;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  color: var(--color-muted);
+  transition: color var(--dur-fast) var(--ease);
+}
+.folder-close:hover { color: var(--color-ink); }
+
+@keyframes page-open {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ---- The front of the drawer ---- */
+
+/* The largest object on the page, and in the reference by a long way: two and a
+   half times the height of the whole stack above it. It is what makes that
+   stack read as filed rather than merely listed, and it is the only place the
+   stock appears at any size — so it is where the drawer's colour lives.
+
+   It is also the handle. "tap the folder" is the reference's own annotation and
+   it is the control for states two and five. */
+.folder--front {
+  --stock: var(--color-folder-front);
+  /* The widest thing in the drawer, and off the fan entirely. */
+  --inset: var(--folder-front-inset);
+  /* The stock is the clipped pseudo's, and so is the shadow. */
+  box-shadow: none;
+  padding: var(--folder-front-pad) var(--space-8);
+  text-align: center;
+  /* The stock is drawn by the pseudo below, which is the only thing the clip
+     may touch: clipping the folder itself would take the tab with it, since a
+     tab sits above the box it belongs to. */
+  background: none;
+}
+.folder--front::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--stock);
+  border-radius: var(--radius-card);
+  clip-path: var(--folder-shape);
+  filter: var(--drop-folder);
+  /* Positioned, so it paints over any in-flow content that follows it and eats
+     the clicks meant for the handle underneath. It is stock, not a surface. */
+  pointer-events: none;
+}
+/* This tab stays up in every state: it names the drawer rather than a folder in
+   it, and the reference keeps it up throughout. */
+.folder-tab--front {
+  /* The front folder holds no page, so its notch has nothing to stand behind:
+     it sits on the folder's own top edge, the way the project notches did
+     before a page edge came between them and the blue. */
+  bottom: 100%;
+  height: var(--folder-tab-h);
+  /* Shape, not a control — the handle is the button in the copy below. */
+  pointer-events: none;
+  /* Empty, so its width is given rather than set by a word. Proportioned off
+     the reference's front notch, which runs about a fifth of its folder. */
+  width: var(--folder-tab-front-w);
+  padding: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 1;
+}
+
+.folder-front-copy {
+  /* Positioned, so tree order puts the copy above the stock pseudo rather than
+     the other way round. The tab is absolute already and follows it anyway. */
+  position: relative;
+  display: block;
+  max-width: var(--reading-max);
+  margin-inline: auto;
+}
+.folder-headline {
+  font-size: var(--text-folder-headline);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-folder-headline);
+  letter-spacing: var(--tracking-display);
+  color: var(--color-folder-ink);
+  margin-bottom: var(--space-4);
+}
+/* The second half of the headline, on its own line and in the folder's own ink
+   — the first line is the claim, this one qualifies it. */
+.folder-headline-sub {
+  display: block;
+  font-weight: var(--weight-regular);
+  color: var(--color-folder-ink-muted);
+}
+.folder-line {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-folder-ink-muted);
+}
+
+/* The annotation, in the hand the rest of the site writes its asides in. */
+.folder-tap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+  font-family: var(--font-script);
+  font-size: var(--text-script);
+  line-height: var(--leading-script);
+  color: var(--color-folder-ink-muted);
+}
+.folder-tap:hover { color: var(--color-folder-ink); }
+.folder-tap-arrow {
+  width: var(--caption-arrow-w);
+  height: auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--caption-stroke);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 
 .tag-chip {
   font-family: var(--font-label);
@@ -2121,6 +2949,28 @@ main > .canvas:first-child { margin-top: 0; }
   .desk-featured { grid-area: featured; padding-bottom: var(--space-5); }
 }
 
+/* Below this the page's left column costs more than it gives: a ~230px column
+   holding a date, a chip, and a title leaves the outcome too narrow to be a
+   sentence. The columns give way before the drawer does — the fan, the tabs,
+   and the tuck all still read here, and only the page inside re-sets. */
+@media (max-width: 980px) {
+  /* Below this the page's left column costs more than it gives: a ~230px column
+     holding a date, a chip, and a title leaves the outcome too narrow to be a
+     sentence. The outcome goes under the title, and the open height goes up by
+     the line it gains — the height *is* the state here, so it cannot be left to
+     the content the way a normal card's would be. */
+  .drawer {
+    --folder-page-h: 136px;
+  }
+  .folder-face {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-2);
+    align-items: start;
+    align-content: start;
+  }
+  .folder-detail { grid-template-columns: minmax(0, 1fr); }
+}
+
 @media (max-width: 900px) {
   .gmasonry { column-count: 2; }
 }
@@ -2179,8 +3029,32 @@ main > .canvas:first-child { margin-top: 0; }
   .desk-grid { grid-template-columns: 1fr; gap: var(--space-8); }
   .manifesto { position: static; }
   .whisper { display: none; }
-  .work-grid { grid-template-columns: 1fr; }
-  .quotes { grid-template-columns: 1fr; }
+  /* Two of the three things `--i` does stop meaning anything at this width. A
+     fan that insets the back folder by 130px of a 340px screen is not
+     perspective, it is a margin; and six tabs stepping right run off the folder
+     long before the sixth. Both go to nothing, which leaves the tabs stacked
+     down one edge — what a set of folders held in the hand actually looks like.
+
+     The opening stays. It is the reason the page is worth looking at, and a
+     stack of cards sliding apart needs no width to read. */
+  .drawer {
+    --folder-fan: 0px;
+    /* The front folder's own step goes with the fan: 66px a side of a 340px
+       screen is not a drawer, it is a margin. */
+    --folder-front-gap: 0px;
+    --folder-front-inset: 0px;
+    --folder-tab-step: 0px;
+    --folder-tab-base: var(--space-4);
+    --folder-front-pad: var(--space-12);
+    /* Tall enough for two lines of outcome under the title *and* the front
+       folder's tab, which rises over the last page in the stack. On a desktop
+       that tab lands in a centred page's bottom padding; here the content is
+       top-aligned and fills the page, so the clearance has to be real. */
+    --folder-page-h: 160px;
+    --folder-open-h: 560px;
+  }
+  .folder-headline { font-size: var(--text-headline); }
+  .folder-actions { flex-wrap: wrap; gap: var(--space-4); }
   .collage { gap: var(--space-5); padding: 0; }
   .collage > * {
     transform: none;
@@ -2244,7 +3118,6 @@ main > .canvas:first-child { margin-top: 0; }
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
-  .work-card:hover .shot-frame .hover-media { opacity: 0; }
 
   /* One hole, for the fold.
 
@@ -2269,4 +3142,66 @@ main > .canvas:first-child { margin-top: 0; }
   .letter-cue {
     animation-duration: var(--dur-cue) !important;
   }
+
+  /* And the desk caption. This one is a loop, which the fold's argument at
+     STILL_FLAG explicitly does not cover — it is asked for, and it is the one
+     piece of this site that keeps moving in the corner of the eye. Held to the
+     smallest version of itself: a hundred-pixel annotation that spends two of
+     every three and three-quarter seconds perfectly still.
+
+     `?motion=still` stops it dead — see the rule beside .caption-mark, which
+     is not scoped to this query because a loop should stop for anyone who asks,
+     preference set or not. All four parts share --cycle-caption, so restoring
+     them is one rule and cannot drift from the animations themselves. */
+  :root:not([data-motion='still']) .caption-mark,
+  :root:not([data-motion='still']) .caption-ink,
+  :root:not([data-motion='still']) .caption-arrow-shaft,
+  :root:not([data-motion='still']) .caption-arrow-head {
+    animation-duration: var(--cycle-caption) !important;
+  }
+
+  /* And one for the drawer on /work, on the fold's argument rather than the
+     caption's: the drawer opening is the page arriving, it plays once, it is
+     over in a second, and what it moves is six folders sliding a couple of
+     centimetres down a runner — no rotation, no scale, nothing crossing the
+     screen. A stack that is simply *there* is not the calm version of that, it
+     is a different page.
+
+     `?motion=still` closes it, next to .drawer below — a rule that lives
+     outside this query because the quiet version should be available to anyone
+     who asks for it, preference set or not.
+
+     Only the parts a state change moves are restored. `.folder`'s own transform
+     is the hover lift and nothing else, and that one stays flattened: it is
+     decoration answering a pointer, not the page arriving. Durations are listed
+     in each rule's own property order — a bare duration would hand the hover
+     shadow the drawer's 620ms along with the height. */
+  :root:not([data-motion='still']) .folder:first-child::before,
+  :root:not([data-motion='still']) .folder + .folder,
+  :root:not([data-motion='still']) .folder-face {
+    transition-duration: var(--dur-drawer) !important;
+  }
+  /* height, transform, box-shadow — in that order. The last two are the hover
+     pop, which stays flattened: it answers a pointer, it is not the page
+     arriving. */
+  :root:not([data-motion='still']) .folder-sheet {
+    transition-duration: var(--dur-drawer), var(--dur-drawer), 0.01ms !important;
+  }
+  :root:not([data-motion='still']) .folder-tab {
+    transition-duration: var(--dur-drawer), var(--dur-mid) !important;
+  }
 }
+
+/* The drawer, without the drawer.
+
+   `?motion=still` lands on the open state and every later change — a page
+   opening, the stack filing itself away — happens between one frame and the
+   next. The phase is still set from an effect, so there is a single frame of
+   the shut state before it: with the transitions off that is a frame, and with
+   them on it is the whole unfold playing for someone who asked for none of it. */
+:root[data-motion='still'] .folder,
+:root[data-motion='still'] .folder:first-child::before,
+:root[data-motion='still'] .folder + .folder,
+:root[data-motion='still'] .folder-sheet,
+:root[data-motion='still'] .folder-face,
+:root[data-motion='still'] .folder-tab { transition: none; }

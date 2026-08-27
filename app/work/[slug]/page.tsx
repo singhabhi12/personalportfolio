@@ -54,13 +54,13 @@ export default async function CaseStudy({ params }: { params: Promise<Params> })
         <figure className="case-figure">
           <img
             src={project.image}
+            srcSet={project.srcSet}
+            /* token-exempt: media conditions, same as @media — CSS vars don't apply */
+            sizes="(max-width: 820px) 92vw, 720px"
             alt={`${project.title} — product screenshot`}
             width={project.width}
             height={project.height}
           />
-          <figcaption className="micro-label">
-            Placeholder — replace with a real screenshot
-          </figcaption>
         </figure>
 
         {caseSections.map((section) => (
@@ -73,6 +73,9 @@ export default async function CaseStudy({ params }: { params: Promise<Params> })
               <figure className="case-figure">
                 <img
                   src={project.image}
+                  srcSet={project.srcSet}
+                  /* token-exempt: media conditions, same as @media — CSS vars don't apply */
+                  sizes="(max-width: 820px) 92vw, 720px"
                   alt=""
                   width={project.width}
                   height={project.height}

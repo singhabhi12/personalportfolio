@@ -23,7 +23,9 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    /* components/MotionFlag.tsx writes data-motion onto this element from a
+       blocking script, before React ever reaches it. */
+    <html lang="en" suppressHydrationWarning>
       <body>{children}</body>
     </html>
   );

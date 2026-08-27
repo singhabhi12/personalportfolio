@@ -413,8 +413,10 @@ export const SCENE_QUERY = "(min-width: 820px) and (min-height: 760px)";
    `?motion=still` is the way back to the quiet version for anyone who wants it,
    and the way to review that path on a machine that does not set the
    preference. It is the switch `?motion=full` used to be, pointing the other
-   way. */
-export const STILL_FLAG = "still";
+   way. The desk's quote card reads the same switch, so it is declared in
+   lib/motion.ts and re-exported here for everything that already imports it
+   from this file. */
+export { STILL_FLAG } from "./motion";
 
 /* ---------- Choreography ---------- */
 

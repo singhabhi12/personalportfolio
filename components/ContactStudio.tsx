@@ -18,7 +18,6 @@ import {
   SCENE_QUERY,
   SEND_DURATION,
   SHEET,
-  STILL_FLAG,
   SLOT,
   STILL_DURATION,
   approach,
@@ -33,6 +32,7 @@ import {
   revealFor,
   sheetCentre,
 } from "@/lib/desk-scene";
+import { STILL_FLAG } from "@/lib/motion";
 import {
   emptyDraft,
   firstError,
@@ -590,16 +590,6 @@ export default function ContactStudio() {
     }
     bodyRef.current?.focus();
   };
-
-  /* `?motion=still` opts this visit out of the send animation — the quiet
-     ending, and the only way to review it on a machine that does not set
-     Reduce Motion. Read once on mount and written to the root, where the CSS
-     can see it too. */
-  useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("motion") === STILL_FLAG) {
-      document.documentElement.dataset.motion = STILL_FLAG;
-    }
-  }, []);
 
   const state: Phase = phase;
   const letterState =

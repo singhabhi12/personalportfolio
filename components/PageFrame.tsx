@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import MotionFlag from "./MotionFlag";
 import NavCapsule, { type NavKey } from "./NavCapsule";
 import StampTime from "./StampTime";
 import { stamp, whisper } from "@/lib/content";
@@ -14,6 +15,7 @@ export default function PageFrame({
 }) {
   return (
     <div className="page">
+      <MotionFlag />
       <a className="skip-link" href="#main">
         Skip to content
       </a>

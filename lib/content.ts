@@ -54,6 +54,10 @@ export const experience: Role[] = [
 
 export interface Project {
   slug: string;
+  /* Unused since /work became a drawer: the folder's tab numbers itself from
+     its place in the list, and the page inside it carries the timeline instead.
+     Kept because the case studies are still to be written and a case number is
+     the sort of thing they will want — but nothing reads it today. */
   caseLabel: string;
   title: string;
   outcome: string;
@@ -63,7 +67,9 @@ export interface Project {
   height: number;
   /** Responsive sources, emitted by the asset pipeline. */
   srcSet?: string;
-  /** Phase 2 slot: a short silent clip revealed on hover. Inert while unset. */
+  /** Phase 2 slot: a short silent clip. Had one consumer — the hover on the old
+      /work card's screenshot — and the drawer took it, so this is inert whether
+      it is set or not until something new opts into it. */
   hoverMedia?: string;
   /** Set false for projects that stay tiles with no detail page (see C1). */
   hasCaseStudy: boolean;
@@ -161,6 +167,36 @@ export const projects: Project[] = projectSources.map((project) => {
   const asset = assetManifest[project.slug];
   return asset ? { ...project, image: asset.src, srcSet: asset.srcSet, width: asset.width, height: asset.height } : project;
 });
+
+/* /work is a drawer. Six manila folders tucked one behind the next, and at the
+   front the folder the whole set is filed behind — which is the only copy the
+   page needs that is not a project, everything else on it being the projects
+   themselves.
+
+   The headline is split in two because the front folder sets it as two lines
+   and a line break is a typographic decision, not a string. */
+export const work = {
+  headline: "Six cases.",
+  headlineSub: "Problem, trade-offs, outcome.",
+  line: "Event tech, Web3, and marketplaces — three years of it, and 100K+ people using what shipped.",
+
+  /* The tab is the folder's whole affordance, so it says what a real one would:
+     a number and a name. The number is the folder's place in the drawer, not
+     the case number printed inside it — they agree today and the drawer should
+     keep reading correctly on the day they stop. */
+  tabSeparator: "·",
+
+  /* The drawer has five states and three of them are reachable by hand, so
+     three of them need words. Written on the front folder, in the script face,
+     the way the reference annotates it. */
+  tap: "tap the folder!",
+  tapShut: "put them back",
+
+  /* On an expanded folder. The card face is a button, so it has to say which
+     way it goes — and the case study is a second, quieter step out of it. */
+  close: "Close",
+  readCase: "Read the case study",
+};
 
 export const portrait = (() => {
   const asset = assetManifest["portrait"];
