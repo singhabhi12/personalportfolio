@@ -747,7 +747,7 @@ export default function ContactStudio() {
             </button>
             <p className="studio-aside">
               {contact.aside}
-              <a className="contact-email" href={`mailto:${identity.email}`}>
+              <a className="contact-email link-sweep" href={`mailto:${identity.email}`}>
                 {identity.email}
               </a>
             </p>
@@ -793,7 +793,7 @@ export default function ContactStudio() {
             <p className="studio-aside">
               <span className="studio-note-label">{contact.failed.label}</span>
               {contact.failed.line}{" "}
-              <a className="contact-email" href={mailtoHref(draft)}>
+              <a className="contact-email link-sweep" href={mailtoHref(draft)}>
                 {identity.email}
               </a>
             </p>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import InlineScript from "./InlineScript";
 import { STILL_FLAG, isStill } from "@/lib/motion";
 
 /* Runs at parse time, ahead of the first paint.
@@ -14,7 +15,12 @@ import { STILL_FLAG, isStill } from "@/lib/motion";
 
    STILL_FLAG is interpolated rather than spelled out, so the script and
    lib/motion.ts cannot drift apart. Wrapped in try/catch because a blocking
-   script that throws takes the parse with it, and nothing here is worth that. */
+   script that throws takes the parse with it, and nothing here is worth that.
+
+   It goes out through InlineScript rather than as a bare <script>: React warns
+   about script tags rendered from a component, and the reason it warns — a
+   client render cannot execute them — is exactly what the effect below is for.
+   The helper carries that argument. */
 const BOOT = `try{if(new URLSearchParams(location.search).get('motion')===${JSON.stringify(
   STILL_FLAG
 )})document.documentElement.dataset.motion=${JSON.stringify(STILL_FLAG)}}catch(e){}`;
@@ -34,5 +40,5 @@ export default function MotionFlag() {
     if (isStill()) document.documentElement.dataset.motion = STILL_FLAG;
   }, []);
 
-  return <script dangerouslySetInnerHTML={{ __html: BOOT }} />;
+  return <InlineScript html={BOOT} />;
 }

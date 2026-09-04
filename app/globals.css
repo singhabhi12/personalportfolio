@@ -154,6 +154,16 @@
   --close-size: 32px;
   --tool-size: 44px;
 
+  /* The photograph being set down in the darkened room. It comes up a little
+     and settles — no further, because the lightbox is already showing the image
+     at up to 90vh and anything that starts visibly smaller has to travel far
+     enough to read as a zoom, which turns a photograph into a transition. */
+  --lightbox-rise: 14px;
+  --lightbox-scale: 0.98;
+  /* The scrim is at --dur-mid; the figure waits that out and then takes its
+     own. Read as one gesture of just under half a second. */
+  --delay-lightbox-figure: 90ms;
+
   /* Collage lifts — how far each desk object tucks under the one above it. */
   --lift-1: -12px;
   --lift-2: -18px;
@@ -297,7 +307,13 @@
      — that is a pile of paper, not a drawer of folders. */
   --folder-shut-h: 3px;
   --folder-spine-h: 7px;
-  --folder-page-h: 108px;
+  /* Measured against its own content rather than guessed: the tallest row —
+     number, chip, and a 26px title — is 59px, so this is that plus a pad top
+     and bottom and nothing else. At 108px every card carried 23–29px of dead
+     space above and below its own text, which is the whitespace that made the
+     stack read loose. It also lands back on the reference's proportion, where a
+     page is about a tenth of its own width. */
+  --folder-page-h: 88px;
   --folder-open-h: 420px;
   --folder-lip: 12px;
 
@@ -312,9 +328,24 @@
      page and the next — the only stock on screen is the lip above the first
      page and the folder at the front. A band of blue between each pair turns
      the stack into a row of tabs; these are pages in a folder. */
-  --folder-tuck: var(--folder-body-h);
+  /* How far each page tucks behind the one below it at rest. Without this the
+     stack is flush, nothing is hidden, and there is nothing for a page to
+     emerge *from* — the whole gesture below depends on a page starting out
+     partly covered. It also buys back more height than it costs: the visible
+     pitch drops from 88px to 74px. */
+  --folder-overlap: 14px;
+  --folder-tuck: calc(var(--folder-body-h) + var(--folder-overlap));
+  /* NOTE: a custom property holding a var() resolves where it is *declared* and
+     inherits already-resolved. Overriding `--folder-overlap` further down does
+     nothing to this; anywhere the tuck differs has to redeclare the tuck. */
 
-  --folder-page-pad: 18px;
+  /* How far a page rises when it is picked up: exactly its own overlap, so it
+     arrives fully clear of the page in front and no further. */
+  --folder-emerge: 14px;
+
+  --folder-page-pad: 12px;
+  /* The chip row sat a full step off the title; half is enough at this size. */
+  --folder-lead-gap: 4px;
   /* How far the page sits inside its folder when only its edge is showing.
      Measured off state five, where the reference's page edge is consistently
      18.5px narrower than the body it rises from on a 2032px frame — 12px at
@@ -366,6 +397,11 @@
   --folder-tab-pad-x: 14px;
   --folder-tab-radius: 9px;
   --folder-tab-front-w: 200px;
+  /* Shallower than a project notch. It rises off the front folder into the last
+     card in the stack, and at the project notches' 25px it reached the
+     descenders of that card's last line. A wide, shallow bump is what the
+     reference's front folder has anyway; the deep ones are for tabs you read. */
+  --folder-tab-front-h: 14px;
   --folder-fillet: 13px;
   --folder-fillet-in: 12.4px;
 
@@ -462,6 +498,26 @@
      control answering a pointer, quicker than the photograph — nobody pressed
      anything, but nobody wants to sit through it either. */
   --dur-quote: 420ms;
+  /* The link sweep. A rule that arrives from one end and leaves by the other
+     rather than rewinding — an underline drawn by hand has a direction, and a
+     hand does not run back the way it came. Longer than --dur-fast because it
+     crosses a whole word: at 150ms the stroke reads as a flicker.
+
+     The colour is deliberately absent. The rule is painted in currentColor, so
+     it inherits the accent every one of these links already fades to, and the
+     two halves of the hover cannot drift apart. */
+  --dur-sweep: 320ms;
+  --ease-sweep: cubic-bezier(0.4, 0, 0.2, 1);
+  /* Thinner than --underline-weight, which is a border on a standing element.
+     In em rather than px so one rule serves the 10px micro-label on a case
+     study and the 14px prose on /life at the same optical weight — but floored
+     at a whole pixel, because 0.075em under a micro-label is 0.75px, and a
+     sub-pixel rule on a 1x display is not a thin line, it is a grey one. */
+  --sweep-weight: max(1px, 0.075em);
+  /* How far an arrow already on the page lifts when its link is pointed at.
+     Small on purpose: the arrows here are affordances at rest, not rewards for
+     hovering, so this is a nudge and not an entrance. */
+  --arrow-lift: 0.15em;
   /* The desk caption: the words are written, an arrow is drawn up at the
      photograph, the finished annotation is held for two seconds, and then it
      goes again.
@@ -629,6 +685,70 @@ ul { list-style: none; }
   font-weight: var(--weight-medium);
 }
 sup.marker { font-size: var(--text-label); }
+
+/* The swept underline. Every link on this site that is a phrase rather than an
+   object wears it; the ones that are objects — a card, a photograph, a folder,
+   the nav capsule — do not, because a rule under a card is not an underline,
+   it is a line under a card.
+
+   Painted as a background gradient rather than a pseudo-element, for two
+   reasons. An absolutely positioned ::after has to be told where the baseline
+   is, and gets it wrong the moment the same class meets a different type size;
+   a background sits on the inline box and is simply correct at any size. And a
+   pseudo-element on an inline link that wraps mid-sentence draws one bar across
+   both lines — `box-decoration-break: clone` below gives every fragment its own.
+
+   The direction is the whole point, and it is carried by the flip between the
+   two `background-position` values, not by the size. At rest the rule is zero
+   wide and anchored right; on hover it is full width and anchored left, so it
+   grows left-to-right. Let go and it returns to the right anchor and collapses
+   the same way — out by the end it was heading for. The position must NOT be
+   transitioned: it flips while the rule is full width, where left and right
+   anchoring are indistinguishable, and the flip is therefore invisible. Give it
+   a duration and the rule slides bodily across the word instead.
+
+   :focus-visible is on the same rule as :hover on purpose. The outline alone
+   told a keyboard where it was but not that the thing was a link. */
+.link-sweep {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-size: 0 var(--sweep-weight);
+  background-position: 100% 100%;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition: color var(--dur-fast) var(--ease),
+    background-size var(--dur-sweep) var(--ease-sweep);
+}
+.link-sweep:hover,
+.link-sweep:focus-visible {
+  background-size: 100% var(--sweep-weight);
+  background-position: 0 100%;
+}
+
+/* Backwards, for a link that points backwards. The rule on "← Back to work"
+   runs right-to-left, with the arrow, or the page has two things disagreeing
+   about which way out is. */
+.link-sweep[data-sweep='reverse'] { background-position: 0 100%; }
+.link-sweep[data-sweep='reverse']:hover,
+.link-sweep[data-sweep='reverse']:focus-visible { background-position: 100% 100%; }
+
+/* An arrow that is already on the page when the pointer arrives. It lifts the
+   way it points — up and out for ↗, along for →. It does not fade in: these
+   arrows are how a visitor knows the link leaves the page before they touch it,
+   and an affordance you have to hover to discover is not an affordance. */
+.link-sweep .arrow,
+.link-sweep .link-arrow {
+  display: inline-block;
+  transition: transform var(--dur-sweep) var(--ease-sweep);
+}
+.link-sweep:hover .arrow,
+.link-sweep:focus-visible .arrow {
+  transform: translate(var(--arrow-lift), calc(-1 * var(--arrow-lift)));
+}
+.link-sweep:hover .link-arrow,
+.link-sweep:focus-visible .link-arrow {
+  transform: translateX(var(--arrow-lift));
+}
 
 /* Every desk object extends this. Never re-declare card styling per component. */
 .widget {
@@ -1184,8 +1304,10 @@ main > .canvas:first-child { margin-top: 0; }
   width: calc(100% - var(--inset) * 2);
   margin-inline: auto;
   padding-bottom: var(--folder-body-h);
-  transition: transform var(--dur-drawer) var(--ease-drawer);
-  transition-delay: calc(var(--i) * var(--stagger-drawer));
+  /* The only transform a folder has is the lift below, and a lift answers a
+     pointer — it must not inherit the stagger the phase change runs on, or the
+     sixth card would take a third of a second to settle back. */
+  transition: transform var(--dur-mid) var(--ease);
 }
 
 /* The stock, and only where the folder actually is.
@@ -1221,16 +1343,48 @@ main > .canvas:first-child { margin-top: 0; }
    difference between the open state and the drawer put away. */
 .folder + .folder {
   margin-top: calc(var(--folder-tuck) * -1);
-  transition: margin-top var(--dur-drawer) var(--ease-drawer),
-    transform var(--dur-drawer) var(--ease-drawer);
+  transition: margin-top var(--dur-drawer) var(--ease-drawer);
   transition-delay: calc(var(--i) * var(--stagger-drawer));
 }
+
+/* The lift. A page is picked up together with everything behind it, so what
+   moves is the whole back half of the stack and not one card out of it.
+
+   That is the difference between emerging and covering. Raise a page on its own
+   and it slides over the page above — every page here is in front of the one
+   behind it, so there is nowhere else for it to go. Raise its neighbours with
+   it and the group keeps its own spacing: the page clears the one in front,
+   which has not moved, and nothing behind it is any more hidden than it was.
+
+   `:has(~ ...)` reads forwards, which is why this is written as "folders that
+   still have the hovered one somewhere after them". */
+/* The last page in the stack is the exception, and `:nth-last-child(2)` — the
+   one before the front folder — is how it is spelled.
+
+   Every other page is tucked fourteen pixels behind the page after it, so a
+   lift uncovers exactly what was hidden. Nothing is in front of the last one:
+   the front folder sits flush against its bottom edge and hides none of it, the
+   way the reference has it. Lifting it therefore reveals nothing and opens a
+   fourteen-pixel band of its own folder body instead. It stays put; the shadow
+   and the coral title still answer the pointer. */
+.drawer[data-phase='open'] .folder:not(:nth-last-child(2)):has(.folder-face:hover),
+.drawer[data-phase='open'] .folder:has(~ .folder:not(:nth-last-child(2)) .folder-face:hover),
+.folder:not(:nth-last-child(2)):has(.folder-face:focus-visible),
+.folder:has(~ .folder:not(:nth-last-child(2)) .folder-face:focus-visible) {
+  transform: translateY(calc(var(--folder-emerge) * -1));
+}
+
 .drawer[data-phase='spines'] {
   --folder-tuck: 0px;
   --sheet-inset: var(--folder-page-inset);
 }
 .drawer[data-phase='shut'] {
   --sheet-inset: var(--folder-page-inset);
+  /* The pages are 3px here, so a 44px tuck lifts each folder eleven pixels
+     *above* the one before it and the stack builds upward, in reverse. The
+     overlap is for pages that need something to emerge from; there are none
+     here, so the tuck is the body and nothing else. */
+  --folder-tuck: var(--folder-body-h);
 }
 
 /* The one lip in the open state. Only the first folder has stock above it that
@@ -1313,7 +1467,7 @@ main > .canvas:first-child { margin-top: 0; }
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--folder-lead-gap);
 }
 /* Not the site's card title any more. The reference hangs a number over a
    title several steps larger than anything else in the row, and that size
@@ -1565,6 +1719,10 @@ main > .canvas:first-child { margin-top: 0; }
   --stock: var(--color-folder-front);
   /* The widest thing in the drawer, and off the fan entirely. */
   --inset: var(--folder-front-inset);
+  /* And off the overlap. That overlap exists so a page can emerge from behind
+     the one in front of it; nothing emerges from behind this folder, and tucking
+     it fourteen further only laid its top edge over the last card. */
+  --folder-tuck: var(--folder-body-h);
   /* The stock is the clipped pseudo's, and so is the shadow. */
   box-shadow: none;
   padding: var(--folder-front-pad) var(--space-8);
@@ -1593,7 +1751,7 @@ main > .canvas:first-child { margin-top: 0; }
      it sits on the folder's own top edge, the way the project notches did
      before a page edge came between them and the blue. */
   bottom: 100%;
-  height: var(--folder-tab-h);
+  height: var(--folder-tab-front-h);
   /* Shape, not a control — the handle is the button in the copy below. */
   pointer-events: none;
   /* Empty, so its width is given rather than set by a word. Proportioned off
@@ -1716,6 +1874,21 @@ main > .canvas:first-child { margin-top: 0; }
 
 /* ---------- Lightbox ---------- */
 
+/* The lightbox arrives; it does not cut. Two parts, because they are two
+   different events: the room goes dark, and then the photograph is put down in
+   it. Running them on one timeline — scrim and picture fading together — reads
+   as a dissolve between two screens, which is a slideshow. Offsetting the
+   figure behind the scrim is what makes it read as depth.
+
+   It only animates in. Closing is a dismissal: the visitor has already decided,
+   and holding the photograph on screen for another 200ms to admire its exit is
+   the one thing a lightbox must not do. Playing it out would also mean keeping
+   the dialog mounted after `open` goes null, which is where the focus return
+   and the scroll lock both live — a state machine bought for a fade nobody
+   asked to watch.
+
+   The reduced-motion block flattens both to 0.01ms, which is exactly right and
+   needs no hole: the lightbox is decoration arriving, not the page itself. */
 .lightbox {
   position: fixed;
   inset: 0;
@@ -1725,6 +1898,12 @@ main > .canvas:first-child { margin-top: 0; }
   align-items: center;
   justify-content: center;
   padding: var(--space-12);
+  animation: lightbox-in var(--dur-mid) var(--ease) both;
+}
+
+@keyframes lightbox-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .lightbox-close {
@@ -1745,16 +1924,40 @@ main > .canvas:first-child { margin-top: 0; }
   justify-content: center;
 }
 
-.lightbox-figure { position: relative; display: flex; flex-direction: column; align-items: center; }
+.lightbox-figure {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: lightbox-figure-in var(--dur-mid) var(--ease) var(--delay-lightbox-figure) both;
+}
 
-/* Never upscaled beyond natural size; never taller than 90vh. */
+@keyframes lightbox-figure-in {
+  from { opacity: 0; transform: translateY(var(--lightbox-rise)) scale(var(--lightbox-scale)); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Never upscaled beyond natural size; never taller than 90vh.
+
+   The fade is for the arrow keys, not for opening. Stepping through the gallery
+   swapped one photograph for the next between two frames, which at these sizes
+   is a jump-cut; the img is keyed on its source in Gallery.tsx so React hands
+   each photograph a fresh element and this replays. Kept to --dur-fast: the
+   neighbours are already preloaded, so there is nothing to cover up — this is
+   punctuation between two pictures, not a dissolve. */
 .lightbox-img {
+  animation: lightbox-img-in var(--dur-fast) var(--ease) both;
   border-radius: var(--radius-image);
   max-width: min(90vw, 100%);
   max-height: 90vh;
   width: auto;
   height: auto;
   object-fit: contain;
+}
+
+@keyframes lightbox-img-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .lightbox-caption {
@@ -2294,7 +2497,8 @@ main > .canvas:first-child { margin-top: 0; }
   color: var(--color-ink);
   margin-top: var(--space-5);
 }
-.contact-email:hover { color: var(--color-accent); }
+.contact-email:hover,
+.contact-email:focus-visible { color: var(--color-accent); }
 
 /* ---------- The Canvas ---------- */
 
@@ -2645,7 +2849,8 @@ main > .canvas:first-child { margin-top: 0; }
 }
 
 .about-link { color: var(--color-ink); white-space: nowrap; }
-.about-link:hover { color: var(--color-accent); }
+.about-link:hover,
+.about-link:focus-visible { color: var(--color-accent); }
 .about-link .arrow { font-size: var(--text-micro); vertical-align: 0.15em; margin-left: 0.1em; }
 
 /* Copy Abhishek still has to write. Deliberately unmistakable, so an
@@ -2843,7 +3048,8 @@ main > .canvas:first-child { margin-top: 0; }
   line-height: var(--leading-body);
   color: var(--color-ink);
 }
-.gp-cta:hover { color: var(--color-accent); }
+.gp-cta:hover,
+.gp-cta:focus-visible { color: var(--color-accent); }
 
 /* ---------- Case study ---------- */
 
@@ -2852,7 +3058,8 @@ main > .canvas:first-child { margin-top: 0; }
 .case { max-width: var(--reading-max); }
 
 .case-back { display: inline-block; margin-bottom: var(--space-8); }
-.case-back:hover { color: var(--color-accent); }
+.case-back:hover,
+.case-back:focus-visible { color: var(--color-accent); }
 
 .case-title {
   font-size: var(--text-display);
@@ -2897,7 +3104,8 @@ main > .canvas:first-child { margin-top: 0; }
 
 .case-next { margin-top: var(--space-12); }
 .case-next a { font-size: var(--text-body); font-weight: var(--weight-medium); color: var(--color-ink); }
-.case-next a:hover { color: var(--color-accent); }
+.case-next a:hover,
+.case-next a:focus-visible { color: var(--color-accent); }
 
 /* ---------- Responsive ---------- */
 
@@ -2960,7 +3168,10 @@ main > .canvas:first-child { margin-top: 0; }
      the line it gains — the height *is* the state here, so it cannot be left to
      the content the way a normal card's would be. */
   .drawer {
-    --folder-page-h: 136px;
+      /* Four more than the content needs, because the overlap takes fourteen of
+       it off the bottom and the two-line outcome was landing 2px under the
+       next card's edge. */
+    --folder-page-h: 126px;
   }
   .folder-face {
     grid-template-columns: minmax(0, 1fr);
@@ -3050,7 +3261,7 @@ main > .canvas:first-child { margin-top: 0; }
        folder's tab, which rises over the last page in the stack. On a desktop
        that tab lands in a centred page's bottom padding; here the content is
        top-aligned and fills the page, so the clearance has to be real. */
-    --folder-page-h: 160px;
+    --folder-page-h: 140px;
     --folder-open-h: 560px;
   }
   .folder-headline { font-size: var(--text-headline); }
@@ -3135,6 +3346,13 @@ main > .canvas:first-child { margin-top: 0; }
   :root:not([data-motion='still']) .studio-stage[data-mode='plain'] .letter {
     transition-duration: var(--dur-slide) !important;
   }
+
+  /* The lightbox figure's delay is not a duration, so the blanket rule above
+     does not reach it: flattened to 0.01ms it would still sit invisible behind
+     `animation-fill-mode: both` for the whole 90ms and then snap in. A stagger
+     that exists to sequence two moves is meaningless once neither move takes
+     any time, so it goes. */
+  .lightbox-figure { animation-delay: 0s !important; }
 
   /* And one for the type-here cue, unconditionally: it is a caret, and native
      carets blink under reduced motion in every browser. Flattened to 0.01ms it

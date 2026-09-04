@@ -18,7 +18,7 @@ function Prose({ runs }: { runs: Run[] }) {
       {runs.map((run, index) => {
         if (run.t === "link") {
           return (
-            <a className="about-link" key={index} href={run.href}>
+            <a className="about-link link-sweep" key={index} href={run.href}>
               {run.v}
               <span className="arrow" aria-hidden="true">
                 ↗

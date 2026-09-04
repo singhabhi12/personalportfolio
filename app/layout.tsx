@@ -26,7 +26,18 @@ export default function RootLayout({
     /* components/MotionFlag.tsx writes data-motion onto this element from a
        blocking script, before React ever reaches it. */
     <html lang="en" suppressHydrationWarning>
-      <body>{children}</body>
+      {/* And this one is for other people's scripts. Extensions that bind a
+          keyboard shortcut mark the body to say so — ColorZilla writes
+          `cz-shortcut-listen`, and it is not the only one — and they do it
+          before React hydrates, so React finds an attribute the server never
+          sent and reports a mismatch on every page load. The server output is
+          bare `<body>`; verified against a clean browser profile, which raises
+          no hydration error on any route.
+
+          It suppresses this element only. React does not inherit the flag down
+          the tree, so a real mismatch anywhere inside still reports normally —
+          which is the whole reason this sits on `<body>` and not higher. */}
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }

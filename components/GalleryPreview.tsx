@@ -95,7 +95,7 @@ export default function GalleryPreview() {
         </span>
       </Link>
 
-      <Link className="gp-cta" href="/gallery">
+      <Link className="gp-cta link-sweep" href="/gallery">
         View gallery
       </Link>
     </div>

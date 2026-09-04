@@ -21,6 +21,35 @@ export const mapkitToken = process.env.NEXT_PUBLIC_MAPKIT_TOKEN ?? "";
 /** With no token configured the widget stays exactly as it was: SVG, no button. */
 export const mapsEnabled = mapkitToken.length > 0;
 
+/* When the token dies, MapKit answers 401 and reports it as `loaderDidFail` —
+   a minified stack from mapkit.core.js with nothing in it about tokens, dates,
+   or what to do next. The expiry is the second segment of the JWT and needs no
+   signing key to read, so the one likely cause gets named out loud.
+
+   Null for anything unparseable, and deliberately never used to withhold a
+   token: whether Apple accepts it is Apple's to decide, and this exists only to
+   explain a rejection after the fact. `atob` rather than Buffer because the map
+   is a client component and this has to read the same in both places. */
+const tokenExpiry = (token: string): number | null => {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return null;
+    const { exp } = JSON.parse(
+      atob(payload.replace(/-/g, "+").replace(/_/g, "/"))
+    );
+    return typeof exp === "number" ? exp * 1000 : null;
+  } catch {
+    return null;
+  }
+};
+
+export const mapkitTokenExpiry = tokenExpiry(mapkitToken);
+
+/** Checked when the map mounts, not at module scope: a static export is built
+    once and served for weeks, so the answer has to be current, not baked in. */
+export const mapkitTokenExpired = () =>
+  mapkitTokenExpiry !== null && mapkitTokenExpiry < Date.now();
+
 /** Only what the map draws. Search, directions, and Look Around stay unloaded. */
 export const mapkitLibraries = ["map", "annotations"];
 

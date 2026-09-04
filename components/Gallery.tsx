@@ -146,6 +146,12 @@ export default function Gallery() {
           </button>
           <div className="lightbox-figure" onClick={(event) => event.stopPropagation()}>
             <img
+              /* Keyed on the source so stepping with the arrows hands React a
+                 fresh element rather than re-pointing this one — which is what
+                 lets .lightbox-img's fade replay between photographs. The
+                 neighbours are preloaded above, so the new element paints from
+                 cache and the fade covers a swap, not a load. */
+              key={current.src}
               className="lightbox-img"
               src={current.src}
               srcSet={current.srcSet}

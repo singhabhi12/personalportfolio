@@ -38,7 +38,8 @@ export default async function CaseStudy({ params }: { params: Promise<Params> })
   return (
     <PageFrame active="work">
       <article className="case">
-        <Link className="micro-label case-back" href="/work">
+        {/* data-sweep: the rule runs the way the arrow points. */}
+        <Link className="micro-label case-back link-sweep" data-sweep="reverse" href="/work">
           ← Back to work
         </Link>
 
@@ -93,7 +94,12 @@ export default async function CaseStudy({ params }: { params: Promise<Params> })
         {next && (
           <nav className="case-next">
             <p className="micro-label">Next</p>
-            <Link href={`/work/${next.slug}`}>{next.title} →</Link>
+            <Link className="link-sweep" href={`/work/${next.slug}`}>
+              {next.title}{" "}
+              <span className="link-arrow" aria-hidden="true">
+                →
+              </span>
+            </Link>
           </nav>
         )}
       </article>

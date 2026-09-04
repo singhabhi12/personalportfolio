@@ -9,6 +9,8 @@ import {
   MAP_INSET,
   mapkitLibraries,
   mapkitToken,
+  mapkitTokenExpired,
+  mapkitTokenExpiry,
   mapPins,
   mapRegion,
 } from "@/lib/maps";
@@ -34,6 +36,21 @@ export default function PlacesMap() {
     let map: MapKitMap | undefined;
     let cancelled = false;
     let detachError: (() => void) | undefined;
+
+    /* Said before the load rather than after the failure, because MapKit's own
+       report of it says only that a loader failed. Not gated on NODE_ENV: it
+       fires only when the token is already dead, which is the state where a
+       line in the console is the most useful thing on the page. */
+    if (mapkitTokenExpired()) {
+      console.warn(
+        `[places] The MapKit token expired on ${new Date(mapkitTokenExpiry!)
+          .toISOString()
+          .slice(0, 10)}. Apple will answer 401 and the map will show its ` +
+          "fallback. Issue a new one under Certificates, Identifiers & " +
+          "Profiles → Maps Tokens, set NEXT_PUBLIC_MAPKIT_TOKEN in .env.local, " +
+          "and restart the dev server — Next inlines it at build time."
+      );
+    }
 
     (async () => {
       try {
