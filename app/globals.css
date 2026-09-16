@@ -50,6 +50,10 @@
   --card-padding: 24px;
   --card-padding-lg: 32px;
   --grid-gutter: 24px;
+  /* The floating view switch on /work: a round button and the line icon in it. */
+  --fab-size: 48px;
+  --fab-icon: 20px;
+  --fab-stroke: 1.5px;
   --section-gap: 96px;
 
   /* Shape */
@@ -253,38 +257,50 @@
      way a page actually comes out of a folder — so the fan, the tab steps and
      the stacking order are decided once and every state inherits them.
 
-     Stock is manila rather than the reference's blue, deepened a step from the
-     first pass: the folders are the largest objects on this page and a tan that
-     barely clears the paper cannot carry them. */
-  /* The ramp. Sampled off state five, where every folder is a different blue and
-     they lighten toward the front — #4872e1 at the back through #6f93f1 at the
-     nearest, a 60% climb in luminance. It is what lets four bands of the same
-     hue read as four objects.
+     Stock is the site's orange rather than the reference's blue: the folders
+     are the largest objects on this page, and the one colour the desk already
+     owns is the one that can carry them. */
+  /* The ramp. The reference's folders are blue; ours take the desk's own
+     colour instead — the "currently cooking" card's gradient, which runs from
+     a pink-red to an orange, with the site accent sitting between the two.
+     The far end of the drawer is the deep coral end of that gradient, the near
+     end is its orange, and the folders lighten toward the front the way the
+     reference's blues do: a ~70% climb in luminance, which is what lets nine
+     bands of one hue read as nine objects.
 
-     Sampled straight off the reference and used as measured. An earlier pass
-     ran the whole ramp darker to keep white notch labels above 4.5:1; these are
-     the real values, and the contrast that comes with them is noted below.
+     Taken down from the card's full-strength values, though. The card is one
+     small object; the drawer is nine large ones stacked, and the accent at that
+     size glares. So the ramp is the same hues at ~60–75% saturation — the card
+     seen through paper — and the folders read as the card's family rather
+     than as the card itself.
 
-     The four sampled folders are the ramp's ends — ours interpolates six across
-     the same span, so a seventh project would space itself too.
+     Each folder is also not one flat colour but a short gradient, foot to
+     crown, in its own stock: see `--stock-body` and `--stock-notch` on
+     `.folder`. That is the card's own 16° rise, and it is what keeps a flat
+     band of stock from looking printed.
 
      The front folder is off the ramp, and darker than the folder behind it: it
      is the one folder whose *front* panel you are looking at, where the rest
-     show you their backs.
+     show you their backs. It is the accent, softened the same step as the
+     rest, so the drawer and the desk's card are visibly the same orange.
 
-     CONTRAST, measured: white on these blues runs 4.40:1 at the back of the
-     stack down to 3.21:1 at the front, and 3.64:1 on the front folder. The
-     32px headline clears the 3:1 that large text needs. The 10px notch labels
-     and the 14px line under the headline do not clear the 4.5:1 that small text
-     needs — the reference does not either. Darkening `--color-folder-front` a
-     step, or giving those two a deep navy ink instead of white, fixes it
-     without touching the ramp. */
-  --color-folder-far: #4872e1;
-  --color-folder-near: #658cee;
-  --color-folder-front: #5780f1;
+     CONTRAST, measured on the flat stock: white runs 4.02:1 at the back of
+     the stack down to 2.54:1 at the front, and 3.38:1 on the front folder.
+     The 32px headline clears the 3:1 that large text needs. The 10px notch
+     labels and the 14px line under the headline do not clear the 4.5:1 that
+     small text needs — the blue reference did not either. Darkening
+     `--color-folder-near` a step, or giving those two a deep ink instead of
+     white, fixes it without touching the rest of the ramp. */
+  --color-folder-far: #cf5a4c;
+  --color-folder-near: #e88a68;
+  --color-folder-front: #e0674b;
+  /* The two ends the per-folder gradient leans toward: a muted rose below,
+     an apricot above. Mixed into the stock at a fifth, never shown neat. */
+  --color-folder-shade: #b94a5a;
+  --color-folder-light: #f4ad8c;
   --color-folder-ink: #ffffff;
   /* The line under the headline on the front folder. White at three quarters,
-     which is the reference's own second voice on blue. */
+     which is the reference's own second voice on its stock. */
   --color-folder-ink-muted: rgba(255, 255, 255, 0.82);
 
   /* The page inside the folder, and the page picked up out of it. The stack is
@@ -292,12 +308,14 @@
      not read as six grey rules, and heavy only on the one being held. */
   /* Folders cast upward, onto the one behind them — which is the only direction
      that shows, since what is below any folder is covered by the next. This is
-     the separation the reference gets between its bands; without it six blues
-     of a single hue run together whatever their tone. */
-  --shadow-stack: 0 -2px 5px rgba(16, 24, 74, 0.13), 0 -8px 20px rgba(16, 24, 74, 0.10);
-  --shadow-page: 0 1px 2px rgba(20, 30, 90, 0.10), 0 2px 6px rgba(20, 30, 90, 0.10);
-  --shadow-page-lift: 0 4px 8px rgba(20, 30, 90, 0.10), 0 16px 32px rgba(20, 30, 90, 0.22);
-  --shadow-folder: 0 1px 2px rgba(20, 30, 90, 0.10), 0 4px 14px rgba(20, 30, 90, 0.12);
+     the separation the reference gets between its bands; without it nine
+     oranges of a single hue run together whatever their tone. Tinted toward
+     the stock — a deep red-brown, not grey — so a shadow reads as the folder's
+     own shade. */
+  --shadow-stack: 0 -2px 5px rgba(84, 20, 10, 0.14), 0 -8px 20px rgba(84, 20, 10, 0.11);
+  --shadow-page: 0 1px 2px rgba(90, 30, 16, 0.10), 0 2px 6px rgba(90, 30, 16, 0.10);
+  --shadow-page-lift: 0 4px 8px rgba(90, 30, 16, 0.10), 0 16px 32px rgba(90, 30, 16, 0.22);
+  --shadow-folder: 0 1px 2px rgba(90, 30, 16, 0.10), 0 4px 14px rgba(90, 30, 16, 0.12);
 
   /* The four page heights, and the stock showing above the first folder.
 
@@ -307,13 +325,13 @@
      — that is a pile of paper, not a drawer of folders. */
   --folder-shut-h: 3px;
   --folder-spine-h: 7px;
-  /* Measured against its own content rather than guessed: the tallest row —
-     number, chip, and a 26px title — is 59px, so this is that plus a pad top
-     and bottom and nothing else. At 108px every card carried 23–29px of dead
+  /* Measured against its own content rather than guessed: the row is a 20px
+     title alone, 23px tall, so this is that plus a pad top and bottom and a
+     little air. At 108px every card carried 23–29px of dead
      space above and below its own text, which is the whitespace that made the
      stack read loose. It also lands back on the reference's proportion, where a
      page is about a tenth of its own width. */
-  --folder-page-h: 88px;
+  --folder-page-h: 52px;
   --folder-open-h: 420px;
   --folder-lip: 12px;
 
@@ -332,7 +350,7 @@
      stack is flush, nothing is hidden, and there is nothing for a page to
      emerge *from* — the whole gesture below depends on a page starting out
      partly covered. It also buys back more height than it costs: the visible
-     pitch drops from 88px to 74px. */
+     pitch drops from 52px to 38px. */
   --folder-overlap: 14px;
   --folder-tuck: calc(var(--folder-body-h) + var(--folder-overlap));
   /* NOTE: a custom property holding a var() resolves where it is *declared* and
@@ -343,9 +361,7 @@
      arrives fully clear of the page in front and no further. */
   --folder-emerge: 14px;
 
-  --folder-page-pad: 12px;
-  /* The chip row sat a full step off the title; half is enough at this size. */
-  --folder-lead-gap: 4px;
+  --folder-page-pad: 10px;
   /* How far the page sits inside its folder when only its edge is showing.
      Measured off state five, where the reference's page edge is consistently
      18.5px narrower than the body it rises from on a 2032px frame — 12px at
@@ -362,7 +378,7 @@
   /* The reference's title is 2.7% of its page's width — several steps above the
      card title this used to be, and the reason its pages read as chapter
      openings rather than as rows. Ours lands here against a ~810px page. */
-  --text-folder-title: 26px;
+  --text-folder-title: 20px;
   --leading-folder-title: 1.15;
   --folder-radius: 12px;
 
@@ -375,8 +391,16 @@
      reads as the thing the rest are filed behind.
 
      Scaled to our drawer: 16px a side between folders, and the last of them
-     sitting 66px in from each edge before the front folder takes the rest. */
-  --folder-fan: 16px;
+     sitting 66px in from each edge before the front folder takes the rest.
+
+     The *spread* is the constant, not the step. Six folders fanned 16px apart
+     covered 80px, and that 80px is what was measured off the reference — so it
+     is the total that holds and the step that divides, or a ninth project makes
+     the drawer 48px deeper and pushes the back folder off the ramp. The step
+     itself is computed on `.drawer`, which is the only scope that knows how
+     many folders there are — and it divides by the last folder's index for the
+     same reason the stock ramp does: the front folder sits outside the fan. */
+  --folder-fan-spread: 80px;
   --folder-front-gap: 66px;
   /* The front folder does not run the full width of the drawer. It is still the
      widest object by a clear step — 94.6% against the stack's 88.2% — but
@@ -390,7 +414,13 @@
      `--folder-fillet-in` sits a hair under `--folder-fillet` because the gap
      between them is the only antialiasing a radial-gradient edge gets. */
   --folder-tab-h: 25px;
-  --folder-tab-step: clamp(78px, 11.4vw, 148px);
+  /* The tabs read across the drawer, so like the fan it is the track they span
+     that is fixed and the step that divides it. The bounds are the old
+     six-folder step (78–148px) multiplied by its five gaps, which leaves the
+     drawer identical at six and keeps the last tab inside the front folder at
+     nine. Tabs overlap once the track is at its floor — they always did, and a
+     stack of folders overlapping down one edge is what the state is. */
+  --folder-tab-track: clamp(390px, 57vw, 740px);
   /* Clear of the folder's own top-left corner: the radius plus the fillet, or
      the first tab's fillet is cut by the rounding it sits on. */
   --folder-tab-base: 28px;
@@ -471,8 +501,8 @@
      the corner. So every blur here is no larger than the offset carrying it,
      which is what keeps the shadow strictly below the folder.
 
-     What separates it from the stack is that it is a different blue. */
-  --drop-folder: drop-shadow(0 3px 3px rgba(20, 30, 90, 0.10)) drop-shadow(0 14px 14px rgba(20, 30, 90, 0.11));
+     What separates it from the stack is that it is a different shade. */
+  --drop-folder: drop-shadow(0 3px 3px rgba(90, 30, 16, 0.10)) drop-shadow(0 14px 14px rgba(90, 30, 16, 0.11));
 
   /* The front folder. Sized off the reference's 208px against a 655px folder;
      the type inside is scaled the same way, which is why the headline sits
@@ -1275,11 +1305,16 @@ main > .canvas:first-child { margin-top: 0; }
   /* A tab rises above its folder's top line and is not layout, so it would not
      make room for itself. */
   padding-top: var(--folder-tab-h);
+  /* `--n` is set by the component and exists nowhere else, so the two lengths
+     that divide by it are computed here rather than at :root — which declares
+     the spread and the track they divide. */
+  --folder-fan: calc(var(--folder-fan-spread) / (var(--n) - 1));
+  --folder-tab-step: calc(var(--folder-tab-track) / (var(--n) - 1));
 }
 
 .folder {
-  /* This folder's place on the ramp: none of the near blue at the back of the
-     drawer, all of it at the front. */
+  /* This folder's place on the ramp: none of the near orange at the back of
+     the drawer, all of it at the front. */
   --stock: color-mix(
     in srgb,
     /* Divided by the last folder's index, not by the count: the front folder is
@@ -1288,8 +1323,16 @@ main > .canvas:first-child { margin-top: 0; }
     var(--color-folder-near) calc(var(--i) / (var(--n) - 1) * 100%),
     var(--color-folder-far)
   );
-  /* Sampled off the reference, a notch is the same blue as the folder it is cut
-     from — #466fda against a #4872e1 body, and identical by the fourth. It
+  /* The stock as a gradient. The foot of a folder leans a fifth toward rose
+     and the crown of its notch a fifth toward apricot, with the flat stock at
+     the seam between them — so a body and the notch cut from it are one
+     continuous rise, and only the shape says where one stops. */
+  --stock-foot: color-mix(in srgb, var(--stock) 80%, var(--color-folder-shade));
+  --stock-crown: color-mix(in srgb, var(--stock) 78%, var(--color-folder-light));
+  --stock-body: linear-gradient(to top, var(--stock-foot), var(--stock));
+  --stock-notch: linear-gradient(to top, var(--stock), var(--stock-crown));
+  /* Sampled off the reference, a notch is the same stock as the folder it is
+     cut from — #466fda against a #4872e1 body there, and identical by the fourth. It
      reads because it stands on the folder *behind* it, which is a step darker,
      not because it is lifted off its own. */
   --lip-stock: var(--stock);
@@ -1332,7 +1375,7 @@ main > .canvas:first-child { margin-top: 0; }
   right: 0;
   bottom: 0;
   height: var(--folder-body-h);
-  background: var(--stock);
+  background: var(--stock-body);
   border-radius: var(--folder-radius) var(--folder-radius) 0 0;
   box-shadow: var(--shadow-stack);
 }
@@ -1403,7 +1446,7 @@ main > .canvas:first-child { margin-top: 0; }
   left: var(--folder-fan);
   right: var(--folder-fan);
   height: var(--folder-lip);
-  background: var(--stock);
+  background: var(--stock-notch);
   border-radius: var(--folder-radius) var(--folder-radius) 0 0;
   transition: height var(--dur-drawer) var(--ease-drawer);
 }
@@ -1463,12 +1506,6 @@ main > .canvas:first-child { margin-top: 0; }
 }
 
 .folder-lead { display: block; }
-.folder-when {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin-bottom: var(--folder-lead-gap);
-}
 /* Not the site's card title any more. The reference hangs a number over a
    title several steps larger than anything else in the row, and that size
    difference is most of why its pages read as pages rather than as list rows. */
@@ -1480,16 +1517,11 @@ main > .canvas:first-child { margin-top: 0; }
   letter-spacing: var(--tracking-display);
 }
 
-/* The number the reference prints over each title. */
-.folder-no {
-  font-family: var(--font-label);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-medium);
-  line-height: var(--leading-micro);
-  letter-spacing: var(--tracking-micro);
-  color: var(--color-muted);
+.folder-face .card-outcome {
+  display: block;
+  font-size: var(--text-label);
+  line-height: var(--leading-body);
 }
-.folder-face .card-outcome { display: block; }
 
 /* ---- The tab ---- */
 
@@ -1517,7 +1549,9 @@ main > .canvas:first-child { margin-top: 0; }
   padding-bottom: var(--folder-spine-h);
   gap: var(--space-2);
   padding: 0 var(--folder-tab-pad-x);
-  background: var(--lip-stock);
+  /* The fillets either side are flat `--lip-stock`, which is the colour this
+     gradient starts from at the foot — exactly where they sit. */
+  background: var(--stock-notch);
   border-radius: var(--folder-tab-radius) var(--folder-tab-radius) 0 0;
 
   /* No shadow of its own, and nothing else's shadow across it either.
@@ -1736,7 +1770,8 @@ main > .canvas:first-child { margin-top: 0; }
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--stock);
+  /* The card's own gradient, at the card's own angle, in this folder's stock. */
+  background: linear-gradient(16deg, var(--stock-foot), var(--stock-crown) 85%);
   border-radius: var(--radius-card);
   clip-path: var(--folder-shape);
   filter: var(--drop-folder);
@@ -1827,6 +1862,97 @@ main > .canvas:first-child { margin-top: 0; }
   padding: var(--space-1) var(--space-3);
   flex: none;
 }
+
+/* ---------- Work: the switch, and the cards ---------- */
+
+/* The cards' head: the headline the front folder would otherwise carry. The
+   drawer has no head at all — its h1 is off the page. */
+.work-head { margin-bottom: var(--space-8); }
+
+/* The same words the front folder sets, in the page's ink instead of the
+   folder's. */
+.work-title {
+  font-size: var(--text-folder-headline);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-folder-headline);
+  letter-spacing: var(--tracking-display);
+  color: var(--color-ink);
+  margin-bottom: var(--space-3);
+}
+.work-title-sub {
+  display: block;
+  font-weight: var(--weight-regular);
+  color: var(--color-muted);
+}
+.work-line {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-body);
+  max-width: var(--reading-max);
+}
+
+/* The switch: one round button pinned to the corner of the viewport, in the
+   nav's dress — card white, pill, the card shadow — carrying the mark of the
+   view it goes to. Fixed rather than in the page because the two views are
+   very different heights, and the way back should be in the same place at
+   the top of the drawer as at the foot of the ninth card. Above the drawer's
+   stacking, below the lightbox. */
+.view-fab {
+  position: fixed;
+  right: var(--space-6);
+  bottom: var(--space-6);
+  z-index: 50;
+  width: var(--fab-size);
+  height: var(--fab-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-card);
+  border: 0;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-card);
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.view-fab:hover { color: var(--color-accent); transform: translateY(calc(-1 * var(--space-1) / 2)); }
+.view-fab-icon {
+  width: var(--fab-icon);
+  height: var(--fab-icon);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--fab-stroke);
+  stroke-linejoin: round;
+}
+
+/* Two columns of the desk's cards. The whole card is the link, and the title
+   answers the hover the way the featured card's does. */
+.work-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--grid-gutter);
+}
+.work-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  background: var(--color-card);
+  border-radius: var(--radius-card);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-card);
+  color: var(--color-ink);
+}
+.work-card:hover .card-title { color: var(--color-accent); }
+/* Every shot is 16:10 whatever it was shot at, so the two columns stay level. */
+.work-card .shot { aspect-ratio: 16 / 10; margin-bottom: var(--space-2); }
+.work-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.work-card .card-outcome { color: var(--color-muted); }
+.work-card-meta { margin-top: var(--space-1); }
 
 /* ---------- Gallery ---------- */
 
@@ -3088,17 +3214,96 @@ main > .canvas:first-child { margin-top: 0; }
 
 .case-section { margin-top: var(--space-12); }
 .case-section > .widget-label { margin-bottom: var(--space-4); }
-.case-section p {
+.case-section p,
+.case-section li {
   font-size: var(--text-body);
   line-height: var(--leading-body);
   color: var(--color-body);
-  margin-bottom: var(--space-4);
 }
-.case-section p:last-child { margin-bottom: 0; }
+.case-section p { margin-bottom: var(--space-4); }
+.case-section > :last-child { margin-bottom: 0; }
+
+/* The run-in on a bullet. Ink rather than body, so the point of the item reads
+   at a glance and the sentence after it stays quiet. */
+.case-section strong {
+  font-weight: var(--weight-semibold);
+  color: var(--color-ink);
+}
+
+/* Bullets. `ul` is list-style: none site-wide (§ reset), so the marker is drawn
+   here — a hairline dash in the accent, hung outside the text column so the
+   copy keeps one left edge with the paragraphs above it. */
+.case-list {
+  margin-bottom: var(--space-4);
+  display: grid;
+  gap: var(--space-3);
+}
+.case-list li {
+  position: relative;
+  padding-left: var(--space-5);
+}
+.case-list li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--color-accent);
+}
+
+/* Numbered, for the few lists where sequence is the content. Counter rather
+   than a real ol marker, so it inherits the same hanging indent as the dash. */
+.case-list--numbered { counter-reset: case-step; list-style: none; }
+.case-list--numbered li { counter-increment: case-step; }
+.case-list--numbered li::before {
+  content: counter(case-step) ".";
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  /* Sits on the body line rather than the box top, since the mono digit is
+     smaller than the copy beside it. */
+  top: 0.1em;
+}
+
+/* A research question, or a tester in their own words. Indented behind an
+   accent rule — the one place on a case page where copy leaves the column. */
+.case-quote {
+  margin-bottom: var(--space-4);
+  padding-left: var(--space-4);
+  border-left: var(--underline-weight) solid var(--color-accent);
+  font-size: var(--text-lead);
+  line-height: var(--leading-lead);
+  letter-spacing: var(--tracking-lead);
+  color: var(--color-ink);
+}
+
+/* What a case study cannot show, and why. Sits between the meta row and the
+   first section, in the same dashed frame the unwritten placeholders use —
+   because it is the same kind of statement: an honest note about what is
+   missing, not part of the argument. */
+.case-note {
+  margin-top: var(--space-8);
+  padding: var(--space-4);
+  border: var(--hairline) dashed var(--color-line);
+  border-radius: var(--radius-image);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-muted);
+}
 
 .case-figure { margin-top: var(--space-8); }
 .case-figure img { border-radius: var(--radius-image); box-shadow: var(--shadow-image); width: 100%; }
-.case-figure figcaption { margin-top: var(--space-3); }
+.case-figure figcaption {
+  margin-top: var(--space-3);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-muted);
+}
+
+/* Inside a section a figure sits between paragraphs, so it takes the
+   paragraph's rhythm rather than the hero's. */
+.case-section .case-figure { margin-top: var(--space-6); margin-bottom: var(--space-6); }
+
+/* Phone screens, two or three abreast. They are all the same height, so the
+   row is a flat grid rather than a masonry, and the caption sits under the lot. */
+.case-figure-row { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: var(--space-3); }
 
 .case-divider { margin-top: var(--space-12); border-top: var(--hairline) solid var(--color-line); }
 
@@ -3171,7 +3376,7 @@ main > .canvas:first-child { margin-top: 0; }
       /* Four more than the content needs, because the overlap takes fourteen of
        it off the bottom and the two-line outcome was landing 2px under the
        next card's edge. */
-    --folder-page-h: 126px;
+    --folder-page-h: 94px;
   }
   .folder-face {
     grid-template-columns: minmax(0, 1fr);
@@ -3238,6 +3443,8 @@ main > .canvas:first-child { margin-top: 0; }
     --featured-shot-h: var(--featured-shot-h-sm);
   }
   .desk-grid { grid-template-columns: 1fr; gap: var(--space-8); }
+  .work-grid { grid-template-columns: 1fr; }
+  .view-fab { right: var(--space-4); bottom: var(--space-4); }
   .manifesto { position: static; }
   .whisper { display: none; }
   /* Two of the three things `--i` does stop meaning anything at this width. A
@@ -3261,7 +3468,7 @@ main > .canvas:first-child { margin-top: 0; }
        folder's tab, which rises over the last page in the stack. On a desktop
        that tab lands in a centred page's bottom padding; here the content is
        top-aligned and fills the page, so the clearance has to be real. */
-    --folder-page-h: 140px;
+    --folder-page-h: 108px;
     --folder-open-h: 560px;
   }
   .folder-headline { font-size: var(--text-headline); }

@@ -36,10 +36,16 @@ const write = (p, s) => {
 };
 
 /* ---- project screenshots (16:10) ---- */
+/* Mirrors `projectSources` in lib/content.ts, in the same order. Every one of
+   these has a real cover now — Kolsetu's is its mark, since the interface is
+   under NDA — so this is the fallback for a fresh clone before `npm run assets`. */
 const projects = [
-  ["truts", "Truts"],
-  ["application-hq", "Application HQ"],
+  ["substrac", "Substrac"],
+  ["stampp", "Stampp"],
+  ["kolsetu", "Kolsetu"],
+  ["jobtrac", "Jobtrac"],
   ["evmet", "Evmet"],
+  ["truts", "Truts"],
   ["dehidden", "Dehidden"],
   ["build-up", "Build Up"],
   ["chip-count", "Chip Count"],

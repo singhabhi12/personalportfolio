@@ -2,13 +2,15 @@
 /**
  * B4 — asset pipeline for product screenshots, the portrait, and tool icons.
  *
- *   raw/projects/<slug>.png   →  public/projects/<slug>-{800,1600}.webp + .jpg
- *   raw/portrait/portrait.jpg →  public/portrait-{400,800}.webp + .jpg
- *   raw/tools/<name>.svg|png  →  public/tools/<name>.svg|png (copied as-is)
+ *   raw/projects/<slug>.png        →  public/projects/<slug>-{800,1600}.webp + .jpg
+ *   raw/cases/<slug>/<name>.png    →  public/cases/<slug>/<name>-{…}.webp + .jpg
+ *   raw/portrait/portrait.jpg      →  public/portrait-{400,800}.webp + .jpg
+ *   raw/tools/<name>.svg|png       →  public/tools/<name>.svg|png (copied as-is)
  *
  * Writes lib/generated/assets.ts, which lib/content.ts merges over the
- * placeholder entries by slug. Drop files in /raw and run `npm run assets` —
- * no component code changes.
+ * placeholder entries by slug, and lib/generated/case-figures.ts, which the
+ * case studies look their inline figures up in by "<slug>/<name>". Drop files
+ * in /raw and run `npm run assets` — no component code changes.
  *
  * Aspect ratios are never altered; width is the only constraint and sources
  * are never upscaled.
@@ -25,8 +27,13 @@ const PUBLIC = join(ROOT, "public");
 
 const PROJECT_WIDTHS = [800, 1600];
 const PORTRAIT_WIDTHS = [400, 800];
+/* A phone screen sits three to a row in the reading column, so it needs a
+   third of the width a full-bleed figure does. Sized by orientation rather
+   than by folder: the same case mixes both. */
+const FIGURE_WIDTHS = { landscape: [800, 1600], portrait: [480, 960] };
 
 const manifest = {};
+const figures = {};
 const produced = [];
 let sourceBytes = 0;
 let outputBytes = 0;
@@ -73,6 +80,41 @@ const projectCount = await processGroup(
   PROJECT_WIDTHS
 );
 if (projectCount === 0) console.log("  (none — drop files in raw/projects/)");
+
+/* Inline figures, one folder per case study. The key is "<slug>/<name>" so the
+   name only has to be unique within its own case. */
+console.log("\nCase figures");
+const casesRaw = join(RAW, "cases");
+let figureCount = 0;
+if (existsSync(casesRaw)) {
+  for (const slug of readdirSync(casesRaw).filter((d) => statSync(join(casesRaw, d)).isDirectory()).sort()) {
+    for (const source of listSources(join(casesRaw, slug))) {
+      const name = slugOf(source);
+      sourceBytes += statSync(source).size;
+      const { width, height } = await sharp(source).metadata();
+      const { natural, written, fallback, fallbackSize } = await emitVariants(
+        source,
+        join(PUBLIC, "cases", slug),
+        name,
+        height > width ? FIGURE_WIDTHS.portrait : FIGURE_WIDTHS.landscape
+      );
+      outputBytes += written.reduce((sum, w) => sum + w.size, 0) + fallbackSize;
+      produced.push(...written.map((w) => w.file), fallback);
+      figures[`${slug}/${name}`] = {
+        src: `/cases/${slug}/${basename(fallback)}`,
+        srcSet: written.map((w) => `/cases/${slug}/${basename(w.file)} ${w.width}w`).join(", "),
+        width: natural.width,
+        height: natural.height,
+      };
+      figureCount++;
+      console.log(
+        `  ${`${slug}/${name}`.padEnd(40)} ${natural.width}×${natural.height}  ` +
+          `${written.map((w) => w.width + "w").join(" ")} + jpg`
+      );
+    }
+  }
+}
+if (figureCount === 0) console.log("  (none — drop files in raw/cases/<slug>/)");
 
 /* The portrait is black-and-white by design (§4), so the grey is baked in here
    rather than left to the CSS filter — no colour channels on the wire. */
@@ -141,8 +183,16 @@ writeManifest(
   manifest
 );
 
+writeManifest(
+  join(ROOT, "lib", "generated", "case-figures.ts"),
+  "caseFigureManifest",
+  "{\n  src: string;\n  srcSet: string;\n  width: number;\n  height: number;\n}",
+  figures
+);
+
 console.log(
   `\nWeight: sources ${bytes(sourceBytes)} → outputs ${bytes(outputBytes)}` +
     (sourceBytes ? ` (${Math.round((outputBytes / sourceBytes) * 100)}%)` : "")
 );
-console.log(`Manifest: lib/generated/assets.ts (${Object.keys(manifest).length} entries)\n`);
+console.log(`Manifest: lib/generated/assets.ts (${Object.keys(manifest).length} entries)`);
+console.log(`Manifest: lib/generated/case-figures.ts (${Object.keys(figures).length} entries)\n`);

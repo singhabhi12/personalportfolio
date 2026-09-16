@@ -9,6 +9,7 @@
     "lint:tokens": "node scripts/check-tokens.mjs",
     "tool-icons": "node scripts/build-tool-icons.mjs",
     "assets": "node scripts/build-assets.mjs",
+    "covers": "node scripts/compose-covers.mjs",
     "photos": "node scripts/build-photos.mjs",
     "placeholders": "node scripts/build-placeholders.mjs",
     "models": "node scripts/build-models.mjs"

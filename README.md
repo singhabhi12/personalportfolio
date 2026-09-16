@@ -10,7 +10,8 @@ npm install
 npm run dev          # http://localhost:3000
 npm run build        # static export to out/
 npm run lint:tokens  # fails if any hex / px / rgba / font stack escapes :root
-npm run assets       # raw/ screenshots + portrait + icons → public/
+npm run assets       # raw/ screenshots + case figures + portrait + icons → public/
+npm run covers       # a 16:10 cover from three phone screens, or from a mark on white
 npm run photos       # raw/gallery photos → responsive WebP, LQIP, EXIF stripped
 npm run placeholders # regenerate the hatch placeholders
 ```
@@ -44,13 +45,16 @@ components/
   ToolsRow, Contact, NavCapsule
 lib/
   content.ts         all copy — edit here, never in JSX
+  case-studies.ts    the nine written cases, typed as blocks (casestudies.md
+                     is the long-form source they are cut from)
   gallery.ts         photo manifest (city/year by hand, never from EXIF)
   places.ts          travel data + the lat/lng projection and clustering
   maps.ts            MapKit token, pins, and the computed map region
   generated/         written by the pipelines; do not edit
 scripts/
   check-tokens.mjs   the token rule, enforced
-  build-assets.mjs   screenshots, portrait, tool icons
+  build-assets.mjs   screenshots, case figures, portrait, tool icons
+  compose-covers.mjs a cover from three phone screens or a mark, for projects with no landscape shot
   build-photos.mjs   gallery photos
 ```
 
@@ -89,13 +93,15 @@ a gallery key without one is dropped rather than rendered broken.
 | What | Where it goes | Command | Key must match |
 |---|---|---|---|
 | Project screenshots | `raw/projects/<slug>.png` | `npm run assets` | `slug` in `lib/content.ts` |
+| Case-study figures | `raw/cases/<slug>/<name>.png` | `npm run assets` | `name` in a `figure` block in `lib/case-studies.ts` |
 | Portrait | `raw/portrait/portrait.jpg` | `npm run assets` | — |
 | Tool icons | `raw/tools/<name>.svg` | `npm run assets` | `tools[].icon` in `lib/content.ts` |
 | Gallery photos | `raw/gallery/<key>.jpg` | `npm run photos` | `key` in `lib/gallery.ts` |
 
 `raw/` is gitignored — originals are inputs, not artefacts.
 
-Outputs: WebP at 800/1600 for screenshots, 400/800/1600 for photos, plus a JPG
+Outputs: WebP at 800/1600 for screenshots and landscape figures (480/960 for
+phone screens, which sit three abreast), 400/800/1600 for photos, plus a JPG
 fallback and (for photos) a ~20px blurred LQIP inlined as a data URI. A source
 narrower than the largest target also gets a variant at its own width, so a
 768px original does not cap out at 400w and go soft. Aspect ratios are never
@@ -207,8 +213,10 @@ for one instead of relying on a rejected promise.
 - Two About sections (`Where I'm from`, `What I used to do`) and two inline
   hints render as visible placeholder blocks — see `aboutSections` in
   `lib/content.ts`.
-- Every case study section is a placeholder block. Run the C1 interview, then
-  replace `caseSections` with per-project copy.
+- Every project has a real cover. Three are composed by `npm run covers`
+  before `npm run assets` runs: Substrac and Stampp from three of their phone
+  screens in `raw/cases/`, and Kolsetu from its mark in `raw/marks/` on white,
+  because the interface itself is under NDA.
 - Set `hasCaseStudy: false` on any project that should stay a tile with no
   detail page; its card link falls back to `#` and no route is generated.
 

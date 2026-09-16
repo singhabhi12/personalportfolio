@@ -30,22 +30,26 @@ type Phase = "shut" | "open" | "spines";
    a closed folder, short enough that nobody waits for it. */
 const HOLD_MS = 900;
 
-export default function WorkFolders() {
+/* `settled` is for arriving from the card view: the drawer landing shut and
+   unfolding is the page's opening beat, and a switch back is not an arrival —
+   so it comes up already open, the way it would under `?motion=still`. */
+export default function WorkFolders({ settled = false }: { settled?: boolean }) {
   /* `?motion=still` gets the drawer already open — there is no version of this
      page that is only reachable through an animation. Read once, at mount,
      because it decides the first frame. */
-  const [phase, setPhase] = useState<Phase>("shut");
+  const [phase, setPhase] = useState<Phase>(settled ? "open" : "shut");
   const [expanded, setExpanded] = useState<string | null>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (settled) return;
     if (isStill()) {
       setPhase("open");
       return;
     }
     const timer = setTimeout(() => setPhase("open"), HOLD_MS);
     return () => clearTimeout(timer);
-  }, []);
+  }, [settled]);
 
   /* Pressing the paper puts things away, one layer at a time: an open page
      closes before the drawer it is lying in, so it takes two presses to get from
@@ -105,109 +109,99 @@ export default function WorkFolders() {
     setExpanded((current) => (current === slug ? null : slug));
   };
 
+  /* No heading of its own: the section around it (WorkView) carries the h1,
+     and the drawer is named by the headline on its front folder. */
   return (
-    <section className="section" id="work">
-      {/* Off the page rather than out of it. The drawer is the whole of /work
-          and the design does not want a heading over it — but a route with no
-          h1 has no name in a screen reader's outline and none in a search
-          result either, so the words stay and only the type goes. */}
-      <h1 className="sr-only">Work</h1>
-
-      <div
-        className="drawer"
-        ref={drawerRef}
-        data-phase={phase}
-        /* `--n` is how many folders sit in front of the front folder. The
+    <div
+      className="drawer"
+      ref={drawerRef}
+      data-phase={phase}
+      /* `--n` is how many folders sit in front of the front folder. The
            stylesheet insets each one by its distance from the front, and it is
            set here so that number can never drift from the list. */
-        style={{ "--n": projects.length } as CSSProperties}
-      >
-        {projects.map((project, index) => {
-          const isOpen = expanded === project.slug;
-          const number = String(index + 1).padStart(2, "0");
+      style={{ "--n": projects.length } as CSSProperties}
+    >
+      {projects.map((project, index) => {
+        const isOpen = expanded === project.slug;
+        const number = String(index + 1).padStart(2, "0");
 
-          return (
-            <article
-              className="folder"
-              key={project.slug}
-              data-open={isOpen || undefined}
-              style={{ "--i": index } as CSSProperties}
-            >
-              <div className="folder-sheet">
-                {/* The page face. A button, not a link: clicking a page opens
+        return (
+          <article
+            className="folder"
+            key={project.slug}
+            data-open={isOpen || undefined}
+            style={{ "--i": index } as CSSProperties}
+          >
+            <div className="folder-sheet">
+              {/* The page face. A button, not a link: clicking a page opens
                     it here (state 4) rather than leaving the drawer. The case
                     study is a link inside, once it is open. */}
-                <button
-                  type="button"
-                  className="folder-face"
-                  aria-expanded={isOpen}
-                  onClick={() => togglePage(project.slug)}
-                >
-                  {/* Number over title, the way the reference sets a page. The
-                      timeline used to sit here; it moved into the opened page,
-                      where it is one of three facts rather than a lone date
-                      competing with the number for the same line. */}
-                  <span className="folder-lead">
-                    <span className="folder-when">
-                      <span className="folder-no">{number}</span>
-                      {project.tag && <span className="tag-chip">{project.tag}</span>}
-                    </span>
-                    <span className="card-title">{project.title}</span>
-                  </span>
+              <button
+                type="button"
+                className="folder-face"
+                aria-expanded={isOpen}
+                onClick={() => togglePage(project.slug)}
+              >
+                {/* Title alone. The number and the tag chip used to sit over
+                    it; the number still prints on the folder's tab, and the
+                    tag went with the timeline into the opened page. */}
+                <span className="folder-lead">
+                  <span className="card-title">{project.title}</span>
+                </span>
 
-                  <span className="card-outcome">{project.outcome}</span>
-                </button>
+                <span className="card-outcome">{project.outcome}</span>
+              </button>
 
-                {/* Only rendered once opened. It carries a screenshot, and a
-                    closed folder should not be paying for six of them. */}
-                {isOpen && (
-                  <div className="folder-detail">
-                    <img
-                      className="folder-shot"
-                      src={project.image}
-                      srcSet={project.srcSet}
-                      /* The open page is the widest folder less its padding.
+              {/* Only rendered once opened. It carries a screenshot, and a
+                    closed folder should not be paying for nine of them. */}
+              {isOpen && (
+                <div className="folder-detail">
+                  <img
+                    className="folder-shot"
+                    src={project.image}
+                    srcSet={project.srcSet}
+                    /* The open page is the widest folder less its padding.
                          token-exempt: media conditions, same as @media. */
-                      sizes="(max-width: 820px) 88vw, 520px"
-                      alt={`${project.title} — product screenshot`}
-                      width={project.width}
-                      height={project.height}
-                    />
+                    sizes="(max-width: 820px) 88vw, 520px"
+                    alt={`${project.title} — product screenshot`}
+                    width={project.width}
+                    height={project.height}
+                  />
 
-                    <div className="folder-facts">
-                      <dl className="folder-meta">
-                        <div>
-                          <dt className="micro-label">Role</dt>
-                          <dd>{project.role}</dd>
-                        </div>
-                        <div>
-                          <dt className="micro-label">When</dt>
-                          <dd>{project.timeline}</dd>
-                        </div>
-                        <div>
-                          <dt className="micro-label">Team</dt>
-                          <dd>{project.team}</dd>
-                        </div>
-                      </dl>
-
-                      <div className="folder-actions">
-                        <a className="folder-read" href={projectHref(project)}>
-                          {work.readCase} <span aria-hidden="true">→</span>
-                        </a>
-                        <button
-                          type="button"
-                          className="folder-close"
-                          onClick={() => setExpanded(null)}
-                        >
-                          {work.close}
-                        </button>
+                  <div className="folder-facts">
+                    <dl className="folder-meta">
+                      <div>
+                        <dt className="micro-label">Role</dt>
+                        <dd>{project.role}</dd>
                       </div>
+                      <div>
+                        <dt className="micro-label">When</dt>
+                        <dd>{project.timeline}</dd>
+                      </div>
+                      <div>
+                        <dt className="micro-label">Team</dt>
+                        <dd>{project.team}</dd>
+                      </div>
+                    </dl>
+
+                    <div className="folder-actions">
+                      <a className="folder-read" href={projectHref(project)}>
+                        {work.readCase} <span aria-hidden="true">→</span>
+                      </a>
+                      <button
+                        type="button"
+                        className="folder-close"
+                        onClick={() => setExpanded(null)}
+                      >
+                        {work.close}
+                      </button>
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
+            </div>
 
-              {/* After the page, not before it. The notch belongs to the folder
+            {/* After the page, not before it. The notch belongs to the folder
                   and the page passes behind it — which is painting order, and
                   painting order among positioned siblings is tree order.
 
@@ -217,45 +211,44 @@ export default function WorkFolders() {
                   the tab order on purpose: `.folder-face` above is the same
                   action as a real, reachable control, and this is the pointer
                   shortcut to it rather than a second thing to find. */}
-              <button
-                type="button"
-                className="folder-tab"
-                aria-hidden="true"
-                tabIndex={-1}
-                onClick={() => togglePage(project.slug)}
-              >
-                <span className="folder-tab-no">{number}</span>
-                <span>{work.tabSeparator}</span>
-                <span>{project.title}</span>
-              </button>
-            </article>
-          );
-        })}
-
-        {/* The front of the drawer: the label the six are filed behind, and the
-            handle that files them. */}
-        <div className="folder folder--front" style={{ "--i": projects.length } as CSSProperties}>
-          {/* Shape only. It is the folder's own notch, not a label for it — the
-              drawer is already named by the headline underneath. */}
-          <span className="folder-tab folder-tab--front" aria-hidden="true" />
-
-          <div className="folder-front-copy">
-            <p className="folder-headline">
-              {work.headline}
-              <span className="folder-headline-sub">{work.headlineSub}</span>
-            </p>
-            <p className="folder-line">{work.line}</p>
-
-            <button type="button" className="folder-tap" onClick={toggleDrawer}>
-              <svg className="folder-tap-arrow" viewBox="0 0 34 26" aria-hidden="true">
-                <path d="M2 3 C 10 2, 18 8, 24 17" />
-                <path d="M2 3 L 10 5 M2 3 L 4 11" />
-              </svg>
-              {phase === "open" ? work.tapShut : work.tap}
+            <button
+              type="button"
+              className="folder-tab"
+              aria-hidden="true"
+              tabIndex={-1}
+              onClick={() => togglePage(project.slug)}
+            >
+              <span className="folder-tab-no">{number}</span>
+              <span>{work.tabSeparator}</span>
+              <span>{project.title}</span>
             </button>
-          </div>
+          </article>
+        );
+      })}
+
+      {/* The front of the drawer: the label the nine are filed behind, and
+          the handle that files them. */}
+      <div className="folder folder--front" style={{ "--i": projects.length } as CSSProperties}>
+        {/* Shape only. It is the folder's own notch, not a label for it — the
+              drawer is already named by the headline underneath. */}
+        <span className="folder-tab folder-tab--front" aria-hidden="true" />
+
+        <div className="folder-front-copy">
+          <p className="folder-headline">
+            {work.headline}
+            <span className="folder-headline-sub">{work.headlineSub}</span>
+          </p>
+          <p className="folder-line">{work.line}</p>
+
+          <button type="button" className="folder-tap" onClick={toggleDrawer}>
+            <svg className="folder-tap-arrow" viewBox="0 0 34 26" aria-hidden="true">
+              <path d="M2 3 C 10 2, 18 8, 24 17" />
+              <path d="M2 3 L 10 5 M2 3 L 4 11" />
+            </svg>
+            {phase === "open" ? work.tapShut : work.tap}
+          </button>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

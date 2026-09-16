@@ -1,12 +1,13 @@
 /* Single source of truth for all site copy.
    Edit here — never in components.
 
-   Gallery photos live in lib/gallery.ts and travel data in lib/places.ts
-   (both carry logic of their own); they are re-exported here so components
-   have one import surface. */
+   Gallery photos live in lib/gallery.ts, travel data in lib/places.ts, and the
+   written case studies in lib/case-studies.ts (all three carry weight of their
+   own); they are re-exported here so components have one import surface. */
 
 export * from "./gallery";
 export * from "./places";
+export * from "./case-studies";
 
 import { assetManifest } from "./generated/assets";
 
@@ -36,8 +37,8 @@ export const whisper = "morning. look around…";
 /* The home page's one gradient card. Carries the availability signal. */
 export const cooking = {
   label: "Currently cooking ☺",
-  headline: "Interviewing right now — open to UX & product roles.",
-  sub: "Hamburg or remote.",
+  headline: "Building Stampp — an iOS app that turns your photos into collectible postage stamps.",
+  sub: "Also open to UX & product roles. Hamburg or remote.",
 };
 
 export interface Role {
@@ -47,6 +48,7 @@ export interface Role {
 }
 
 export const experience: Role[] = [
+  { years: "2025–26", role: "Product Designer — Kolsetu", field: "Voice AI" },
   { years: "2024–25", role: "Product Designer — Evmet", field: "Event tech" },
   { years: "2022–24", role: "UX/UI Designer — Truts", field: "Web3" },
   { years: "2021–22", role: "Design Intern — Dehidden", field: "NFT" },
@@ -78,10 +80,81 @@ export interface Project {
   team: string;
 }
 
+/* Reverse-chronological, which is also the order casestudies.md keeps them in.
+   The drawer numbers folders from this list, so the order here is the order on
+   /work — and `featured` below deliberately does not take the top of it. */
 const projectSources: Project[] = [
   {
-    slug: "truts",
+    slug: "substrac",
     caseLabel: "Case 01",
+    title: "Substrac",
+    outcome: "MA thesis turning passive subscription spend into active control.",
+    tag: "Thesis",
+    image: "/projects/substrac.svg",
+    width: 1600,
+    height: 1000,
+    hasCaseStudy: true,
+    role: "Sole Designer & Researcher",
+    timeline: "2026",
+    team: "Solo · MA thesis",
+  },
+  {
+    slug: "stampp",
+    caseLabel: "Case 02",
+    title: "Stampp",
+    outcome: "iOS app that turns your photos into collectible postage stamps.",
+    tag: "iOS",
+    image: "/projects/stampp.svg",
+    width: 1600,
+    height: 1000,
+    hasCaseStudy: true,
+    role: "Product Designer & Solo Builder",
+    timeline: "2026",
+    team: "Solo",
+  },
+  {
+    slug: "kolsetu",
+    caseLabel: "Case 03",
+    title: "Kolsetu",
+    outcome: "Sole designer on a Voice AI platform for regulated enterprises.",
+    tag: "Voice AI",
+    image: "/projects/kolsetu.svg",
+    width: 1600,
+    height: 1000,
+    hasCaseStudy: true,
+    role: "Product Designer (sole designer)",
+    timeline: "2025–2026",
+    team: "Kolsetu GmbH · Hamburg",
+  },
+  {
+    slug: "jobtrac",
+    caseLabel: "Case 04",
+    title: "Jobtrac",
+    outcome: "AI job tracker that tailors documents, scores ATS compatibility, and reads the inbox for status.",
+    image: "/projects/jobtrac.svg",
+    width: 1600,
+    height: 1000,
+    hasCaseStudy: true,
+    role: "Product Designer & Full-Stack Builder",
+    timeline: "2025–present",
+    team: "Solo",
+  },
+  {
+    slug: "evmet",
+    caseLabel: "Case 05",
+    title: "Evmet",
+    outcome: "End-to-end UX for a live event management platform, web and mobile.",
+    image: "/projects/evmet.svg",
+    width: 1600,
+    height: 1000,
+    hasCaseStudy: true,
+    role: "Product Designer",
+    timeline: "2024–2025",
+    team: "Remote · Event tech",
+  },
+  {
+    slug: "truts",
+    caseLabel: "Case 06",
     title: "Truts",
     outcome: "Led UX for 7 products used by 100K+ Web3 users.",
     tag: "Web3",
@@ -94,34 +167,8 @@ const projectSources: Project[] = [
     team: "Remote · Web3",
   },
   {
-    slug: "application-hq",
-    caseLabel: "Case 02",
-    title: "Application HQ",
-    outcome: "Web + mobile UX for live event ops: booth tracking and real-time attendee flow.",
-    image: "/projects/application-hq.svg",
-    width: 1600,
-    height: 1000,
-    hasCaseStudy: true,
-    role: "Product Designer",
-    timeline: "2024–2025",
-    team: "Remote · Event tech",
-  },
-  {
-    slug: "evmet",
-    caseLabel: "Case 03",
-    title: "Evmet",
-    outcome: "End-to-end UX for a live event management platform, web and mobile.",
-    image: "/projects/evmet.svg",
-    width: 1600,
-    height: 1000,
-    hasCaseStudy: true,
-    role: "Product Designer",
-    timeline: "2024–2025",
-    team: "Remote · Event tech",
-  },
-  {
     slug: "dehidden",
-    caseLabel: "Case 04",
+    caseLabel: "Case 07",
     title: "Dehidden",
     outcome: "Mobile-first NFT campaign UX shipped for Coinbase, Bacardi, and Polygon.",
     tag: "NFT",
@@ -135,7 +182,7 @@ const projectSources: Project[] = [
   },
   {
     slug: "build-up",
-    caseLabel: "Case 05",
+    caseLabel: "Case 08",
     title: "Build Up",
     outcome: "Marketplace concept connecting homeowners with local contractors.",
     image: "/projects/build-up.svg",
@@ -148,7 +195,7 @@ const projectSources: Project[] = [
   },
   {
     slug: "chip-count",
-    caseLabel: "Case 06",
+    caseLabel: "Case 09",
     title: "Chip Count",
     outcome: "Real-time chip tracking concept for live poker tournaments.",
     image: "/projects/chip-count.svg",
@@ -156,7 +203,7 @@ const projectSources: Project[] = [
     height: 1000,
     hasCaseStudy: true,
     role: "Self-directed concept",
-    timeline: "2023",
+    timeline: "2024",
     team: "Solo",
   },
 ];
@@ -168,7 +215,7 @@ export const projects: Project[] = projectSources.map((project) => {
   return asset ? { ...project, image: asset.src, srcSet: asset.srcSet, width: asset.width, height: asset.height } : project;
 });
 
-/* /work is a drawer. Six manila folders tucked one behind the next, and at the
+/* /work is a drawer. Nine manila folders tucked one behind the next, and at the
    front the folder the whole set is filed behind — which is the only copy the
    page needs that is not a project, everything else on it being the projects
    themselves.
@@ -176,9 +223,9 @@ export const projects: Project[] = projectSources.map((project) => {
    The headline is split in two because the front folder sets it as two lines
    and a line break is a typographic decision, not a string. */
 export const work = {
-  headline: "Six cases.",
+  headline: "Nine cases.",
   headlineSub: "Problem, trade-offs, outcome.",
-  line: "Event tech, Web3, and marketplaces — three years of it, and 100K+ people using what shipped.",
+  line: "Voice AI, event tech, Web3, and the things I build on my own time — three years of it, and 100K+ people using what shipped.",
 
   /* The tab is the folder's whole affordance, so it says what a real one would:
      a number and a name. The number is the folder's place in the drawer, not
@@ -196,6 +243,12 @@ export const work = {
      way it goes — and the case study is a second, quieter step out of it. */
   close: "Close",
   readCase: "Read the case study",
+
+  /* The same nine, two ways: filed in the drawer, or laid out as cards for
+     anyone who would rather see them all at once. One floating button switches
+     between them, and it is named for where it goes, not where you are — the
+     icon on it is the other view too. */
+  switchTo: { folders: "Show as folders", cards: "Show as cards" },
 };
 
 export const portrait = (() => {
@@ -216,20 +269,31 @@ export const portrait = (() => {
 export const projectHref = (project: Project) =>
   project.hasCaseStudy ? `/work/${project.slug}` : "#";
 
-/* The featured project on the desk. */
-export const featured = projects[0];
+/* The featured project on the desk. Not `projects[0]`: the drawer's order is
+   editorial, not by what has a screenshot, while the desk puts one at full
+   width. So this is the first project down the list that actually has one —
+   drop a file in raw/projects/ and run `npm run assets`, and the desk moves
+   on its own. */
+export const featured = projects.find((p) => p.srcSet) ?? projects[0];
 
 /* The manifesto card's headline, composed in three parts — <name> <verb>
    <subject> — so the weight mix (bold name, plain verb, underlined subject) is
    copy rather than markup. The subject is a live link to what it names. */
+/* What is on the desk right now. Not `featured`: that follows the newest
+   project with a screenshot, and the thing being built is usually the one
+   that has none yet. */
+const current = projects.find((p) => p.slug === "stampp") ?? featured;
+
 export const headline = {
-  verb: "is designing",
-  subject: featured.title,
-  href: projectHref(featured),
+  verb: "is building",
+  subject: current.title,
+  href: projectHref(current),
 };
 
-/* Case study scaffolding. Real copy comes from the C1 interview — until then
-   every section renders as a visible placeholder, never as finished prose. */
+/* Case study scaffolding, kept as the fallback. All nine cases are written in
+   lib/case-studies.ts and the page prefers those; a project added to `projects`
+   before its copy exists renders this instead — a visible placeholder, never
+   prose pretending to be finished. */
 export interface CaseSection {
   label: string;
   placeholder: string;

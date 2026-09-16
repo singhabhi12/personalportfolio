@@ -55,3 +55,10 @@ next-env.d.ts
 # only — the browser never sees them, and the drawer is built now.
 /Animation Frames
 /Video Animation Frames
+# case-study source exports and phone photos — inputs to scripts/compose-covers
+# and build-assets; the served derivatives live in public/cases and
+# public/projects. GitHub is not a place for 19MB of originals.
+/Portfolio Images
+/IMG_*.jpg
+# Finder duplicate of a build output
+/out 2
