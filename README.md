@@ -1,6 +1,6 @@
 # Abhishek Singh — Portfolio
 
-Static Next.js site implementing the **Personal Desk** direction from the Claude
+Next.js site implementing the **Personal Desk** direction from the Claude
 Design project, per `PORTFOLIO_DESIGN_SOURCE_OF_TRUTH_v2.1.md`.
 
 ## Run
@@ -8,7 +8,7 @@ Design project, per `PORTFOLIO_DESIGN_SOURCE_OF_TRUTH_v2.1.md`.
 ```bash
 npm install
 npm run dev          # http://localhost:3000
-npm run build        # static export to out/
+npm run build        # production build (deployed on Vercel)
 npm run lint:tokens  # fails if any hex / px / rgba / font stack escapes :root
 npm run assets       # raw/ screenshots + case figures + portrait + icons → public/
 npm run covers       # a 16:10 cover from three phone screens, or from a mark on white
@@ -16,8 +16,10 @@ npm run photos       # raw/gallery photos → responsive WebP, LQIP, EXIF stripp
 npm run placeholders # regenerate the hatch placeholders
 ```
 
-`next.config.ts` sets `output: "export"`, so `npm run build` produces a fully
-static `out/` you can host anywhere.
+Every page prerenders to static HTML; the one piece that needs a server is
+`app/api/contact`, the letterbox behind the contact page — see
+[The letterbox](#the-letterbox-resend) below. That is why `next.config.ts` no
+longer sets `output: "export"`.
 
 ## Structure
 
@@ -177,8 +179,7 @@ putting the inline SVG back.
 1. Apple Developer → Certificates, Identifiers & Profiles → **Maps Tokens**.
 2. Create a token and bind it to your deployed domain. MapKit JS 6 issues
    static domain-bound tokens directly, so there is no `.p8` private key to
-   store and nothing to sign at runtime — which is what keeps the site a plain
-   `output: "export"` static build with no token endpoint.
+   store and nothing to sign at runtime — so there is no token endpoint to run.
 3. Put it in `.env.local` (see `.env.example`):
 
    ```bash
@@ -206,6 +207,37 @@ If Apple rejects the token or the quota is spent, the card shows "The map
 didn't load." rather than an empty box; that failure arrives as a MapKit
 `error` event well after `load()` resolves, which is why `PlacesMap` listens
 for one instead of relying on a rejected promise.
+
+## The letterbox (Resend)
+
+A letter posted on `/contact` is sent to `app/api/contact/route.ts`, which
+turns it into an email to `identity.email` in `lib/content.ts` through
+[Resend](https://resend.com)'s REST API — one `fetch`, no SDK. The visitor's
+address goes in `Reply-To`, so answering the mail is answering them.
+
+**Setup:**
+
+1. Sign up at Resend with the same address as `identity.email` and create an
+   API key (**API Keys → Create**, sending access is enough).
+2. Put it in `.env.local` for local testing, and in Vercel under
+   **Settings → Environment Variables** for the deploy:
+
+   ```bash
+   RESEND_API_KEY=re_…
+   ```
+
+   It is a real secret: server-only, never `NEXT_PUBLIC_`.
+3. No domain is needed to start. Resend's shared `onboarding@resend.dev`
+   sender delivers to the address that owns the key, and nowhere else — which
+   is exactly the one address this route ever writes to. Once you verify a
+   domain there, set `CONTACT_FROM="Portfolio <letters@yourdomain>"` and the
+   mail stops looking like it came from Resend.
+
+**Without the key** the route answers 503 and the studio shows "Didn't post"
+with the letter intact and a `mailto:` link, so nothing is lost — but that is
+the fallback, not the feature. `NEXT_PUBLIC_CONTACT_ENDPOINT` can still point
+the client at some other JSON endpoint (Formspree, a Worker), or be set to the
+empty string to skip the wire and hand the letter to the visitor's mail app.
 
 ## Placeholders still to replace
 

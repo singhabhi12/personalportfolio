@@ -15,7 +15,7 @@ export const identity = {
   firstName: "Abhishek",
   name: "Abhishek Singh",
   role: "UX Designer — Hamburg",
-  email: "kwebellkop.1204@gmail.com",
+  email: "abhiiiishek.1204@gmail.com",
   linkedin: "https://www.linkedin.com/in/abhishek-singh-7b5300198/",
   cv: "https://drive.google.com/file/d/1tb9bNpAES6i9-qGWQHPL0JBlmSoPgz9S/view?usp=sharing",
   intro: "https://cal.com/",

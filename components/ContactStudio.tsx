@@ -532,9 +532,9 @@ export default function ContactStudio() {
        send at the instant it began, which is both startling and a spoiler.
 
        So the mail client is now offered afterwards, as a button in the panel
-       below, and the send is allowed to be the send. A real form endpoint skips
-       that step entirely: set NEXT_PUBLIC_CONTACT_ENDPOINT and the letter is
-       posted over the wire while the animation plays, with nothing to click. */
+       below, and the send is allowed to be the send. With an endpoint — the
+       site's own /api/contact by default — that step never appears: the letter
+       is posted over the wire while the animation plays, with nothing to click. */
     outcome.current = contactEndpoint ? postLetter(draft) : Promise.resolve(true);
 
     const still = document.documentElement.dataset.motion === STILL_FLAG;
