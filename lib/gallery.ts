@@ -67,7 +67,7 @@ const manifest: Omit<Photo, "src" | "width" | "height">[] = [
     key: "blankanese2",
     title: "Blankenese", base: "Hamburg", country: "DE", year: "2026",
     alt: "Villas and a dark church spire on the Blankenese hillside",
-    focus: "50% 64%",
+    focus: "50% 60%",
   },
   {
     key: "alsterwinters",
@@ -127,7 +127,7 @@ const manifest: Omit<Photo, "src" | "width" | "height">[] = [
     key: "gateway-of-india",
     title: "Gateway of India", base: "Mumbai", country: "IN", year: "2026",
     alt: "The stone arch and turrets of the Gateway of India",
-    focus: "56% 60%",
+    focus: "55% 40%",
   },
   {
     key: "hamburg-2026",
@@ -193,7 +193,7 @@ const manifest: Omit<Photo, "src" | "width" | "height">[] = [
     key: "st-peter-s-church2",
     title: "St. Peter's Church", base: "Hamburg", country: "DE", year: "2026",
     alt: "The copper spire of St. Petri against a winter sky",
-    focus: "48% 46%",
+    focus: "48% 38%",
   },
   {
     key: "marine-driave-mumbai",
@@ -205,13 +205,13 @@ const manifest: Omit<Photo, "src" | "width" | "height">[] = [
     key: "dammtor",
     title: "Dammtor", base: "Hamburg", country: "DE", year: "2025",
     alt: "A carved stone dormer catching low autumn sun",
-    focus: "50% 45%",
+    focus: "50% 42%",
   },
   {
     key: "schwerin",
     title: "Schwerin", base: "Schwerin", country: "DE", year: "2025",
     alt: "Turrets and a gilded figure on Schwerin Castle",
-    focus: "45% 48%",
+    focus: "45% 42%",
   },
   {
     key: "the-perseids-meteor-shower-2026",

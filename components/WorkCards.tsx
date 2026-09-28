@@ -1,7 +1,8 @@
 import { projects, projectHref } from "@/lib/content";
 
-/* The nine as cards: the same list the drawer files, laid flat in two columns
-   for anyone who would rather see them all at once than one at a time. The
+/* All nine as cards, laid flat in two columns — the full list, where the
+   drawer files a selection of six. For anyone who would rather see them all
+   at once than one at a time. The
    whole card is the link; hover moves the title to the accent, the way the
    desk's featured card does. No "view project" buttons.
 

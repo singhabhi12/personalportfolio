@@ -20,8 +20,8 @@ const readStored = (): View | null => {
   }
 };
 
-/* /work, two ways. The drawer is the page's own idea and the way it lands; the
-   cards are the plainer view of the same nine, for anyone who wants them all
+/* /work, two ways. The drawer is the page's own idea and the way it lands,
+   with six of the nine filed in it; the cards are the plainer view, all nine
    on the table at once. One button, floating bottom right, and the choice
    sticks.
 
@@ -64,7 +64,7 @@ export default function WorkView() {
       {cards ? (
         <div className="work-head">
           <h1 className="work-title">
-            {work.headline}
+            {work.headline.cards}
             <span className="work-title-sub">{work.headlineSub}</span>
           </h1>
           <p className="work-line">{work.line}</p>

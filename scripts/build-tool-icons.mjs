@@ -37,6 +37,12 @@ const TOOLS = [
   { name: "Claude", slug: "claude", icon: "claude-color" },
   { name: "VS Code", slug: "vscode", icon: null }, // not in the pack — AI/LLM brands only
   { name: "Xcode", slug: "xcode", icon: null },
+  /* The pack draws the cube in currentColor; Notion's mark is black. */
+  { name: "Notion", slug: "notion", icon: "notion", color: "#000000" },
+  /* Adobe's app icon, from Wikimedia Commons (PD-textlogo) — supplied by hand. */
+  { name: "Lightroom", slug: "lightroom", icon: null },
+  /* The pack draws the knot in currentColor; OpenAI's mark is black. */
+  { name: "ChatGPT", slug: "chatgpt", icon: "openai", color: "#000000" },
 ];
 
 function stage(spec) {

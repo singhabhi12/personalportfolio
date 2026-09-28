@@ -15,15 +15,16 @@ import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.j
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { models } from "@/lib/generated/models";
 import {
-  CAMERA,
   DEFAULT_FINISH,
   FINISHES,
   KEYS,
+  LENS,
   LID,
   LIGHTS,
   MATERIAL_FINISH,
-  PROPS,
   type FinishName,
+  type Placement,
+  type Stage,
   type Vec3,
 } from "@/lib/desk-scene";
 
@@ -102,8 +103,7 @@ function buildFinishes() {
    down with its base on the ground and its footprint centred on its mark. The
    group is what gets placed and turned, so the fit never has to know about the
    rotation and the rotation never has to undo the fit. */
-function placeProp(source: THREE.Object3D, key: keyof typeof PROPS) {
-  const place = PROPS[key];
+function placeProp(source: THREE.Object3D, place: Placement) {
   const box = new THREE.Box3().setFromObject(source);
   const size = box.getSize(new THREE.Vector3());
   const centre = box.getCenter(new THREE.Vector3());
@@ -399,7 +399,8 @@ function liftLid(root: THREE.Object3D): THREE.Group | null {
   return pivot;
 }
 
-export async function createStudio(canvas: HTMLCanvasElement): Promise<Studio> {
+/** Builds the scene as `stage` describes it — see STAGES in lib/desk-scene.ts. */
+export async function createStudio(canvas: HTMLCanvasElement, stage: Stage): Promise<Studio> {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     /* The page's own paper is the background. A cleared colour here would put a
@@ -415,9 +416,10 @@ export async function createStudio(canvas: HTMLCanvasElement): Promise<Studio> {
   renderer.toneMappingExposure = 1.05;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(CAMERA.fov, 1, CAMERA.near, CAMERA.far);
-  const target = new THREE.Vector3(...CAMERA.target);
-  const direction = new THREE.Vector3(...CAMERA.direction).normalize();
+  const camera = new THREE.PerspectiveCamera(LENS.fov, 1, LENS.near, LENS.far);
+  const view = stage.view;
+  const target = new THREE.Vector3(...view.target);
+  const direction = new THREE.Vector3(...view.direction).normalize();
 
   /* A procedural soft-box, generated once and thrown away. Two directional
      lights alone leave the ink body reading as flat charcoal and the coral box
@@ -496,8 +498,8 @@ export async function createStudio(canvas: HTMLCanvasElement): Promise<Studio> {
      else — placeProp only ever touches the group it wraps. */
   const lidPivot = liftLid(letterboxGltf.scene);
 
-  const typewriter = placeProp(typewriterGltf.scene, "typewriter");
-  const letterbox = placeProp(letterboxGltf.scene, "letterbox");
+  const typewriter = placeProp(typewriterGltf.scene, stage.props.typewriter);
+  const letterbox = placeProp(letterboxGltf.scene, stage.props.letterbox);
   scene.add(typewriter, letterbox);
 
   const typewriterRest = typewriter.position.y;
@@ -512,9 +514,10 @@ export async function createStudio(canvas: HTMLCanvasElement): Promise<Studio> {
     if (object instanceof THREE.Mesh) object.material = boxFinish;
   });
 
-  /* Sizing. The stage can be any shape; the composition was framed at 3:2, so
-     anything narrower opens the vertical angle rather than letting the box slide
-     out of frame. Wider than 3:2 just shows more desk. */
+  /* Sizing. The stage can be any shape; the composition was framed for the
+     slab `view.frame` names, so anything narrower than that opens the vertical
+     angle rather than letting the box slide out of frame, and anything wider
+     just shows more desk. */
   const size = { width: 0, height: 0 };
 
   function resize() {
@@ -531,10 +534,10 @@ export async function createStudio(canvas: HTMLCanvasElement): Promise<Studio> {
     /* Solve for the distance at which the framed slab fits — vertically and
        horizontally — and stand the camera there along its fixed direction. The
        lens never changes, so neither does the perspective. */
-    const half = Math.tan((CAMERA.fov * Math.PI) / 360);
+    const half = Math.tan((LENS.fov * Math.PI) / 360);
     const distance = Math.max(
-      CAMERA.frame.height / 2 / half,
-      CAMERA.frame.width / 2 / (half * aspect)
+      view.frame.height / 2 / half,
+      view.frame.width / 2 / (half * aspect)
     );
     camera.position.copy(direction).multiplyScalar(distance).add(target);
     camera.lookAt(target);

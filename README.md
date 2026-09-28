@@ -43,6 +43,8 @@ components/
   PlacesWidget       the live map, then the count line and city list
   PlacesMap          MapKit JS map (client) — needs JavaScript
   GalleryPreview     framed photo tile, whole gallery on a 4s beat (Life)
+  ListeningWidget    the song on now, as a record on the desk (Life)
+  VinylDisc          the record: cover on the label, hover to play (client)
   StampTime          isolated so Phase 2 can make it live
   ToolsRow, Contact, NavCapsule
 lib/
@@ -52,6 +54,7 @@ lib/
   gallery.ts         photo manifest (city/year by hand, never from EXIF)
   places.ts          travel data + the lat/lng projection and clustering
   maps.ts            MapKit token, pins, and the computed map region
+  listening.ts       Apple Music developer token + the catalog lookup (build)
   generated/         written by the pipelines; do not edit
 scripts/
   check-tokens.mjs   the token rule, enforced
@@ -123,6 +126,9 @@ is worth it. The pack is an AI/LLM brand collection and covers only some tools.
 | Claude | `@lobehub/icons-static-svg` (`claude-color`) | SVG |
 | VS Code | supplied by hand into `raw/tools/` | PNG 88px |
 | Xcode | supplied by hand into `raw/tools/` — Apple's app icon, see note | PNG 88px |
+| Notion | `@lobehub/icons-static-svg` (`notion`, `currentColor` → black) | SVG |
+| Lightroom | supplied by hand into `raw/tools/` — Adobe's app icon via [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Adobe_Photoshop_Lightroom_CC_logo.svg) (PD-textlogo; trademark still Adobe's) | SVG |
+| ChatGPT | `@lobehub/icons-static-svg` (`openai`, `currentColor` → black) | SVG |
 
 `npm run assets` copies an SVG verbatim but fits a PNG to 88px (2× the 44px
 slot), since vendor app icons ship at 316–1024px and would otherwise cost ~100KB
@@ -207,6 +213,58 @@ If Apple rejects the token or the quota is spent, the card shows "The map
 didn't load." rather than an empty box; that failure arrives as a MapKit
 `error` event well after `load()` resolves, which is why `PlacesMap` listens
 for one instead of relying on a rejected promise.
+
+## The song on (Apple Music)
+
+The Listening card on `/life` is one song, named by hand in `lib/content.ts`
+(`listening.title` and `listening.artist`). Everything else it shows — the
+cover, the colours the record is pressed in, the link into Apple Music and
+the 30-second preview — comes from the Apple Music catalog, looked up **once, at build
+time**, by `lib/listening.ts`. The page stays static; no visitor waits on
+Apple, and nothing about the key reaches the browser.
+
+**Setup** (needs a paid Apple Developer Program membership):
+
+1. Apple Developer → Certificates, Identifiers & Profiles → **Keys** → new key
+   with **MusicKit** enabled. Download the `.p8` — Apple offers it once.
+2. Put the `.p8` in the project root as `AuthKey_<KEY_ID>.p8` (`.gitignore`
+   keeps it out of the repo), and set the two identifiers in `.env.local`:
+
+   ```bash
+   APPLE_MUSIC_TEAM_ID=XXXXXXXXXX   # Membership page
+   APPLE_MUSIC_KEY_ID=YYYYYYYYYY    # from the file name
+   ```
+
+3. On Vercel, where the file is not, paste the file's contents into
+   `APPLE_MUSIC_PRIVATE_KEY` alongside the two IDs.
+4. `npm run build`. The lookup runs during the build — change the song in
+   `lib/content.ts` and rebuild to change the card.
+
+The build signs a short-lived ES256 developer token from the key with Node's
+own `crypto` — no SDK — and searches the catalog for `"<title> <artist>"`,
+taking the first hit whose artist line starts with the artist named (so the
+original comes before the instrumental and the DJ mix). It searches the
+storefront in `listening.storefront` first, then `in` and `us`, so a song
+missing from one store is still found.
+
+**With no key, or with Apple unreachable at build**, the card shows the title
+and artist and a blank square where the cover would be. The build logs a
+warning and carries on; it never fails over this.
+
+**The record.** The disc is pressed in the cover's own colours — Apple's
+`bgColor` for the vinyl, the last of its `textColor`s for the marbling — with
+the cover on the label. Rest a pointer on it and it spins up and plays the
+preview; take the pointer away and it winds down and stops. Browsers refuse
+sound until the visitor has clicked or typed on the page, so a hover that is
+refused leaves the disc still and a click starts it; on a phone a tap
+toggles it. The clip is not fetched until one of those happens, and it stops
+on its own when it ends or when the tab is hidden.
+
+The spin is driven frame by frame in `VinylDisc` rather than by a CSS
+animation, which is what gives it a spin-up and a wind-down. It plays under
+`prefers-reduced-motion` on the letter fold's argument (it is the thing the
+pointer asked for, and it stops the moment the pointer leaves); `?motion=still`
+holds the disc still while the sound still plays.
 
 ## The letterbox (Resend)
 

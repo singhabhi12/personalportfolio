@@ -6,9 +6,10 @@ import { GALLERY_ROTATE_MS, photos } from "@/lib/content";
 
 /* One photograph at a time, full width, in a white frame — now walking the
    whole gallery on a 4s beat. Still not a card and not a control surface: no
-   header label, no count line, no tab bar, nothing sitting on the picture.
-   Filtering belongs to the gallery this links to (§11), and the tile's only job
-   is to be worth clicking.
+   header label, no count line, no tab bar. The one thing on the picture is the
+   "View gallery" pill in its corner, which is the link's label and the only
+   text the tile has. Filtering belongs to the gallery this links to (§11), and
+   the tile's only job is to be worth clicking.
 
    The frame is the one place on the site that does crop — the masonry and the
    lightbox show every photo whole (§9) — so each photo carries its own `focus`
@@ -59,11 +60,11 @@ export default function GalleryPreview() {
     new Set([slide.leaving, slide.showing, next].filter((i) => i >= 0))
   );
 
+  /* One link: the whole frame. Its only words are the pill in the corner of
+     the picture, which is what a screen reader hears it as. */
   return (
     <div className="gp-tile">
-      {/* A mouse convenience that duplicates the link below it, so assistive
-          tech is offered the gallery once rather than twice. */}
-      <Link className="gp-frame" href="/gallery" aria-hidden="true" tabIndex={-1}>
+      <Link className="gp-frame" href="/gallery">
         <span className="gp-stack">
           {mounted.map((i) => {
             const photo = photos[i];
@@ -76,8 +77,11 @@ export default function GalleryPreview() {
                 }
                 src={photo.src}
                 srcSet={photo.srcSet}
+                /* Wider than the box on purpose: under `cover` a photograph the
+                   wrong shape for the tile is drawn bigger than the tile, and a
+                   size that only counted the box would fetch a source too small. */
                 /* token-exempt: media conditions, same as @media — CSS vars don't apply */
-                sizes="(max-width: 860px) 92vw, 30vw"
+                sizes="(max-width: 860px) 100vw, 45vw"
                 alt=""
                 width={photo.width}
                 height={photo.height}
@@ -85,18 +89,13 @@ export default function GalleryPreview() {
                 /* token-exempt: focal point and LQIP data URI from the photo manifest */
                 style={{
                   objectPosition: photo.focus,
-                  ...(photo.lqip
-                    ? { backgroundImage: `url(${photo.lqip})`, backgroundSize: "cover" }
-                    : {}),
+                  ...(photo.lqip ? { backgroundImage: `url(${photo.lqip})` } : {}),
                 }}
               />
             );
           })}
+          <span className="gp-cta">View gallery</span>
         </span>
-      </Link>
-
-      <Link className="gp-cta link-sweep" href="/gallery">
-        View gallery
       </Link>
     </div>
   );

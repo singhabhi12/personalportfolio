@@ -23,6 +23,8 @@
 # misc
 .DS_Store
 *.pem
+# Apple MusicKit private key — lib/listening.ts reads it from the project root
+*.p8
 
 # debug
 npm-debug.log*
@@ -55,6 +57,10 @@ next-env.d.ts
 # only — the browser never sees them, and the drawer is built now.
 /Animation Frames
 /Video Animation Frames
+# sticker reference: the frame pull of the peel-and-drag interaction the Life
+# page's stickers are modelled on, plus the product shots that
+# scripts/build-stickers.py cuts into public/stickers. Inputs only.
+/Sticker animation
 # case-study source exports and phone photos — inputs to scripts/compose-covers
 # and build-assets; the served derivatives live in public/cases and
 # public/projects. GitHub is not a place for 19MB of originals.

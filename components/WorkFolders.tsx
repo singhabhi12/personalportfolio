@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { projects, projectHref, work } from "@/lib/content";
+import { filed, projectHref, work } from "@/lib/content";
 import { isStill } from "@/lib/motion";
 
 /* /work is a drawer of folders, built to the five states in the Figma.
@@ -20,9 +20,11 @@ import { isStill } from "@/lib/motion";
    what the reference animates too — a page coming out of a folder gets taller,
    it does not slide in from somewhere else.
 
-   `--i` is a folder's place in the drawer and `--n` how many there are. Between
-   them they carry the fan, the tab's step, and the stagger, so a seventh
-   project stays one entry in lib/content.ts and nothing here. */
+   The drawer files six of the nine — `filed` in lib/content.ts picks which,
+   and in what order; the cards view is where the rest are. `--i` is a folder's
+   place in the drawer and `--n` how many there are. Between them they carry
+   the fan, the tab's step, and the stagger, so a seventh folder is one slug
+   added to that list and nothing here. */
 
 type Phase = "shut" | "open" | "spines";
 
@@ -119,9 +121,9 @@ export default function WorkFolders({ settled = false }: { settled?: boolean }) 
       /* `--n` is how many folders sit in front of the front folder. The
            stylesheet insets each one by its distance from the front, and it is
            set here so that number can never drift from the list. */
-      style={{ "--n": projects.length } as CSSProperties}
+      style={{ "--n": filed.length } as CSSProperties}
     >
-      {projects.map((project, index) => {
+      {filed.map((project, index) => {
         const isOpen = expanded === project.slug;
         const number = String(index + 1).padStart(2, "0");
 
@@ -153,7 +155,7 @@ export default function WorkFolders({ settled = false }: { settled?: boolean }) 
               </button>
 
               {/* Only rendered once opened. It carries a screenshot, and a
-                    closed folder should not be paying for nine of them. */}
+                    closed folder should not be paying for six of them. */}
               {isOpen && (
                 <div className="folder-detail">
                   <img
@@ -226,16 +228,16 @@ export default function WorkFolders({ settled = false }: { settled?: boolean }) 
         );
       })}
 
-      {/* The front of the drawer: the label the nine are filed behind, and
+      {/* The front of the drawer: the label the six are filed behind, and
           the handle that files them. */}
-      <div className="folder folder--front" style={{ "--i": projects.length } as CSSProperties}>
+      <div className="folder folder--front" style={{ "--i": filed.length } as CSSProperties}>
         {/* Shape only. It is the folder's own notch, not a label for it — the
               drawer is already named by the headline underneath. */}
         <span className="folder-tab folder-tab--front" aria-hidden="true" />
 
         <div className="folder-front-copy">
           <p className="folder-headline">
-            {work.headline}
+            {work.headline.folders}
             <span className="folder-headline-sub">{work.headlineSub}</span>
           </p>
           <p className="folder-line">{work.line}</p>

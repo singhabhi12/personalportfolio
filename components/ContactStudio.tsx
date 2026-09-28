@@ -10,15 +10,13 @@ import {
   type FormEvent,
 } from "react";
 import { contact, identity } from "@/lib/content";
-import type { Vec3 } from "@/lib/desk-scene";
+import type { Stage, Vec3 } from "@/lib/desk-scene";
 import {
   ENTRY,
   FLAP,
   MARKS,
-  SCENE_QUERY,
   SEND_DURATION,
   SHEET,
-  SLOT,
   STILL_DURATION,
   approach,
   beat,
@@ -31,6 +29,7 @@ import {
   lerp,
   revealFor,
   sheetCentre,
+  stageFor,
 } from "@/lib/desk-scene";
 import { STILL_FLAG } from "@/lib/motion";
 import {
@@ -75,6 +74,9 @@ type Fold = "flat" | "lower" | "both";
    frame. */
 interface Live {
   studio: Studio | null;
+  /** Which arrangement of the desk the scene was built as — the anchors the
+      sheet is hung from live here. Null until a scene exists. */
+  stage: Stage | null;
   /** performance.now() when the send began, or 0 while someone is still typing. */
   sendAt: number;
   /** performance.now() when the box was told to expect a letter, or 0. On its
@@ -114,6 +116,9 @@ export default function ContactStudio() {
   const fieldRefs = useRef<Partial<Record<LetterField, HTMLElement | null>>>({});
 
   const [mode, setMode] = useState<Mode>("plain");
+  /* Named on the stage element so the stylesheet can size the box the scene
+     is drawn in — the two arrangements are different shapes. */
+  const [stageName, setStageName] = useState<Stage["name"] | null>(null);
   const [phase, setPhase] = useState<Phase>("writing");
   const [draft, setDraft] = useState<LetterDraft>(emptyDraft);
   const [errors, setErrors] = useState<Partial<Record<LetterField, string>>>({});
@@ -127,6 +132,7 @@ export default function ContactStudio() {
 
   const live = useRef<Live>({
     studio: null,
+    stage: null,
     sendAt: 0,
     flapAt: 0,
     visible: SHEET.visibleAtRest,
@@ -167,15 +173,18 @@ export default function ContactStudio() {
     let frame = 0;
     let studio: Studio | null = null;
 
-    const wideEnough = () => window.matchMedia(SCENE_QUERY).matches;
-
     (async () => {
-      if (!wideEnough()) return;
+      /* Decided once, at mount. A window that is turned round mid-visit keeps
+         the stage it arrived with — the camera refits to the new shape, and a
+         scene torn down and rebuilt under a half-written letter is worse than
+         a scene seen from a slightly odd seat. */
+      const stage = stageFor();
+      if (!stage) return;
       const { createStudio, supportsWebGL } = await import("./studio-scene");
       if (cancelled || !supportsWebGL()) return;
 
       try {
-        studio = await createStudio(canvas);
+        studio = await createStudio(canvas, stage);
       } catch {
         /* A context that exists but refuses to build a scene — a blocklisted
            driver, a lost context on wake. The form is already on the page and
@@ -188,6 +197,8 @@ export default function ContactStudio() {
       }
 
       live.current.studio = studio;
+      live.current.stage = stage;
+      setStageName(stage.name);
       setMode("scene");
 
       const loop = (now: number) => {
@@ -201,6 +212,7 @@ export default function ContactStudio() {
       cancelled = true;
       cancelAnimationFrame(frame);
       live.current.studio = null;
+      live.current.stage = null;
       studio?.dispose();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -212,6 +224,8 @@ export default function ContactStudio() {
      someone types, the machine's answer to a keystroke, the whole send. */
   const step = useCallback((now: number, studio: Studio) => {
     const state = live.current;
+    const stage = state.stage;
+    if (!stage) return;
     const dt = state.last ? Math.min(now - state.last, 64) : 16;
     state.last = now;
 
@@ -279,7 +293,7 @@ export default function ContactStudio() {
       letter.style.opacity = "0";
     } else if (letter) {
       const flying = sending && t >= MARKS.flightStart;
-      const inRoller = sheetCentre(state.visible);
+      const inRoller = sheetCentre(state.visible, stage.platen);
 
       let point: Vec3 = inRoller;
       let lean = SHEET.lean;
@@ -290,9 +304,9 @@ export default function ContactStudio() {
 
       if (sending) {
         point = [
-          lerp(inRoller[0], SHEET.held[0], fed),
-          lerp(inRoller[1], SHEET.held[1], fed),
-          lerp(inRoller[2], SHEET.held[2], fed),
+          lerp(inRoller[0], stage.held[0], fed),
+          lerp(inRoller[1], stage.held[1], fed),
+          lerp(inRoller[2], stage.held[2], fed),
         ];
         lean = lerp(SHEET.lean, SHEET.leanHeld, fed);
       }
@@ -301,10 +315,10 @@ export default function ContactStudio() {
         const f = beat(t, MARKS.flightStart, MARKS.flightEnd);
         /* Slow away, quick across, slow in — a hand's arc, not a projectile's. */
         const eased = f < 0.5 ? easeInCubic(f * 2) / 2 : 0.5 + easeOutCubic((f - 0.5) * 2) / 2;
-        point = flightPoint(eased, SHEET.held, SLOT);
+        point = flightPoint(eased, stage.held, stage.slot, stage.flight);
         /* Banks into the arc, then turns square to the box's face for the slot. */
         tilt = Math.sin(f * Math.PI) * ENTRY.bank;
-        turn = lerp(0, ENTRY.turn, easeInOutCubic(f));
+        turn = lerp(0, stage.turn, easeInOutCubic(f));
         shrink = lerp(1, ENTRY.shrink, easeInOutCubic(f));
         /* And the last of it drops through the slot, bottom edge first. */
         eaten = easeInCubic(beat(t, MARKS.swallowStart, MARKS.flightEnd));
@@ -337,7 +351,7 @@ export default function ContactStudio() {
         /* From the bottom of the folded band up through it. */
         cut = third * (1 + eaten);
       } else if (fed < 1) {
-        const lip = studio.project(SHEET.platen);
+        const lip = studio.project(stage.platen);
         const below = (at.y + (letter.offsetHeight / 2) * scale - lip.y) / scale;
         cut = Math.max(0, Math.min(below, letter.offsetHeight)) * (1 - fed);
       }
@@ -526,6 +540,17 @@ export default function ContactStudio() {
     setSealed({ ...draft });
     setPhase("sending");
 
+    /* On the tall stage the button sits under a stage most of a screen high,
+       so the box the letter is about to fly into can be above the fold when
+       the button is pressed. The stage is brought fully into view first — the
+       smallest scroll that does it, and none at all where it already is,
+       which is every wide screen. Smooth unless the visit asked for the quiet
+       version. */
+    stageRef.current?.scrollIntoView({
+      block: "nearest",
+      behavior: document.documentElement.dataset.motion === STILL_FLAG ? "auto" : "smooth",
+    });
+
     /* Nothing navigates here. An earlier version handed the letter straight to
        the visitor's mail client inside this click — which is the only moment a
        browser will allow it — and the cost was a mail window thrown over the
@@ -602,7 +627,12 @@ export default function ContactStudio() {
         <h1 className="studio-line">{contact.line}</h1>
       </header>
 
-      <div className="studio-stage" ref={stageRef} data-mode={mode}>
+      <div
+        className="studio-stage"
+        ref={stageRef}
+        data-mode={mode}
+        data-stage={stageName ?? undefined}
+      >
         <canvas
           className="studio-canvas"
           ref={canvasRef}

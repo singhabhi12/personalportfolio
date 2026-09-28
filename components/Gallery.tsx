@@ -1,11 +1,22 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { galleryCountLabel, photos } from "@/lib/content";
+import { photos } from "@/lib/content";
+import OpticalGrid, { supportsOpticalGrid } from "./OpticalGrid";
 
-/* Gallery ⁕ — the photos. Soft masonry at natural aspect ratios, never
-   force-cropped (§9), opening into the lightbox. Owns the /gallery route; it
-   is no longer a section at the foot of /life.
+/* Gallery ⁕ — the photos. A strip of them rolling past a lens (OpticalGrid),
+   opening into the lightbox. Owns the /gallery route; it is no longer a
+   section at the foot of /life.
+
+   The strip is a canvas, so it carries nothing a keyboard or a screen reader
+   can reach. The list under it does: one button per photograph, visually
+   hidden, opening the same lightbox — and it is where focus goes back to
+   after the lightbox closes on a photograph that was clicked in the strip.
+
+   Without WebGL the strip cannot be drawn, and the soft masonry it replaced
+   comes back: natural aspect ratios, never force-cropped (§9). The choice is
+   made on mount, so the server renders the stage and a machine that cannot
+   draw it swaps once, before any photograph has been asked for.
 
    The lightbox is Phase 1, not a cosmetic: it is how the gallery is read.
    Escape closes, arrows navigate, scrim click closes, focus is trapped while
@@ -14,9 +25,24 @@ import { galleryCountLabel, photos } from "@/lib/content";
    gutter so removing the scrollbar moves nothing. */
 export default function Gallery() {
   const [open, setOpen] = useState<number | null>(null);
+  const [masonry, setMasonry] = useState(false);
   const closeRef = useRef<HTMLButtonElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const listRef = useRef<HTMLUListElement | null>(null);
   const isOpen = open !== null;
+
+  useEffect(() => {
+    if (!supportsOpticalGrid()) setMasonry(true);
+  }, []);
+  const fallBack = useCallback(() => setMasonry(true), []);
+
+  /* A click in the strip has no button to hand focus back to, so the
+     photograph's entry in the hidden list stands in for it. */
+  const openFromStage = useCallback((index: number) => {
+    const entry = listRef.current?.querySelectorAll("button")[index] ?? null;
+    triggerRef.current = entry;
+    setOpen(index);
+  }, []);
 
   const close = useCallback(() => {
     setOpen(null);
@@ -85,46 +111,61 @@ export default function Gallery() {
 
   return (
     <>
-      <section className="section" id="gallery">
-        <div className="gallery-head">
-          <h1 className="section-title">
-            Gallery <span className="glyph" aria-hidden="true">⁕</span>
-          </h1>
-          <span className="micro-label">{galleryCountLabel}</span>
-        </div>
-
-        <div className="gmasonry">
-          {photos.map((photo, i) => (
-            <button
-              key={photo.src}
-              className="gtile"
-              type="button"
-              aria-haspopup="dialog"
-              aria-label={`Open photo: ${photo.title}`}
-              onClick={(event) => {
-                triggerRef.current = event.currentTarget;
-                setOpen(i);
-              }}
-            >
-              <img
-                className="shot"
-                src={photo.src}
-                srcSet={photo.srcSet}
-                /* token-exempt: media conditions, same as @media — CSS vars don't apply */
-                sizes="(max-width: 560px) 90vw, (max-width: 900px) 45vw, 30vw"
-                alt=""
-                width={photo.width}
-                height={photo.height}
-                loading="lazy"
-                /* token-exempt: LQIP data URI emitted by the photo pipeline */
-                style={photo.lqip ? { backgroundImage: `url(${photo.lqip})`, backgroundSize: "cover" } : undefined}
-              />
-              <span className="gcaption">
-                <span className="gtitle">{photo.title}</span>
-              </span>
-            </button>
-          ))}
-        </div>
+      <section className="gallery" id="gallery" aria-label="Gallery" data-masonry={masonry ? "" : undefined}>
+        {masonry ? (
+          <div className="gmasonry">
+            {photos.map((photo, i) => (
+              <button
+                key={photo.src}
+                className="gtile"
+                type="button"
+                aria-haspopup="dialog"
+                aria-label={`Open photo: ${photo.title}`}
+                onClick={(event) => {
+                  triggerRef.current = event.currentTarget;
+                  setOpen(i);
+                }}
+              >
+                <img
+                  className="shot"
+                  src={photo.src}
+                  srcSet={photo.srcSet}
+                  /* token-exempt: media conditions, same as @media — CSS vars don't apply */
+                  sizes="(max-width: 560px) 90vw, (max-width: 900px) 45vw, 30vw"
+                  alt=""
+                  width={photo.width}
+                  height={photo.height}
+                  loading="lazy"
+                  /* token-exempt: LQIP data URI emitted by the photo pipeline */
+                  style={photo.lqip ? { backgroundImage: `url(${photo.lqip})`, backgroundSize: "cover" } : undefined}
+                />
+                <span className="gcaption">
+                  <span className="gtitle">{photo.title}</span>
+                </span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <>
+            <OpticalGrid photos={photos} onOpen={openFromStage} onFallback={fallBack} />
+            <ul className="sr-only" ref={listRef} aria-label="Photographs">
+              {photos.map((photo, i) => (
+                <li key={photo.src}>
+                  <button
+                    type="button"
+                    aria-haspopup="dialog"
+                    onClick={(event) => {
+                      triggerRef.current = event.currentTarget;
+                      setOpen(i);
+                    }}
+                  >
+                    {photo.title}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </section>
 
       {current && (

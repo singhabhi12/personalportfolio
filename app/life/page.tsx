@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import PageFrame from "@/components/PageFrame";
 import PlacesWidget from "@/components/PlacesWidget";
 import GalleryPreview from "@/components/GalleryPreview";
+import ListeningWidget from "@/components/ListeningWidget";
+import StickerSheet from "@/components/StickerSheet";
 import ToolsRow from "@/components/ToolsRow";
 import WidgetCard from "@/components/WidgetCard";
 import { about, type Run } from "@/lib/content";
@@ -41,44 +43,54 @@ function Prose({ runs }: { runs: Run[] }) {
 
 /* Life: prose card left, widget stack right. The photos are their own route
    now — the gallery tile links out to /gallery.
-   No gradient on this page (§5) — that budget is spent on the home desk. */
+   No gradient on this page (§5) — that budget is spent on the home desk.
+
+   The desk items lie over the whole grid as stickers (StickerSheet), which is
+   why the grid is wrapped rather than the cards: a sticker can be dragged from
+   one column to the other, or off the edge of a card. */
 export default function Life() {
   return (
     <PageFrame active="life">
-      <div className="about-grid">
-        <WidgetCard as="article" size="lg">
-          <h1 className="about-heading">
-            {about.heading}{" "}
-            <span className="glyph" aria-hidden="true">
-              {about.glyph}
-            </span>
-          </h1>
+      <StickerSheet>
+        <div className="about-grid">
+          <WidgetCard as="article" size="lg">
+            <h1 className="about-heading">
+              {about.heading}{" "}
+              <span className="glyph" aria-hidden="true">
+                {about.glyph}
+              </span>
+            </h1>
 
-          {about.sections.map((section) => (
-            <section className="about-section" key={section.label}>
-              <h2 className="widget-label">{section.label}</h2>
+            {about.sections.map((section) => (
+              <section className="about-section" key={section.label}>
+                <h2 className="widget-label">{section.label}</h2>
 
-              {section.placeholder ? (
-                <p className="about-placeholder">
-                  <span className="ph-mark">◍ placeholder</span> — {section.placeholder}
-                </p>
-              ) : (
-                section.runs && <Prose runs={section.runs} />
-              )}
+                {section.placeholder ? (
+                  <p className="about-placeholder">
+                    <span className="ph-mark">◍ placeholder</span> —{" "}
+                    {section.placeholder}
+                  </p>
+                ) : (
+                  section.runs && <Prose runs={section.runs} />
+                )}
 
-              {section.aside && <p className="about-aside">{section.aside}</p>}
-            </section>
-          ))}
-        </WidgetCard>
+                {section.aside && (
+                  <p className="about-aside">{section.aside}</p>
+                )}
+              </section>
+            ))}
+          </WidgetCard>
 
-        {/* Map across the top, then the gallery tile with the deck standing
-            beside it. */}
-        <div className="side-grid">
-          <PlacesWidget />
-          <GalleryPreview />
-          <ToolsRow direction="column" />
+          {/* Map across the top, then the gallery tile with the deck standing
+            beside it, then the song on at the bottom. */}
+          <div className="side-grid">
+            <PlacesWidget />
+            <GalleryPreview />
+            <ToolsRow direction="column" />
+            <ListeningWidget />
+          </div>
         </div>
-      </div>
+      </StickerSheet>
     </PageFrame>
   );
 }

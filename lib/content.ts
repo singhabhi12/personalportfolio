@@ -215,15 +215,27 @@ export const projects: Project[] = projectSources.map((project) => {
   return asset ? { ...project, image: asset.src, srcSet: asset.srcSet, width: asset.width, height: asset.height } : project;
 });
 
-/* /work is a drawer. Nine manila folders tucked one behind the next, and at the
-   front the folder the whole set is filed behind — which is the only copy the
-   page needs that is not a project, everything else on it being the projects
+/* Which of the nine the drawer files, and in what order. The drawer is the
+   page's opening beat and six folders is what it was drawn at, so it takes a
+   selection: the current builds first, then the jobs, newest to oldest. The
+   cards view is where all nine stay on the table. Order here is the order of
+   the tabs; a slug that is not in `projects` is simply not filed. */
+const filedSlugs = ["stampp", "kolsetu", "jobtrac", "substrac", "truts", "dehidden"];
+
+export const filed: Project[] = filedSlugs
+  .map((slug) => projects.find((p) => p.slug === slug))
+  .filter((p): p is Project => p !== undefined);
+
+/* /work is a drawer. Six manila folders tucked one behind the next, and at the
+   front the folder the set is filed behind — which is the only copy the page
+   needs that is not a project, everything else on it being the projects
    themselves.
 
    The headline is split in two because the front folder sets it as two lines
-   and a line break is a typographic decision, not a string. */
+   and a line break is a typographic decision, not a string. The drawer and
+   the cards each count what they show, so the number is set per view. */
 export const work = {
-  headline: "Nine cases.",
+  headline: { folders: "Six cases.", cards: "Nine cases." },
   headlineSub: "Problem, trade-offs, outcome.",
   line: "Voice AI, event tech, Web3, and the things I build on my own time — three years of it, and 100K+ people using what shipped.",
 
@@ -244,10 +256,10 @@ export const work = {
   close: "Close",
   readCase: "Read the case study",
 
-  /* The same nine, two ways: filed in the drawer, or laid out as cards for
-     anyone who would rather see them all at once. One floating button switches
-     between them, and it is named for where it goes, not where you are — the
-     icon on it is the other view too. */
+  /* Two ways in: six filed in the drawer, or all nine laid out as cards for
+     anyone who would rather see everything at once. One floating button
+     switches between them, and it is named for where it goes, not where you
+     are — the icon on it is the other view too. */
   switchTo: { folders: "Show as folders", cards: "Show as cards" },
 };
 
@@ -270,18 +282,18 @@ export const projectHref = (project: Project) =>
   project.hasCaseStudy ? `/work/${project.slug}` : "#";
 
 /* The featured project on the desk. Not `projects[0]`: the drawer's order is
-   editorial, not by what has a screenshot, while the desk puts one at full
-   width. So this is the first project down the list that actually has one —
-   drop a file in raw/projects/ and run `npm run assets`, and the desk moves
-   on its own. */
-export const featured = projects.find((p) => p.srcSet) ?? projects[0];
+   editorial, and the desk puts one project at full width, so which one is a
+   separate editorial call — pinned by slug here. Falls back to the first
+   project with a screenshot if the slug ever goes away. */
+export const featured =
+  projects.find((p) => p.slug === "stampp") ?? projects.find((p) => p.srcSet) ?? projects[0];
 
 /* The manifesto card's headline, composed in three parts — <name> <verb>
    <subject> — so the weight mix (bold name, plain verb, underlined subject) is
    copy rather than markup. The subject is a live link to what it names. */
-/* What is on the desk right now. Not `featured`: that follows the newest
-   project with a screenshot, and the thing being built is usually the one
-   that has none yet. */
+/* What is being built right now. Kept separate from `featured` — they agree
+   today, but the desk's showcase and the thing on the bench will drift apart
+   again. */
 const current = projects.find((p) => p.slug === "stampp") ?? featured;
 
 export const headline = {
@@ -351,7 +363,44 @@ export const tools: Tool[] = [
   { name: "Claude", icon: "/tools/claude.svg" },
   { name: "VS Code", icon: "/tools/vscode.png" },
   { name: "Xcode", icon: "/tools/xcode.png" },
+  { name: "Notion", icon: "/tools/notion.svg" },
+  { name: "Lightroom", icon: "/tools/lightroom.svg" },
+  { name: "ChatGPT", icon: "/tools/chatgpt.svg" },
 ];
+
+/* The desk shows the four that are open every day; the strip on /life carries
+   the whole tray. Named, not sliced, so reordering the list cannot change what
+   sits on the desk. */
+export const deskTools: Tool[] = ["Figma", "Claude", "VS Code", "Xcode"].map(
+  (name) => tools.find((tool) => tool.name === name)!
+);
+
+/* What is on right now. Title and artist by hand; everything else the card
+   shows — the artwork, the album, the year, the Apple Music link, the 30s
+   preview — is looked up in the Apple Music catalog at build time by
+   lib/listening.ts. Change the song here and rebuild.
+
+   `storefront` picks the catalog the link opens in: "de" for a desk in
+   Hamburg. A song missing from that storefront is still found — the lookup
+   tries "in" and "us" after it. */
+export const listening = {
+  label: "Listening",
+  title: "Winning Speech",
+  artist: "Karan Aujla",
+  storefront: "de",
+  /* The record's accessible name, in its two states. */
+  preview: { play: "Play", stop: "Stop", seconds: 30 },
+  noPreview: "no preview available",
+  /* Where the title goes; the arrow on it is the tell. */
+  link: "open in Apple Music",
+  /* The script aside under the artist: the one hint that the record is the
+     control. Pointer devices read the first, phones the second. */
+  hint: { hover: "↳ hover the record to listen", tap: "↳ tap the record to listen" },
+  /* What the record is pressed in when the catalog gave no colours: plain
+     black vinyl with a smoke-grey swirl. Hex without the `#`, the way the
+     catalog gives its own. */
+  blankDisc: { background: "1f1f1f", swirl: "8a877f" },
+} as const;
 
 /* The contact page is a writing desk: a typewriter you type into, the sheet it
    feeds, and the letterbox the sheet is posted to. Every string the studio can
@@ -513,40 +562,58 @@ export interface AboutSection {
 export const aboutSections: AboutSection[] = [
   {
     label: "Where I'm from",
-    placeholder:
-      "2–3 sentences: India → Hamburg. Where I grew up, and the path that ended in Germany.",
+    runs: [
+      {
+        t: "text",
+        v: "I was born in Rewa in central India, but moved to Mumbai at one and grew up there. A master's in UX design brought me to Hamburg, and I stayed. Somewhere in between, I stretched a tight student budget across 11 countries, and I'm proud of that.",
+      },
+    ],
   },
   {
     label: "What I used to do",
-    placeholder:
-      "The jobs before design. What you did first, and how it pointed you here.",
+    runs: [
+      {
+        t: "text",
+        v: "I trained as a computer scientist before I found design. Building software taught me to think in systems and structure first, and that's still the lens I bring to every product.",
+      },
+    ],
   },
   {
     label: "What I do now",
     runs: [
-      { t: "text", v: "Product and UX designer. I've shaped product at " },
+      { t: "text", v: "Product and UX designer. Most recently the sole designer on " },
+      { t: "link", v: "Elba", href: "/work/kolsetu" },
+      { t: "text", v: ", a voice AI platform at Kolsetu, before that shaping product at " },
       { t: "link", v: "Evmet", href: "/work/evmet" },
       { t: "text", v: ", " },
       { t: "link", v: "Truts", href: "/work/truts" },
       { t: "text", v: ", and " },
       { t: "link", v: "Dehidden", href: "/work/dehidden" },
-      { t: "text", v: " — event tech, Web3, and NFTs. Structure first, then speed, then story." },
+      { t: "text", v: " across event tech, Web3, and NFTs. On the side I build my own things, like " },
+      { t: "link", v: "Jobtrac", href: "/work/jobtrac" },
+      {
+        t: "text",
+        v: ", a SaaS tool for job seekers, and Stampp, an iOS app that turns your photos into collectible stamps. Structure first, then speed, then story.",
+      },
     ],
   },
   {
     label: "Where I'm at now",
     runs: [
-      { t: "text", v: "Based in Hamburg. When I'm not working " },
-      { t: "hint", v: "[ placeholder: what you do — walks along the Elbe, photography, cooking ]" },
-      { t: "text", v: "." },
+      {
+        t: "text",
+        v: "Based in Hamburg. Off the clock I'm usually taking photos, building Lego, or playing something on PC or PlayStation.",
+      },
     ],
-    aside: "↳ still adjusting to the winters",
+    aside: "↳ still learning German",
   },
   {
     label: "What I'm looking for",
     runs: [
-      { t: "text", v: "A product or UX design role on a team that ships. " },
-      { t: "hint", v: "[ placeholder: state the role plainly — seniority, product type, remote/Hamburg ]" },
+      {
+        t: "text",
+        v: "A full-time Product or UX design role on a team that ships. Mid to senior, ideally SaaS or product work, in Hamburg or remote within Germany. I hold EU work authorization.",
+      },
     ],
   },
 ];

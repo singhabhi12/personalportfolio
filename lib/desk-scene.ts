@@ -129,7 +129,7 @@ export const PROPS: Record<"typewriter" | "letterbox", Placement> = {
   /* Turned a twentieth of a turn to the right so the lid faces the letter
      coming at it rather than the camera, and set back in Z so perspective keeps
      it the smaller object without having to shrink it into a toy. */
-  letterbox: { fit: "height", size: 0.6, position: [-0.62, 0, -0.15], turn: 0.055 },
+  letterbox: { fit: "height", size: 0.66, position: [-0.66, 0, -0.15], turn: 0.055 },
 };
 
 /* The box has to open, and it arrives as one welded mesh with one material and
@@ -170,19 +170,37 @@ export const LID = {
    lens is what keeps the perspective identical on every screen: a phone gets
    the same photograph from further away, not a distorted one from the same
    spot. */
-export const CAMERA = {
+export const LENS = {
   fov: 30,
   near: 0.1,
   far: 40,
+};
+
+/** Where the lens stands and what it has to hold — the half of the camera
+    that changes with the stage's shape. The lens itself never does. */
+export interface View {
   /** Direction only — the distance is solved for. Height above the target sets
-      how much of the desk top is seen; this is a standing view, not a top-down. */
-  direction: [0, 0.13, 1] as Vec3,
-  target: [0, 0.53, 0] as Vec3,
-  /* Tall enough to hold the sheet at `SHEET.visibleMax` — the moment the whole
-     letter, signature and all, is standing clear of the roller. That is the
-     highest anything in this scene ever reaches, so it is what sets the top
-     edge; everything else fits underneath it. */
-  frame: { width: 2.3, height: 1.3 },
+      how much of the desk top is seen. */
+  direction: Vec3;
+  target: Vec3;
+  /** The slab of world the shot has to contain, in scene units. */
+  frame: { width: number; height: number };
+}
+
+/* The wide view: a standing view, not a top-down.
+
+   Tall enough to hold the sheet at `SHEET.visibleMax` — the moment the whole
+   letter, signature and all, is standing clear of the roller. That is the
+   highest anything in this scene ever reaches, so it is what sets the top
+   edge; everything else fits underneath it. The width is the props and not
+   much more: the machine and the box span about 1.75 units between them,
+   and every unit of slack here is a unit the whole scene is drawn smaller
+   by whenever the stage is squarer than this frame — the size the typed
+   letter comes out on screen is decided right here. */
+export const CAMERA: View = {
+  direction: [0, 0.13, 1],
+  target: [0, 0.53, 0],
+  frame: { width: 2.0, height: 1.3 },
 };
 
 /* Two lights and a bounce. The key throws the one shadow in the scene; the fill
@@ -218,36 +236,53 @@ export const LIGHTS = {
    how the first version ended up a third wider than the platen that was
    supposedly feeding it, standing past the paper guides on both sides.
 
-   Everything below is expressed against PROPS.typewriter, so the machine can
-   be resized or moved and the slot stays true. */
+   Everything below is expressed against the machine's own placement, so it
+   can be resized or moved — and on the tall stage it is moved — and the slot
+   stays true. */
 const measured = models.typewriter;
 /* The build script throws if the source model ever loses its paper mesh, so
    this assertion records a guarantee rather than a hope. */
 const paperMesh = measured.paperBounds!;
 const span = measured.bounds;
-const fitted = PROPS.typewriter.size / (span.max[0] - span.min[0]);
 const mid = (low: number, high: number) => (low + high) / 2;
 
-const slot = {
-  width: (paperMesh.max[0] - paperMesh.min[0]) * fitted,
-  x:
-    PROPS.typewriter.position[0] +
-    (mid(paperMesh.min[0], paperMesh.max[0]) - mid(span.min[0], span.max[0])) * fitted,
-  z:
-    PROPS.typewriter.position[2] +
-    (mid(paperMesh.min[2], paperMesh.max[2]) - mid(span.min[2], span.max[2])) * fitted,
-  /* Where the sheet is cut, as a point up the rolled sheet's own height.
+/** The platen, for a machine fitted and placed as `place` says. */
+function slotFor(place: Placement) {
+  const fitted = place.size / (span.max[0] - span.min[0]);
+  return {
+    width: (paperMesh.max[0] - paperMesh.min[0]) * fitted,
+    x:
+      place.position[0] +
+      (mid(paperMesh.min[0], paperMesh.max[0]) - mid(span.min[0], span.max[0])) * fitted,
+    z:
+      place.position[2] +
+      (mid(paperMesh.min[2], paperMesh.max[2]) - mid(span.min[2], span.max[2])) * fitted,
+    /* Where the sheet is cut, as a point up the rolled sheet's own height.
 
-     Not the roller's crown — the *carriage line*: the top of the frame and
-     paper fingers that stand around the platen. The DOM sheet cannot pass
-     behind anything the canvas draws, so everywhere the machine's silhouette
-     overlaps the paper's path the paper has to be clipped instead; cutting at
-     the roller left the sheet lying over the carriage ends, paper printed on
-     top of the machine that should be hiding it. The model's own rolled sheet
-     stands to exactly this line, which is why 1.0 — its measured top — is the
-     right cut. */
-  lip: paperMesh.max[1] * fitted,
-};
+       Not the roller's crown — the *carriage line*: the top of the frame and
+       paper fingers that stand around the platen. The DOM sheet cannot pass
+       behind anything the canvas draws, so everywhere the machine's silhouette
+       overlaps the paper's path the paper has to be clipped instead; cutting at
+       the roller left the sheet lying over the carriage ends, paper printed on
+       top of the machine that should be hiding it. The model's own rolled sheet
+       stands to exactly this line, which is why 1.0 — its measured top — is the
+       right cut. */
+    lip: paperMesh.max[1] * fitted,
+  };
+}
+
+/* The sheet's own size follows from the wide stage's machine. Both stages fit
+   the machine to the same width, so the sheet is the same size on both — a
+   Placement that changed `size` would change the paper with it, and the two
+   would have to be sized here as a pair. */
+const slot = slotFor(PROPS.typewriter);
+
+/** The roller's lip — where the sheet stops being inside a machine placed
+    as `place` says. */
+export function platenFor(place: Placement): Vec3 {
+  const at = slotFor(place);
+  return [at.x, at.lip, at.z];
+}
 
 /* The CSS letter's aspect — --letter-scene-w / --letter-scene-h in
    app/globals.css, which the projection scales into the scene-unit box below.
@@ -260,8 +295,6 @@ export const SHEET = {
       guide, because it is the sheet that platen feeds. */
   width: slot.width,
   height: sheetHeight,
-  /** The roller's lip — where the sheet stops being inside the machine. */
-  platen: [slot.x, slot.lip, slot.z] as Vec3,
   /** Where the sheet stands before anything has been typed. Only a fallback:
       the real figure is measured off the sheet itself the moment it is laid
       out (see `revealFor`), because what should be showing is exactly the top
@@ -272,19 +305,10 @@ export const SHEET = {
   visibleAtRest: sheetHeight * 0.38,
   /** The ceiling. At this height the whole letter — signature blanks and all —
       is clear of the roller, and the top edge of the paper is just inside the
-      top of CAMERA.frame. Raising one without the other pushes paper out of
-      the picture. Fractions of the sheet's own height, both of them, so the
+      top of the view's frame. Raising one without the other pushes paper out
+      of the picture. Fractions of the sheet's own height, both of them, so the
       slot can change size without either climbing out of the composition. */
   visibleMax: sheetHeight * 0.95,
-  /** Where a finished letter is folded.
-
-      Not "fed further out of the roller" — that was the first version, and it
-      cost the composition a third of its height in headroom the sheet only
-      used for half a second. A letter is not folded standing up in the machine
-      anyway: it is drawn out and folded in front of it. So the sheet comes
-      forward, toward the camera and toward the middle of the desk, which reads
-      as a hand taking it and buys back every pixel of that headroom. */
-  held: [0.28, 0.52, 0.26] as Vec3,
   /** Backward lean, in turns — paper in a roller leans away from you. Any more
       than this and the mono type starts losing its edges to the foreshortening.
       It straightens as the sheet is drawn out. */
@@ -306,11 +330,11 @@ export function revealFor(px: number, heightPx: number): number {
   return Math.min(SHEET.height * (px / heightPx), SHEET.visibleMax);
 }
 
-/** Where the sheet's centre sits for a given `visible` height above the platen.
+/** Where the sheet's centre sits for a given `visible` height above `platen`.
     Its top edge is simply platen + visible, which is what the rise is measured
     in — how much paper is standing out of the machine. */
-export function sheetCentre(visible: number): Vec3 {
-  const [x, y, z] = SHEET.platen;
+export function sheetCentre(visible: number, platen: Vec3): Vec3 {
+  const [x, y, z] = platen;
   return [x, y - SHEET.height / 2 + visible, z];
 }
 
@@ -319,7 +343,7 @@ export function sheetCentre(visible: number): Vec3 {
    opening itself would have it arrive and stop, like a magnet on a fridge.
    Going *through* is also what makes the perspective do half the work of
    shrinking it to letter-slot size. */
-export const SLOT: Vec3 = [-0.6, 0.52, -0.16];
+export const SLOT: Vec3 = [-0.64, 0.57, -0.16];
 
 /* The arc, as the two control points of a cubic bezier from platen to slot. The
    letter lifts before it travels: the first handle is almost straight up, so
@@ -330,7 +354,17 @@ export const FLIGHT_HANDLES: [Vec3, Vec3] = [
   [-0.5, 0.72, 0.04],
 ];
 
-/* The letter is ~0.53 units across and the box is 0.34. Something has to give
+/* Where a finished letter is folded.
+
+   Not "fed further out of the roller" — that was the first version, and it
+   cost the composition a third of its height in headroom the sheet only
+   used for half a second. A letter is not folded standing up in the machine
+   anyway: it is drawn out and folded in front of it. So the sheet comes
+   forward, toward the camera and toward the middle of the desk, which reads
+   as a hand taking it and buys back every pixel of that headroom. */
+export const HELD: Vec3 = [0.28, 0.52, 0.26];
+
+/* The letter is ~0.53 units across and the box is 0.37. Something has to give
    between "a letter you can read" and "a letter that fits through a slot", and
    the honest answer is that it recedes: it turns to line up with the box's
    face, shrinks as it goes away from the camera, and the last of it is eaten
@@ -342,9 +376,6 @@ export const FLIGHT_HANDLES: [Vec3, Vec3] = [
 export const ENTRY = {
   /** Size at the slot, before the swallow takes the rest. */
   shrink: 0.62,
-  /** Turn, in degrees, that lines the sheet up with the box's front face. Reads
-      straight off PROPS.letterbox.turn: 0.055 of a turn is 19.8°. */
-  turn: 20,
   /** How far it banks into the arc on the way over. */
   bank: 7,
   /** How far it sinks while the slot takes it, in scene units — a little more
@@ -352,9 +383,9 @@ export const ENTRY = {
   drop: 0.22,
 };
 
-/** Cubic bezier through the flight handles. `t` runs 0 (platen) → 1 (slot). */
-export function flightPoint(t: number, from: Vec3, to: Vec3): Vec3 {
-  const [c1, c2] = FLIGHT_HANDLES;
+/** Cubic bezier through `handles`. `t` runs 0 (platen) → 1 (slot). */
+export function flightPoint(t: number, from: Vec3, to: Vec3, handles: [Vec3, Vec3]): Vec3 {
+  const [c1, c2] = handles;
   const u = 1 - t;
   const a = u * u * u;
   const b = 3 * u * u * t;
@@ -367,30 +398,137 @@ export function flightPoint(t: number, from: Vec3, to: Vec3): Vec3 {
   ];
 }
 
+/* ---------- Two stages ---------- */
+
+/* One scene, two arrangements of it.
+
+   The wide stage is the desk seen from a chair: the machine right of centre,
+   the box to its left, the letter carried across between them. That needs
+   width — the two props span 1.75 units, and squeezed into a phone the sheet
+   comes out around a hundred pixels across, which nobody can type on.
+
+   So a screen taller than it is wide gets the desk from a different seat. The
+   machine sits square at the bottom of the frame, close enough that its ends
+   run off the sides — a photograph taken standing over it — and the sheet
+   climbs straight up out of it, as wide as the screen allows. The box stands
+   further back on the desk, up and to the left, where the raised camera puts
+   it clear of the machine; the letter is drawn out, folded, and carried up and
+   away into it. Same props, same lens, same choreography — only the seat and
+   the arc are different.
+
+   `platen` is derived rather than written, and `turn` reads off the box's own
+   turn, so neither can disagree with the placement it belongs to. */
+export interface Stage {
+  name: "wide" | "tall";
+  props: Record<"typewriter" | "letterbox", Placement>;
+  view: View;
+  /** The roller's lip — where the sheet stops being inside the machine. */
+  platen: Vec3;
+  /** Where the sheet is taken to be folded. */
+  held: Vec3;
+  /** The mouth of the box. */
+  slot: Vec3;
+  /** The two control points of the arc between them. */
+  flight: [Vec3, Vec3];
+  /** Turn, in degrees, that lines the sheet up with the box's front face. */
+  turn: number;
+}
+
+const degrees = (turns: number) => turns * 360;
+
+function stage(spec: Omit<Stage, "platen" | "turn">): Stage {
+  return {
+    ...spec,
+    platen: platenFor(spec.props.typewriter),
+    turn: degrees(spec.props.letterbox.turn),
+  };
+}
+
+const TALL_PROPS: Record<"typewriter" | "letterbox", Placement> = {
+  /* Centred on the sheet rather than on itself: the platen sits a little right
+     of the machine's middle, and it is the paper the eye is on. */
+  typewriter: { fit: "width", size: 1.02, position: [-0.04, 0, 0], turn: 0 },
+  /* Well back and off to the left, turned a little further toward the letter
+     than on the wide stage — from here the letter arrives from below and in
+     front, so the lid has to face down the desk. Larger than the wide box
+     because it is a good deal further from the lens. */
+  letterbox: { fit: "height", size: 0.56, position: [-0.4, 0, -1.6], turn: 0.09 },
+};
+
+export const STAGES: Record<Stage["name"], Stage> = {
+  wide: stage({
+    name: "wide",
+    props: PROPS,
+    view: CAMERA,
+    held: HELD,
+    slot: SLOT,
+    flight: FLIGHT_HANDLES,
+  }),
+  tall: stage({
+    name: "tall",
+    props: TALL_PROPS,
+    /* A higher seat — standing over the desk rather than sitting at it — so
+       the far end of the desk is in the frame and the box on it stands clear
+       above the machine. The frame is the sheet and a little desk either
+       side, tall enough for the sheet at its ceiling plus the machine's
+       working half below it; the keyboard's front rows run off the bottom,
+       which is what a close shot does. */
+    view: {
+      direction: [0, 0.42, 1],
+      target: [0, 0.56, -0.05],
+      frame: { width: 0.68, height: 1.24 },
+    },
+    /* Drawn up and toward the lens — a page taken out of the machine by
+       someone standing over it. */
+    held: [0, 0.8, 0.32],
+    slot: [-0.38, 0.48, -1.6],
+    /* Up first, then back down the desk: the letter is lifted clear of the
+       machine before it travels, and arrives at the box on its way down. */
+    flight: [
+      [0.05, 0.98, 0.2],
+      [-0.28, 0.92, -0.9],
+    ],
+  }),
+};
+
 /* ---------- Where the scene is worth building ---------- */
 
-/* Below this the stage cannot hold both props *and* a sheet anyone could read —
-   the letter comes out around a hundred pixels across. The page stays flat
-   there: the same form, the same fold, no scene. It is the same call §11
-   already makes for the desk collage, which flattens rather than shrinking, and
-   it is deliberately the same 820px breakpoint app/globals.css flattens at.
+/* Which stage a screen gets, if any.
+
+   Width and height both matter, and for different reasons. Too narrow and the
+   wide stage cannot hold both props *and* a readable sheet; too short and it
+   can hold them but not within one screen, and the send would play half above
+   the fold and half below it. The wide stage is the same 820px call §11
+   already makes for the desk collage, and its height is not a guess: it is
+   the fixed chrome on that page plus --studio-h-min, the shortest stage the
+   sheet is still legible on. The pair has to match the fitted-layout guard in
+   app/globals.css, or one of them would build a scene the other refuses to
+   make room for.
+
+   Under it, a screen that is taller than it is wide — a phone held upright, a
+   tablet in portrait — gets the tall stage instead, provided it has the height
+   for the sheet to climb: the stage there is a fixed tall box the page scrolls
+   past, sized in app/globals.css against the same `--studio-h-tall`. Anything
+   else — a phone on its side, a short window — stays flat: same form, same
+   fold, no scene, and scrolling is the right answer again.
 
    B1 exempts @media breakpoints from the token rule because custom properties
    do not work in them; a matchMedia query is the same breakpoint by another
    route, so it takes the same exemption. */
-/* Height matters as much as width, and for a different reason. Too narrow and
-   the stage cannot hold both props *and* a readable sheet; too short and it can
-   hold them but not within one screen, and the send would play half above the
-   fold and half below it. Under either threshold the page stays flat: same
-   form, same fold, no scene — and scrolling becomes the right answer again.
+export const SCENE_QUERIES: Record<Stage["name"], string> = {
+  /* token-exempt */
+  wide: "(min-width: 820px) and (min-height: 760px)",
+  /* token-exempt */
+  tall: "(max-width: 819.98px) and (min-height: 600px) and (orientation: portrait)",
+};
 
-   The pair has to match the fitted-layout guard in app/globals.css, or one of
-   them would build a scene the other refuses to make room for. The height is
-   not a guess: it is the fixed chrome on that page plus --studio-h-min, which
-   is the shortest stage the sheet is still legible on. Below it the stage would
-   have to break one promise or the other. */
-/* token-exempt */
-export const SCENE_QUERY = "(min-width: 820px) and (min-height: 760px)";
+/** The stage this window can hold, or null for the flat form. Browser-only. */
+export function stageFor(): Stage | null {
+  for (const name of ["wide", "tall"] as const) {
+    if (window.matchMedia(SCENE_QUERIES[name]).matches) return STAGES[name];
+  }
+  return null;
+}
 
 /* The send plays for everyone.
 

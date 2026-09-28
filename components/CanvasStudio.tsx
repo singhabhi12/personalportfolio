@@ -53,16 +53,18 @@ const CONFIRM_MS = 1600;
 
 /* The toolbar is a fixed 633px wide with everything on it, and it is clipped
    by the surface it sits on — so below a tablet it cannot lie along the bottom
-   of the sheet. It stands up as a rail on the right instead, and a rail has to
-   be short enough to stand in the stage, so the phone gets four pens.
+   of the sheet. It stands up as a rail instead, and a rail has to be short
+   enough to stand in the stage, so the phone gets four pens.
 
+   The bar wants 673px of sheet with its inset, and the frame takes 80px off
+   the viewport before the sheet gets any — 753px, so a tablet held upright
+   (768–834px) keeps the whole bar lying down, and only a phone stands it up.
    Kept in step with the `--canvas-stage-h` breakpoint in globals.css, which
-   makes the table tall enough for the rail. The reasoning for the width is
-   there, next to the numbers it is derived from.
+   makes the table tall enough for the rail.
 
    token-exempt: a media query is a breakpoint, and B1 exempts those in CSS for
    the same reason it has to here — a custom property cannot be one. */
-const RAIL_QUERY = "(max-width: 820px)";
+const RAIL_QUERY = "(max-width: 759.98px)";
 
 /* Four that behave differently from each other — graphite, ballpoint, a broad
    marker, and a transparent highlighter. The other three are variations a
@@ -74,8 +76,13 @@ const RAIL_TOOLS: PenId[] = ["pencil", "pen", "marker", "highlighter"];
    the point. */
 const RAIL_CONTROLS = { custom: false };
 
+/* Drawesome's own class on the wrapper its toolbar is dragged by — the one
+   part of the stage a touch has to be allowed to reach as a tap. */
+const TOOLBAR_CLASS = "Draw_toolbar";
+
 export default function CanvasStudio() {
   const drawRef = useRef<DrawHandle | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
 
   /* The wall is read on mount, never during render: the server has no
      localStorage, and a first paint that differs from the markup is a
@@ -106,6 +113,34 @@ export default function CanvasStudio() {
      measurement: the bar's width is the library's business, and what this page
      has to decide is only whether there is room for it lying down. */
   const [rail, setRail] = useState(false);
+
+  /* A finger on the sheet is a pen, never a scroll.
+
+     Drawesome draws through pointer events and marks its surface
+     `touch-action: none`, which is what a browser is supposed to need. iOS
+     Safari needs more: it decides at `touchstart` whether the gesture is a
+     scroll, a long-press callout or a pinch, and once it has, the pointer
+     events stop arriving — a stroke ends after a centimetre, or never begins.
+     Cancelling the touch events here, on the stage and not the surface, is
+     what settles the question before Safari asks it. Non-passive on purpose:
+     a passive listener cannot cancel anything, and React registers touch
+     handlers passive. The bar is left alone: cancelling a touch also cancels
+     the click it would have become, and the bar is made of buttons. */
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const pen = (event: TouchEvent) => {
+      const target = event.target as Element | null;
+      if (target?.closest(`.${TOOLBAR_CLASS}`)) return;
+      if (event.cancelable) event.preventDefault();
+    };
+    stage.addEventListener("touchstart", pen, { passive: false });
+    stage.addEventListener("touchmove", pen, { passive: false });
+    return () => {
+      stage.removeEventListener("touchstart", pen);
+      stage.removeEventListener("touchmove", pen);
+    };
+  }, []);
 
   useLayoutEffect(() => {
     const query = window.matchMedia(RAIL_QUERY);
@@ -213,6 +248,7 @@ export default function CanvasStudio() {
               the brush ring the size of the mark it is about to leave. */}
           <div
             className="canvas-stage"
+            ref={stageRef}
             role="group"
             aria-label={canvas.surfaceLabel}
           >

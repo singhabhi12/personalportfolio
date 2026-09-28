@@ -1,9 +1,11 @@
 import WidgetCard from "./WidgetCard";
 import PlacesMap from "./PlacesMap";
-import { places, placesCountLabel } from "@/lib/content";
+import { placesCountLabel } from "@/lib/content";
 
-/* Places ◎ — the live Apple map (MapKit JS), then the count line and the city
-   list §7 fixes beneath it.
+/* Places ◎ — the live Apple map (MapKit JS), then the count line beneath it.
+   The city list that used to follow the count is gone: the map is the list,
+   and the strip it lives in is kept short so the photograph below gets the
+   height instead.
 
    This card no longer honours §10's "no map library" rule, and the inline-SVG
    sketch that used to stand in for one is gone. Two consequences worth knowing:
@@ -17,9 +19,6 @@ export default function PlacesWidget() {
       <PlacesMap />
 
       <p className="places-count">{placesCountLabel}</p>
-      <p className="micro-label places-list">
-        {places.map((place) => place.city).join(" · ")}
-      </p>
     </WidgetCard>
   );
 }

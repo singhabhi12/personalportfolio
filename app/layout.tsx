@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 /* Three voices, strict roles (§4). Self-hosted rather than loaded from
    Google — the site is served to a German audience and the fonts are part of
@@ -17,6 +17,15 @@ export const metadata: Metadata = {
   title: "Abhishek Singh — UX Designer, Hamburg",
   description:
     "UX designer in Hamburg with 3+ years across event tech, Web3, and marketplaces. Structure first, then speed, then story.",
+};
+
+/* Safari paints its tab bar and the iPhone status bar in this colour, so
+   the browser's own chrome is the same paper the page is. One value: the site
+   has no dark scheme. The paper token lives in globals.css; this is the one
+   place it has to be repeated, because the tag is written before any
+   stylesheet is. */
+export const viewport: Viewport = {
+  themeColor: "#f7f5f1", // token-exempt: --color-paper
 };
 
 export default function RootLayout({

@@ -9,6 +9,7 @@ import {
   manifestoFootnote,
   portrait,
   projectHref,
+  deskTools,
 } from "@/lib/content";
 import DeskQuote from "./DeskQuote";
 import ToolsRow from "./ToolsRow";
@@ -80,10 +81,10 @@ export default function Desk() {
 
       {/* RIGHT — the arranged desk */}
       <div className="collage">
-        {/* The one photo object on this page, in a white frame with the gallery
-            tile breaking out of its top-right corner. Black-and-white is baked
-            into the asset by `npm run assets`; the CSS filter is belt-and-braces
-            for a colour source dropped in without the pipeline. */}
+        {/* The one photo object on this page, in a white frame. Black-and-white
+            is baked into the asset by `npm run assets`; the CSS filter is
+            belt-and-braces for a colour source dropped in without the
+            pipeline. */}
         <figure className="desk-portrait">
           <div className="portrait-frame">
             <img
@@ -96,9 +97,6 @@ export default function Desk() {
               width={portrait.width}
               height={portrait.height}
             />
-            <Link className="app-badge" href="/gallery" aria-label="See the gallery">
-              <span aria-hidden="true">⁕</span>
-            </Link>
           </div>
           {/* Annotated onto the print rather than set under it: the words arrive
               left to right the way they were written, then an arrow is drawn up
@@ -153,7 +151,7 @@ export default function Desk() {
 
         <div className="desk-tools">
           <p className="micro-label">On the desk</p>
-          <ToolsRow />
+          <ToolsRow tools={deskTools} />
         </div>
       </div>
     </div>

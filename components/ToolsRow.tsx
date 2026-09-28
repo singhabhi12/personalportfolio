@@ -1,4 +1,4 @@
-import { tools } from "@/lib/content";
+import { tools as allTools, type Tool } from "@/lib/content";
 
 /* Real app icons at native colors — a sanctioned multicolor moment (§7).
    They sit on a white dock, the way running apps sit in a tray. At rest it is
@@ -6,11 +6,14 @@ import { tools } from "@/lib/content";
 
    `direction` picks the tray's axis — a row on the desk, a standing strip
    beside the gallery tile. Below 860px the column lies back down, where a
-   full-width vertical strip would be a very tall thin nothing. */
+   full-width vertical strip would be a very tall thin nothing. `tools` is the
+   subset to show; the whole tray by default. */
 export default function ToolsRow({
   direction = "row",
+  tools = allTools,
 }: {
   direction?: "row" | "column";
+  tools?: Tool[];
 }) {
   return (
     <div className="dock" data-direction={direction}>
