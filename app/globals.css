@@ -223,20 +223,6 @@
   --studio-ratio: 19 / 10;
   --studio-h-min: 400px;
   --studio-h-max: 760px;
-  /* The tall stage — the same desk from a standing seat, for a screen taller
-     than it is wide (STAGES.tall in lib/desk-scene.ts). Sized by height: the
-     sheet has to climb to its ceiling inside it, and on a phone that is most
-     of a screen. Its width follows from the ratio, and where a phone is
-     narrower than that the stage takes the width and the camera refits. The
-     floor is where the sheet, scaled onto the platen, is still readable; the
-     ceiling is where a tablet stops gaining anything. */
-  --studio-ratio-tall: 0.58;
-  --studio-h-tall: clamp(560px, 82svh, 760px);
-  /* The sheet is scaled harder onto the platen here than on the wide stage —
-     the lens is closer and the frame narrower — so the face is set larger to
-     land at the same size on screen. Fewer characters to a line, which is
-     what a phone's letter has anyway. */
-  --letter-scene-text-tall: 21px;
   --letter-w: 420px;
   --letter-h: 474px;
   --letter-pad: 34px;
@@ -261,6 +247,10 @@
      under it, and that gap is the whole reason the fold reads as physical. */
   --seal-lift: 1.5px;
   --shadow-crease: 0 3px 8px rgba(31, 31, 31, 0.2);
+  /* The dart's own shadow, cast through drop-shadow() so it follows the
+     clip-path rather than the box around it — a rectangular shadow under a
+     triangle is the one thing that would give the fold away. */
+  --shadow-plane: 0 10px 18px rgba(31, 31, 31, 0.18);
   /* Folded paper is not flat white. A faint darkening that fades away from the
      crease is what stops the sealed letter reading as a blank card. */
   --fold-sheen: linear-gradient(rgba(31, 31, 31, 0.05), rgba(31, 31, 31, 0) 45%);
@@ -281,6 +271,75 @@
   --dur-cue: 1.1s;
   --studio-gap: 28px;
   --field-underline: 1px;
+
+  /* The sheet on a phone.
+
+     No scene under 820px, so the sheet is not a page scaled onto a platen any
+     more — it is the page, at the size of the screen. It takes whatever the
+     lead above it and the send button below it leave, between a floor of
+     roughly five written lines and a ceiling that stops a tablet handing it
+     half a metre of paper. The padding comes in with it: a 34px margin is a
+     generous sheet on a desk and a wasted sixth of the writing area on a
+     phone. */
+  --letter-h-phone-min: clamp(240px, 40svh, 300px);
+  --letter-h-phone-max: 560px;
+  --letter-pad-phone: 22px;
+  /* What the writing area is allowed to shrink to before the sheet has to
+     grow instead.
+
+     The desk's figure is 150px, and on a phone that number breaks the sheet:
+     a dateline, a salutation, two signature blanks and 150px of writing come
+     to more than 320px of content, the sheet is whatever the screen had left
+     after the lead and the button — often under 300 once a browser's address
+     bar is showing — and the signature lands outside the paper. Two lines is
+     the floor here, and the sheet is only ever this tight at its own floor;
+     everywhere above it the writing area takes the slack. Tapping the sheet
+     opens the composer anyway, which is where anyone actually writes. */
+  --letter-blank-phone: 60px;
+
+  /* The composer. The room goes dark, the sheet comes forward, and the only
+     two things left on the screen are the letter and the keyboard.
+
+     --compose-top and --compose-h are written on :root by ContactStudio from
+     visualViewport, because nothing in CSS knows where a keyboard's top edge
+     is. --compose-foot is the band kept under the sheet for the send button:
+     the one control that has to stay reachable, since the whole reason this
+     page was rearranged was that its send button was hard to get to. */
+  --compose-foot: 64px;
+  --compose-scrim: rgba(18, 18, 17, 0.88);
+  /* The prompting button's outline on the scrim. The page version is a
+     hairline of --color-line on cream, which on a dark room is invisible. */
+  --compose-line: rgba(255, 255, 255, 0.34);
+  --compose-rise: 22px;
+  --shadow-compose: 0 2px 6px rgba(9, 9, 8, 0.24), 0 26px 60px rgba(9, 9, 8, 0.42);
+
+  /* The paper plane — the send where there is no letterbox to send to. See
+     PLANE in lib/desk-scene.ts for the beats these times belong to; the
+     component switches the states and this is what moves the paper, so the
+     two sets of numbers have to stay in step.
+
+     The dart is a little narrower and a little shorter than the sheet it came
+     from, because a folded plane is — and it is seeded slightly small so it
+     grows into the fold rather than appearing at full size. */
+  --plane-dart-scale-w: 0.62;
+  --plane-dart-scale-h: 0.86;
+  --plane-dart-seed: 0.78;
+  /* How the two wings are shaded apart. Both are the same paper; one of them
+     is turned a few degrees further from the light, and that difference is
+     the whole of what makes a flat clip-path read as a folded object. */
+  --plane-wing-shade: linear-gradient(105deg, rgba(31, 31, 31, 0.1), rgba(31, 31, 31, 0.02) 60%);
+  /* The throw. Rocked back over --dur-plane-bank, then away: fast off the
+     hand and coasting by the time it is small. A thrown plane also veers —
+     it is paper, and one wing always catches more air than the other. */
+  --dur-plane-bank: 200ms;
+  --dur-plane-flight: 1000ms;
+  /* Near-linear off the hand and decelerating into the distance, which is
+     what a thrown plane does and what a plain ease-out does not: an ease-out
+     spends two thirds of its distance in its first quarter and the flight is
+     over before anyone has seen it. */
+  --ease-plane: cubic-bezier(0.25, 0.5, 0.45, 1);
+  --plane-yaw: 24deg;
+  --plane-shrink: 0.3;
 
   /* The Canvas — the desk handed over. The stage is the table, the board
      Drawesome letterboxes inside it is the paper, and the wall below holds
@@ -2034,7 +2093,7 @@ main > .canvas:first-child { margin-top: 0; }
   position: fixed;
   right: var(--space-6);
   bottom: var(--space-6);
-  z-index: 50;
+  z-index: 55;
   width: var(--fab-size);
   height: var(--fab-size);
   display: flex;
@@ -2343,11 +2402,10 @@ main > .canvas:first-child { margin-top: 0; }
    is the one measurement guaranteed to overflow while the address bar is
    showing.
 
-   Guarded on both axes because both have to hold. Under either threshold this
-   wide arrangement is not built (SCENE_QUERIES.wide in lib/desk-scene.ts,
-   which carries the same two numbers). A screen held upright gets the tall
-   stage instead — see the tall block under "The stage" below — and anything
-   else falls back to the flat form, where scrolling is the right answer. */
+   Guarded on both axes because both have to hold. Under either threshold the
+   scene is not built at all (SCENE_QUERIES in lib/desk-scene.ts, which carries
+   the same two numbers) — and the phone block below takes the same one-screen
+   argument to a page with no props on it. */
 @media (min-width: 820px) and (min-height: 760px) {
   .frame[data-page='contact'] {
     min-height: 100svh;
@@ -2431,14 +2489,257 @@ main > .canvas:first-child { margin-top: 0; }
 
 /* ---------- The stage ---------- */
 
-/* The flat form, on a phone. Under the wide breakpoint and without a scene
-   this is the whole page, and it has to be typed into with a thumb. */
-@media (max-width: 819.98px) {
+/* The same argument, without a scene.
+
+   This is the exact complement of the query above — everything too narrow or
+   too short to build the desk on, which is every phone, every tablet held
+   upright, and a laptop window someone has squashed. There is no typewriter
+   and no letterbox on any of them (SCENE_QUERIES in lib/desk-scene.ts), and
+   what is left is the part anyone came here for: a sheet to write on and the
+   button that sends it. Those two belong on one screen together. The
+   arrangement this replaced put most of a screen of desk above them, which
+   meant the only control on the page was found by scrolling for it.
+
+   So it takes the fitted layout the wide screen takes, for the same reason
+   and by the same means: the frame is a column one small-viewport tall and
+   the sheet is the give in it. `min-height` rather than `height`, because a
+   short screen should grow the page by the few pixels it is over rather than
+   crush the sheet to fit — and `svh`, because `vh` on a phone is the viewport
+   with the address bar hidden, the one measurement guaranteed to overflow
+   while it is showing.
+
+   It has to stay the complement. Written as one width call it would miss a
+   phone on its side, which has the width for a scene and nowhere near the
+   height, and would leave that visitor with the one arrangement this page no
+   longer has: a fixed sheet taller than the screen, scrolled past to reach a
+   button. */
+@media (max-width: 819.98px), (max-height: 759.98px) {
   .studio-stage[data-mode='plain'] { --text-letter: var(--text-letter-touch); }
+
+  .frame[data-page='contact'] {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: var(--space-8);
+  }
+  .frame[data-page='contact'] > main {
+    flex: 1;
+    display: flex;
+    min-width: 0;
+    min-height: 0;
+  }
+  /* Unbroken, the same way the wide layout needs it unbroken: every box
+     between the frame and the sheet passes the height down, or the sheet
+     falls back to its floor and the slack collects in whichever ancestor
+     stopped forwarding it.
+
+     `min-width: 0` on every one of them, which the wide layout does not need
+     and this one cannot do without: a flex item's floor is its content, the
+     content here is a sheet written in whole pixels, and on a phone narrower
+     than that sheet the whole column would rather overflow the screen
+     sideways than let the paper be trimmed. The sheet's own `max-width` is
+     what trims it, and it only gets the chance once its parents stop
+     insisting. */
+  .frame[data-page='contact'] .contact {
+    flex: 1;
+    display: flex;
+    min-width: 0;
+    min-height: 0;
+    margin-top: var(--space-4);
+  }
+  .frame[data-page='contact'] .studio {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  /* Every gap here is a line of the letter somewhere else, so each one is cut
+     to the smallest that still separates — the nav's phone margin most of
+     all, which is set for pages that scroll. */
+  .frame[data-page='contact'] > .nav-wrap { margin-bottom: var(--space-5); }
+  .frame[data-page='contact'] .studio-head { margin-bottom: var(--space-4); }
+  .frame[data-page='contact'] .studio-foot { margin-top: var(--space-5); }
+  .frame[data-page='contact'] .stamp { margin-top: var(--space-5); }
+
+  /* The sheet takes what the lead above and the button below leave — and
+     gives it back once the letter has flown, so the reply and the button that
+     writes another rise into the space the letter was in rather than sitting
+     under a screen of nothing. `flex-grow` and the floor have to go together
+     or the floor holds the hole open; both are numbers, so both interpolate,
+     and the stage closes at a deliberate speed rather than snapping shut. */
+  .frame[data-page='contact'] .studio-stage[data-mode='plain'] {
+    flex: 1;
+    min-width: 0;
+    min-height: var(--letter-h-phone-min);
+    transition: flex-grow var(--dur-slide) var(--ease),
+      min-height var(--dur-slide) var(--ease);
+  }
+  .frame[data-page='contact'] .studio-stage[data-mode='plain'][data-empty] {
+    flex-grow: 0;
+    min-height: 0;
+  }
+  .frame[data-page='contact'] .studio-stage[data-mode='plain'] .letter {
+    height: auto;
+    align-self: stretch;
+    max-height: var(--letter-h-phone-max);
+    --letter-pad: var(--letter-pad-phone);
+    --letter-blank: var(--letter-blank-phone);
+  }
+  /* A dateline and a signature are the trimmings; on a phone they give most of
+     their room back to the writing. */
+  .frame[data-page='contact'] .letter-dateline { margin-bottom: var(--space-3); }
+  .frame[data-page='contact'] .letter-sign { margin-top: var(--space-3); }
+
+  .frame[data-page='contact'] .studio-foot { gap: var(--space-4); }
+}
+
+/* ---------- The composer, lifted ----------
+
+   The same query as COMPOSE_QUERY in lib/desk-scene.ts, which is what decides
+   whether to ask for any of this: the screens with no desk on them, and only
+   the ones with a keyboard that takes half of one. The two have to stay in
+   step — the component sets the state and this is the whole of what the state
+   does.
+
+   The sheet and the button are lifted out of the page into the band
+   visualViewport says is still visible. `position: fixed` for both, because
+   the page underneath keeps its layout and its scroll position and neither is
+   disturbed by a letter being written over it — and because the alternative,
+   moving the sheet in the document, would tear the live form out from under
+   the caret mid-tap. */
+@media (pointer: coarse) and (max-width: 819.98px), (pointer: coarse) and (max-height: 759.98px) {
+  /* The stage carries the sheet up with it; it is already the sheet's
+     positioning context and already the element the plane's measurements are
+     written on, so nothing else has to learn a second set of coordinates. */
+  .frame[data-page='contact'] .studio-stage[data-mode='plain'][data-writing] {
+    position: fixed;
+    z-index: 80;
+    left: var(--frame-pad-x);
+    right: var(--frame-pad-x);
+    width: auto;
+    top: calc(var(--compose-top) + var(--space-4));
+    height: calc(var(--compose-h) - var(--compose-foot) - var(--space-4));
+    min-height: 0;
+    max-height: none;
+  }
+  /* Off the phone ceiling as well: in here the sheet is as tall as the space
+     above the keyboard, which is the whole point of being in here. */
+  .frame[data-page='contact'] .studio-stage[data-mode='plain'][data-writing] .letter {
+    max-height: none;
+    --letter-blank: var(--letter-blank-phone);
+    box-shadow: var(--shadow-compose);
+  }
+  /* Once the sheet has been folded there is no sheet, and its shadow has to
+     go with it. Left behind, it keeps darkening the scrim in a ring around a
+     paper-shaped hole the page shows through — the one rectangle on a dark
+     screen that is lighter than the rest, exactly where the letter used to
+     be. The plane is the only paper in the room from here. */
+  .frame[data-page='contact'] .studio-stage[data-mode='plain'][data-writing] .letter[data-state='sealing'],
+  .frame[data-page='contact'] .studio-stage[data-mode='plain'][data-writing] .letter[data-state='delivered'] {
+    box-shadow: none;
+  }
+
+  /* And the sheet drops its focus ring in here. On the page it is what says
+     the paper has the caret; in a composer opened *by* giving it the caret it
+     says nothing, and a coral halo at 16% over a dark room reads as a badly
+     printed edge rather than as a state. */
+  .frame[data-page='contact'] .studio-stage[data-mode='plain'][data-writing] .letter-face:focus-within {
+    box-shadow: none;
+  }
+
+  /* It comes forward rather than appearing: a short rise and a hair of scale,
+     against the scrim's own fade, which together read as the page stepping
+     back from the letter rather than the letter being swapped in. */
+  .frame[data-page='contact'] .studio-stage[data-mode='plain'][data-writing] .letter {
+    animation: compose-in var(--dur-mid) var(--ease) both;
+  }
+  @keyframes compose-in {
+    from {
+      transform: translateY(var(--compose-rise)) scale(0.97);
+      opacity: 0.4;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  /* The send button rides up under the sheet, in the band left for it. The
+     aside goes: an email address to copy out by hand is not what anybody is
+     reaching for with a keyboard already open and a letter already written. */
+  .frame[data-page='contact'] .studio-foot[data-writing] {
+    position: fixed;
+    z-index: 80;
+    left: var(--frame-pad-x);
+    right: var(--frame-pad-x);
+    top: calc(var(--compose-top) + var(--compose-h) - var(--compose-foot));
+    height: var(--compose-foot);
+    margin: 0;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+  .studio-foot[data-writing] .studio-aside,
+  .studio-foot[data-writing] .studio-note-row { display: none; }
+
+  /* Both buttons invert on the scrim. The page's send button is near-black
+     with white on it, which on a dark room is a black pill on black; and the
+     outlined one it wears while the letter is unfinished is ink on a hairline
+     of --color-line, which is a cream token and simply is not there. So the
+     paper's colour carries the action instead — the same white the sheet is,
+     which is also the only other light in the room. */
+  .studio-foot[data-writing] .btn-ink {
+    background: var(--color-card);
+    color: var(--color-ink);
+  }
+  .studio-foot[data-writing] .btn-ink[data-prompting] {
+    background: none;
+    color: var(--color-on-dark);
+    border-color: var(--compose-line);
+  }
+
+  /* Over the scrim, not under it. The plane is normally below the nav capsule
+     so that paper thrown at the top corner passes behind it; thrown out of a
+     composer there is no nav to pass behind, only a dark room, and the letter
+     has to be in front of it. */
+  :root[data-composing] .plane { z-index: 90; }
+
+  /* Nothing behind the scrim should move while it is up. */
+  :root[data-composing] body { overflow: hidden; }
+}
+
+/* And the part of it that is about a thumb rather than about a screen.
+
+   The one action on the page goes full width, so it is under the thumb
+   wherever the thumb is rather than wherever a wrapped row happened to leave
+   it. Width only: a short laptop window has no scene either, and a send
+   button twelve hundred pixels across is not a button. */
+@media (max-width: 819.98px) {
+  .frame[data-page='contact'] .studio-foot .btn-ink,
+  .frame[data-page='contact'] .studio-note .btn-ink { width: 100%; }
+  .frame[data-page='contact'] .studio-note { width: 100%; gap: var(--space-4); }
 }
 
 .studio-stage {
   position: relative;
+  /* The plane's measurements, which ContactStudio overwrites on the stage
+     itself the instant a send begins — see aimPlane there, and the plane
+     block below for what reads them.
+
+     They are declared *here* and not on `.plane`, and that is the whole of
+     why they work. A custom property declared on an element beats the same
+     property inherited into it, so a fallback written on `.plane` would win
+     over the real measurement every time and the plane would be a zero-sized
+     box at the top-left corner. Written on the ancestor, the inline style
+     the component sets on that same ancestor simply replaces them. */
+  --plane-x: 0px;
+  --plane-y: 0px;
+  --plane-w: 0px;
+  --plane-h: 0px;
+  --fly-x: 0px;
+  --fly-y: 0px;
+  --fly-turn: 0deg;
   /* When the send scrolls the stage into view, the top of it — where the box
      stands on the tall stage — has to land under the floating nav, not
      behind it. */
@@ -2467,30 +2768,6 @@ main > .canvas:first-child { margin-top: 0; }
   --text-letter: var(--letter-scene-text);
 }
 
-/* The tall stage: a box the page scrolls past rather than one fitted to the
-   screen, since under 820px the page is a stack of sections like any other.
-   Centred, with the camera fitting whatever width is left — see
-   SCENE_QUERIES in lib/desk-scene.ts for when this arrangement is chosen.
-
-   The gaps above it are cut the way the fitted layout cuts them: a full
-   section gap between the lead and a stage most of a screen tall pushes the
-   button under the fold for nothing. Same query as SCENE_QUERIES.tall. */
-@media (max-width: 819.98px) and (min-height: 600px) and (orientation: portrait) {
-  .frame[data-page='contact'] .contact { margin-top: var(--space-8); }
-  .frame[data-page='contact'] .studio-head { margin-bottom: var(--space-5); }
-}
-
-.studio-stage[data-mode='scene'][data-stage='tall'] {
-  --text-letter: var(--letter-scene-text-tall);
-  aspect-ratio: var(--studio-ratio-tall);
-  height: var(--studio-h-tall);
-  min-height: 0;
-  max-height: none;
-  width: auto;
-  max-width: 100%;
-  margin-inline: auto;
-}
-
 .studio-canvas {
   position: absolute;
   inset: 0;
@@ -2501,6 +2778,28 @@ main > .canvas:first-child { margin-top: 0; }
      looked at, never operated. */
   pointer-events: none;
 }
+
+/* ---------- The composer ---------- */
+
+/* Tapping the sheet on a phone lifts it off the page: the room behind goes
+   dark, the letter comes to the front at the size of the screen, and the send
+   button follows it up so the letter can be finished without ever going back.
+   Everything that does the lifting is in the composer block further down,
+   under the query that decides where this is offered at all; what is here is
+   the scrim, which has to be inert on every screen that never opens one. */
+.compose-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  border: none;
+  padding: 0;
+  background: var(--compose-scrim);
+  opacity: 0;
+  pointer-events: none;
+  cursor: default;
+  transition: opacity var(--dur-mid) var(--ease);
+}
+.compose-scrim[data-open] { opacity: 1; pointer-events: auto; }
 
 /* ---------- The sheet ---------- */
 
@@ -2614,6 +2913,14 @@ main > .canvas:first-child { margin-top: 0; }
 }
 .letter-body:focus + .letter-cue,
 .letter-body:not(:placeholder-shown) + .letter-cue { display: none; }
+
+/* The cue and the hint were standing in the same character cell, so the first
+   letter of the placeholder read as struck through by a coral block. The
+   first line of the hint steps aside by one cell for exactly as long as the
+   cue is there — `text-indent` touches the first line and nothing else, and
+   both conditions are the cue's own, so the two can never disagree about
+   whether to make room. */
+.letter-body:placeholder-shown:not(:focus) { text-indent: calc(var(--text-letter) * 0.95); }
 
 /* Abrupt, not faded: a caret switches, it does not glow. */
 @keyframes cue-blink {
@@ -2769,14 +3076,199 @@ main > .canvas:first-child { margin-top: 0; }
    both, or every third of the letter would draw its own drop shadow. */
 .seal-page .letter-face { box-shadow: none; border-radius: 0; opacity: 1; visibility: visible; }
 
-/* With no scene to fly across, the sealed letter still has to leave. It goes
-   the only way a folded letter can go on a flat page: up and out. */
-.studio-stage[data-mode='plain'] .letter {
-  transition: transform var(--dur-slide) var(--ease), opacity var(--dur-slide) var(--ease);
+/* ---------- The paper plane ---------- */
+
+/* Where the letter goes when there is no letterbox to put it in: every phone,
+   and any browser that will not give the page a WebGL context.
+
+   The sheet used to slide up and fade here, and that is a form clearing
+   itself rather than a letter going anywhere. So it is folded instead — in
+   half down the middle, then into a dart — and thrown off the corner of the
+   screen. See PLANE in lib/desk-scene.ts for the beats; the component sets
+   the three attributes below and everything that moves is here.
+
+   Three attributes rather than one state, because three separate things are
+   happening to the same piece of paper and a single enum would have to spell
+   out every combination of them:
+
+     data-fold    flat → crease    the sheet folds in half
+     data-shape   sheet → dart     the halved sheet becomes a plane
+     data-fly     held → bank → away    it is aimed, rocked back, and thrown
+
+   It is `position: fixed` and it is the one element on this page that is,
+   deliberately: it has to travel past the edge of the screen, and an absolute
+   element that does that hands the document a sideways scrollbar to get
+   there. Fixed boxes are outside the scrollable overflow entirely. It is laid
+   over the sheet it came from — ContactStudio measures that sheet and writes
+   --plane-x/y/w/h — and the live sheet underneath hides in the same frame, so
+   the handover is invisible and nothing below it moves. */
+.plane {
+  position: fixed;
+  left: var(--plane-x);
+  top: var(--plane-y);
+  width: var(--plane-w);
+  height: var(--plane-h);
+  /* Above the page and below the nav capsule, which is exactly where a plane
+     thrown at the top corner passes. The capsule floats over this page the
+     way it floats over every other one; paper going under it is what says so. */
+  z-index: 55;
+  pointer-events: none;
+  perspective: var(--seal-persp);
+  transform-origin: center center;
+  will-change: transform, opacity;
+  transition: transform var(--dur-plane-bank) var(--ease);
 }
-.studio-stage[data-mode='plain'] .letter[data-state='delivered'] {
-  transform: translateY(calc(var(--letter-h) / -4)) scale(0.88);
+
+/* --- the sheet, and the crease down its middle --- */
+
+/* Two windows onto the same still copy of the letter, split down the centre;
+   the left one is hinged on the crease they share. Same construction as the
+   fold above, and for the same reason: the text has to stay exactly where it
+   was while the paper moves under it. */
+.plane-sheet {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.plane[data-shape='dart'] .plane-sheet { opacity: 0; }
+
+.plane-half {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  background: var(--fold-sheen), var(--color-card);
+  transform-style: preserve-3d;
+}
+.plane-half--right {
+  left: 50%;
+  border-radius: 0 var(--radius-sheet) var(--radius-sheet) 0;
+  box-shadow: var(--shadow-sheet);
+}
+.plane-half--left {
+  left: 0;
+  border-radius: var(--radius-sheet) 0 0 var(--radius-sheet);
+  transform-origin: right center;
+  box-shadow: var(--shadow-sheet);
+  transition: transform var(--dur-fold) var(--ease-fold),
+    box-shadow var(--dur-fold) var(--ease-hover);
+}
+/* Folded over, one paper thickness proud. The lift is written before the
+   rotation for the reason the seal flaps give above: transform functions
+   apply right to left, and a lift written second is a lift in a frame the
+   half turn has just pointed away from the camera. */
+.plane[data-fold='crease'] .plane-half--left {
+  transform: translateZ(var(--seal-lift)) rotateY(180deg);
+  box-shadow: var(--shadow-crease);
+}
+
+/* The window each half looks through. `overflow` flattens 3D inside it, and
+   the hidden backface is what leaves the half's own paper — not the writing,
+   mirrored — facing out once it has turned past ninety degrees. */
+.plane-clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  backface-visibility: hidden;
+}
+.plane-page {
+  position: absolute;
+  top: 0;
+  width: var(--plane-w);
+  height: var(--plane-h);
+}
+.plane-half--left .plane-page { left: 0; }
+.plane-half--right .plane-page { left: calc(var(--plane-w) / -2); }
+/* The copy carries neither shadow nor rounding: the half it sits in owns
+   both, or each side of the sheet would draw its own. */
+.plane-page .letter-face {
+  box-shadow: none;
+  border-radius: 0;
+  opacity: 1;
+  visibility: visible;
+}
+
+/* --- the dart --- */
+
+/* Two wings meeting at a spine, which is the silhouette everybody already
+   reads as a paper plane. It grows into place over the last of the crease,
+   seeded slightly small, while the halved sheet fades under it — folded paper
+   does not dissolve into a new shape, but a hinge that turned a sheet into a
+   dart in one move would be four more folds and half a second nobody has. */
+.plane-dart {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--plane-w) * var(--plane-dart-scale-w));
+  height: calc(var(--plane-h) * var(--plane-dart-scale-h));
+  transform: translate(-50%, -50%) scale(var(--plane-dart-seed));
   opacity: 0;
+  filter: drop-shadow(var(--shadow-plane));
+  transition: opacity var(--dur-fast) var(--ease),
+    transform var(--dur-fold) var(--ease-fold);
+}
+.plane[data-shape='dart'] .plane-dart {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Nose at the top, tail notched up to the spine. The two wings are the same
+   paper; the far one is shaded as though turned further from the light, and
+   that difference is the whole of what makes two flat clip-paths read as one
+   folded object. */
+.plane-wing {
+  position: absolute;
+  inset: 0;
+  background: var(--color-card);
+}
+.plane-wing--far {
+  clip-path: polygon(50% 0%, 50% 88%, 6% 100%);
+  background: var(--plane-wing-shade), var(--color-card);
+}
+.plane-wing--near { clip-path: polygon(50% 0%, 94% 100%, 50% 88%); }
+
+/* --- the throw --- */
+
+/* Aimed and rocked back. --fly-turn is where the corner is from here, worked
+   out by the component off the sheet's own position, so a plane launched from
+   a tall phone and one launched from a laptop both point at the corner they
+   are actually going to rather than at a direction written down once. */
+.plane[data-fly='bank'] {
+  transform: translate3d(calc(var(--fly-x) * -0.04), calc(var(--fly-y) * -0.04), 0)
+    rotate(var(--fly-turn)) scale(0.97);
+}
+
+.plane[data-fly='away'] {
+  animation: plane-away var(--dur-plane-flight) var(--ease-plane) forwards;
+}
+
+/* It starts from exactly where the bank left it — written out rather than
+   inherited, because an animation's first keyframe replaces the transition's
+   result and any disagreement between the two is a jump at the throw. */
+@keyframes plane-away {
+  0% {
+    transform: translate3d(calc(var(--fly-x) * -0.04), calc(var(--fly-y) * -0.04), 0)
+      rotate(var(--fly-turn)) scale(0.97);
+    opacity: 1;
+  }
+  /* By here it is past the corner and the fade is only insurance — a plane
+     that dissolved in mid-air over the page would be the one beat in this
+     that was an effect rather than an object. */
+  78% { opacity: 1; }
+  100% {
+    transform: translate3d(var(--fly-x), var(--fly-y), 0)
+      rotate(calc(var(--fly-turn) + var(--plane-yaw))) scale(var(--plane-shrink));
+    opacity: 0;
+  }
+}
+
+/* The quiet ending, for `?motion=still`: the sheet is folded and then it is
+   simply not there. No aim, no throw — the fold is the whole of it, which is
+   the same bargain the scene's still path strikes with the lid. */
+.plane[data-fly='gone'] {
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease);
 }
 
 /* ---------- Below the stage ---------- */
@@ -4304,6 +4796,29 @@ main > .canvas:first-child { margin-top: 0; }
 @media (max-width: 759.98px) {
   .canvas-foot { gap: var(--space-4) var(--space-6); }
   .canvas-privacy { margin-left: 0; flex-basis: 100%; text-align: left; }
+
+  /* And under the same width the Canvas is not offered at all — the link
+     comes off the capsule, and the page itself says why. `display: none`
+     rather than a dimmed link, so it leaves the tab order and the nav's
+     reading order with its appearance. Same line as HANDHELD_QUERY in
+     components/CanvasStudio.tsx, which decides the other half. */
+  .nav-link[data-handheld='off'] { display: none; }
+}
+
+/* What the page says instead. Sized to the reading measure and nothing else:
+   it is a sentence and a way out, not a layout. */
+.canvas-handheld {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  max-width: var(--contact-max);
+  margin-top: var(--space-8);
+}
+.canvas-handheld-line {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-muted);
 }
 
 @media (max-width: 640px) {
@@ -4391,8 +4906,20 @@ main > .canvas:first-child { margin-top: 0; }
   :root:not([data-motion='still']) .seal-flap {
     transition-duration: var(--dur-fold) !important;
   }
-  :root:not([data-motion='still']) .studio-stage[data-mode='plain'] .letter {
-    transition-duration: var(--dur-slide) !important;
+  /* And the same hole for the plane, which is that fold's other half: where
+     there is no scene the letter is folded into a dart and thrown, and a
+     dart that appears fully folded and then teleports off the corner has not
+     been calmed either. Same switch, same reasoning. */
+  :root:not([data-motion='still']) .plane {
+    transition-duration: var(--dur-plane-bank) !important;
+  }
+  :root:not([data-motion='still']) .plane-half--left,
+  :root:not([data-motion='still']) .plane-dart,
+  :root:not([data-motion='still']) .plane-sheet {
+    transition-duration: var(--dur-fold) !important;
+  }
+  :root:not([data-motion='still']) .plane[data-fly='away'] {
+    animation-duration: var(--dur-plane-flight) !important;
   }
 
   /* The lightbox figure's delay is not a duration, so the blanket rule above

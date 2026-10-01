@@ -12,10 +12,12 @@ import {
 import { contact, identity } from "@/lib/content";
 import type { Stage, Vec3 } from "@/lib/desk-scene";
 import {
+  COMPOSE_QUERY,
   ENTRY,
   FLAP,
   MARKS,
-  SEND_DURATION,
+  PLANE,
+  PLANE_OVERSHOOT,
   SHEET,
   STILL_DURATION,
   approach,
@@ -59,6 +61,16 @@ import type { Studio } from "./studio-scene";
    MARKS), and overlapping timeouts drift apart the moment a frame is slow —
    a fold that finishes after the letter has already left is the one failure
    this arrangement cannot have.
+
+   Under 820px none of that is built. A phone has no room for a typewriter, a
+   letterbox, a sheet big enough to type on and the button that sends it, and
+   of those four only the last two are why anyone opened the page — so the
+   phone gets the sheet, full width, with the send button under it on the same
+   screen. The letter still leaves: with no box to post it into it is folded
+   into a paper plane and thrown off the corner. That path is `mode: "plain"`,
+   which is also what a desktop with no WebGL gets, and it is run by the
+   `plane` effect below rather than by the loop — there is no loop without a
+   scene, and four hinges are four CSS transitions.
 
    The send plays for everyone, including under `prefers-reduced-motion` — the
    reasoning is at STILL_FLAG in lib/desk-scene.ts, and it is a decision about
@@ -113,13 +125,15 @@ export default function ContactStudio() {
   const letterRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
   const gaugeRef = useRef<HTMLDivElement>(null);
+  const planeRef = useRef<HTMLDivElement>(null);
   const fieldRefs = useRef<Partial<Record<LetterField, HTMLElement | null>>>({});
 
   const [mode, setMode] = useState<Mode>("plain");
-  /* Named on the stage element so the stylesheet can size the box the scene
-     is drawn in — the two arrangements are different shapes. */
-  const [stageName, setStageName] = useState<Stage["name"] | null>(null);
   const [phase, setPhase] = useState<Phase>("writing");
+  /* The composer is open: the sheet is lifted clear of the page, everything
+     behind it is dark, and the only two things on the screen are the letter
+     and the keyboard. Phones only — see COMPOSE_QUERY in lib/desk-scene.ts. */
+  const [composing, setComposing] = useState(false);
   const [draft, setDraft] = useState<LetterDraft>(emptyDraft);
   const [errors, setErrors] = useState<Partial<Record<LetterField, string>>>({});
   /* Frozen at the moment of sending. The fold layer renders this rather than
@@ -198,7 +212,6 @@ export default function ContactStudio() {
 
       live.current.studio = studio;
       live.current.stage = stage;
-      setStageName(stage.name);
       setMode("scene");
 
       const loop = (now: number) => {
@@ -461,7 +474,155 @@ export default function ContactStudio() {
   const onSign = () => {
     live.current.drawn = true;
     live.current.target = SHEET.visibleMax;
+    openComposer();
   };
+
+  /* ---------- The composer ---------- */
+
+  /* Opened by touching any blank on the sheet, and closed by touching
+     anything that is not one. There is deliberately no `blur` handler: a blur
+     fires before the click that caused it, so closing on blur would drop the
+     page back to its resting layout in the instant between someone pressing
+     the send button and that press landing — and the button would no longer
+     be under the finger. Everything except the sheet and that button is
+     behind the scrim, so a tap on the scrim is the only "outside" there is,
+     and it says so explicitly. */
+  const openComposer = useCallback(() => {
+    if (window.matchMedia(COMPOSE_QUERY).matches) setComposing(true);
+  }, []);
+
+  const closeComposer = useCallback(() => {
+    setComposing(false);
+    /* The keyboard goes with it. Left focused, iOS keeps the keyboard up over
+       a page that has just stopped making room for it. */
+    (document.activeElement as HTMLElement | null)?.blur();
+  }, []);
+
+  /* Where the keyboard's top edge is.
+
+     `100svh` is the viewport a phone has before a keyboard opens, and once one
+     is up it is roughly half a screen too tall — so the composer cannot be
+     sized in it. visualViewport is the part still being looked at, and it is
+     the only thing that knows. `offsetTop` matters as much as `height`: the
+     composer is fixed, fixed boxes are laid out against the *layout* viewport,
+     and on iOS a focused field scrolls that viewport out from under them. The
+     pair of them put the sheet back over the part of the screen that is
+     actually visible, on every frame the keyboard or the page moves. */
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!composing) {
+      delete root.dataset.composing;
+      root.style.removeProperty("--compose-top");
+      root.style.removeProperty("--compose-h");
+      return;
+    }
+    root.dataset.composing = "";
+
+    const view = window.visualViewport;
+    const sync = () => {
+      root.style.setProperty("--compose-top", `${view ? view.offsetTop : 0}px`);
+      root.style.setProperty("--compose-h", `${view ? view.height : window.innerHeight}px`);
+    };
+    sync();
+    view?.addEventListener("resize", sync);
+    view?.addEventListener("scroll", sync);
+    const key = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeComposer();
+    };
+    window.addEventListener("keydown", key);
+
+    return () => {
+      view?.removeEventListener("resize", sync);
+      view?.removeEventListener("scroll", sync);
+      window.removeEventListener("keydown", key);
+    };
+  }, [composing, closeComposer]);
+
+  /* ---------- The paper plane ---------- */
+
+  /* Where the sheet is, and where it is going.
+
+     Both are measured rather than written down, because neither is knowable
+     from here: the sheet's size is whatever the phone left it after the lead
+     and the button took their share, and the corner is wherever the corner is
+     from that. The numbers go onto the stage as custom properties and the
+     plane — a fixed element, so it can leave the screen without handing the
+     document a sideways scrollbar — reads them from there. Writing them on an
+     ancestor rather than on the plane itself is what lets this run before the
+     plane exists: it is rendered by the same click that calls this, one React
+     commit later, and custom properties inherit.
+
+     The destination is a sheet's width past the top-right corner, so the
+     plane is gone before it fades rather than fading because it has stopped.
+     --fly-turn is the bearing of that trip, and the dart is drawn nose-up, so
+     it is the angle of the throw plus a quarter turn. */
+  const aimPlane = useCallback(() => {
+    const letter = letterRef.current;
+    const stage = stageRef.current;
+    if (!letter || !stage) return;
+
+    const box = letter.getBoundingClientRect();
+    stage.style.setProperty("--plane-x", `${box.left}px`);
+    stage.style.setProperty("--plane-y", `${box.top}px`);
+    stage.style.setProperty("--plane-w", `${box.width}px`);
+    stage.style.setProperty("--plane-h", `${box.height}px`);
+
+    const overshoot = box.width * PLANE_OVERSHOOT;
+    const x = window.innerWidth + overshoot - (box.left + box.width / 2);
+    const y = -overshoot - (box.top + box.height / 2);
+    stage.style.setProperty("--fly-x", `${x}px`);
+    stage.style.setProperty("--fly-y", `${y}px`);
+    stage.style.setProperty("--fly-turn", `${(Math.atan2(y, x) * 180) / Math.PI + 90}deg`);
+  }, []);
+
+  /* The four beats, once the plane is on the page.
+
+     Timeouts rather than a clock, and that is a different call from the one
+     the scene makes — there the beats are frames of one continuous motion and
+     drift between them is visible; here each beat is a CSS transition that
+     owns its own timing, and a late `data-fold` only means the hinge starts
+     late, not that two halves of one move come apart.
+
+     The first state is set a frame late on purpose. A transition needs a
+     frame at its starting value to have something to transition *from*, and
+     an element that is inserted already folded has simply always been folded.
+     Two frames, because one is not reliably enough after a commit. */
+  useEffect(() => {
+    const plane = planeRef.current;
+    if (!plane || !sealed || mode !== "plain") return;
+
+    if (document.documentElement.dataset.motion === STILL_FLAG) {
+      /* No aim and no throw: it is folded, and then it is not there. */
+      plane.dataset.shape = "dart";
+      const quiet = window.setTimeout(() => {
+        if (planeRef.current) planeRef.current.dataset.fly = "gone";
+      }, STILL_DURATION);
+      return () => window.clearTimeout(quiet);
+    }
+
+    const at = (ms: number, part: "fold" | "shape" | "fly", value: string) =>
+      window.setTimeout(() => {
+        if (planeRef.current) planeRef.current.dataset[part] = value;
+      }, ms);
+
+    let first = 0;
+    const frame = requestAnimationFrame(() => {
+      first = requestAnimationFrame(() => {
+        if (planeRef.current) planeRef.current.dataset.fold = "crease";
+      });
+    });
+    const timers = [
+      at(PLANE.dartAt, "shape", "dart"),
+      at(PLANE.bankAt, "fly", "bank"),
+      at(PLANE.flightAt, "fly", "away"),
+    ];
+
+    return () => {
+      cancelAnimationFrame(frame);
+      cancelAnimationFrame(first);
+      timers.forEach(window.clearTimeout);
+    };
+  }, [sealed, mode]);
 
   /* ---------- Sending ---------- */
 
@@ -475,6 +636,11 @@ export default function ContactStudio() {
          is the whole of what happened, and saying "posted" would be a claim
          about a message that is still sitting in this tab. */
       setPhase(!ok ? "failed" : contactEndpoint ? "delivered" : "handoff");
+      /* And the room comes back up, on the same beat. The composer is held
+         open through the whole send on purpose — the letter is folded and
+         thrown from where it was being written, over the dark, rather than
+         dropped back onto the page first and folded there. */
+      setComposing(false);
       if (!ok) {
         /* The letter comes back out of the box with every word still in it —
          and the box shuts behind it, or the lid stands open over a letter that
@@ -539,6 +705,10 @@ export default function ContactStudio() {
 
     setSealed({ ...draft });
     setPhase("sending");
+    /* The keyboard is done with; the composer is not, and stays until the
+       letter has landed. Blurring here rather than closing means the sheet
+       keeps its lifted position for the fold, and the plane is aimed from it. */
+    (document.activeElement as HTMLElement | null)?.blur();
 
     /* On the tall stage the button sits under a stage most of a screen high,
        so the box the letter is about to fly into can be above the fold when
@@ -565,35 +735,34 @@ export default function ContactStudio() {
     const still = document.documentElement.dataset.motion === STILL_FLAG;
 
     live.current.landed = false;
-    if (still || mode === "plain") {
-      /* No scene to fly across, or the quiet ending was asked for. Either way
-         the letter is still sealed, and then it is simply gone. */
-      const letter = letterRef.current;
-      if (still) {
-        if (letter) letter.dataset.fold = "both";
-        /* The one beat reduced motion keeps: the box opens and shuts. Without
-           it the letter vanishes and the scene never answers, which is the
-           difference between "posted" and "lost". Cued now rather than at
-           MARKS.flapAt because there is no flight for it to wait for. */
-        live.current.posted = true;
-        live.current.flapAt = performance.now();
-        window.setTimeout(settle, STILL_DURATION);
-      } else {
-        /* No loop running here, so the two creases are the one place a pair of
-           timeouts is the honest way to say "then". */
-        window.setTimeout(() => letter && (letter.dataset.fold = "lower"), MARKS.lowerStart);
-        window.setTimeout(() => letter && (letter.dataset.fold = "both"), MARKS.upperStart);
-        window.setTimeout(settle, SEND_DURATION);
-      }
-    } else {
+    if (mode === "scene" && !still) {
       const at = performance.now();
       live.current.sendAt = at;
       live.current.flapAt = at + MARKS.flapAt;
+    } else if (mode === "scene") {
+      /* A box to answer, and the quiet ending asked for. The letter is sealed
+         and gone where it stood, and the lid is the whole acknowledgement —
+         without it the letter vanishes and the scene never answers, which is
+         the difference between "posted" and "lost". Cued now rather than at
+         MARKS.flapAt because there is no flight for it to wait for. */
+      const letter = letterRef.current;
+      if (letter) letter.dataset.fold = "both";
+      live.current.posted = true;
+      live.current.flapAt = performance.now();
+      window.setTimeout(settle, STILL_DURATION);
+    } else {
+      /* No scene, so no box: the sheet becomes a paper plane instead. The
+         folds themselves are run by the `plane` effect below — it needs the
+         thing in the document before it can start moving it — and all this
+         does is aim it and start the clock the panel changes over on. */
+      aimPlane();
+      window.setTimeout(settle, still ? STILL_DURATION : PLANE.deliveredAt);
     }
   };
 
   const writeAnother = () => {
     setPhase("writing");
+    setComposing(false);
     setSealed(null);
     setDraft(emptyDraft);
     setErrors({});
@@ -617,8 +786,17 @@ export default function ContactStudio() {
   };
 
   const state: Phase = phase;
+  /* Handoff counts as delivered here. The two endings differ in what the panel
+     below offers — one of them still has a mail client to open — but the sheet
+     itself is equally gone in both, and a letter that reappears on the desk
+     once it has been folded and sent is a letter that was never sent. Only a
+     failure brings it back, with every word still in it. */
   const letterState =
-    state === "sending" ? "sealing" : state === "delivered" ? "delivered" : "writing";
+    state === "sending"
+      ? "sealing"
+      : state === "delivered" || state === "handoff"
+        ? "delivered"
+        : "writing";
 
   return (
     <div className="studio">
@@ -627,17 +805,49 @@ export default function ContactStudio() {
         <h1 className="studio-line">{contact.line}</h1>
       </header>
 
+      {/* `data-empty` once the sheet has left and is not coming back. Only the
+          phone layout reads it, and what it does there is let the stage give
+          its height up: the scene still has a desk to show after a send, and
+          a phone is left with a sheet-shaped hole between the lead and the
+          acknowledgement. Giving it back puts the reply, and the button that
+          writes another, where the letter was. */}
+      {/* The room going dark behind the letter.
+
+          A real button, not a decorated div: it is the way out of the
+          composer, it is the only way out that is not the keyboard's own
+          dismiss key, and a tap target covering the whole screen with no name
+          on it is invisible to anyone not looking at it. It sits before the
+          sheet in the source so that the sheet, which is lifted over it, is
+          also the next thing after it in the tab order. */}
+      <button
+        type="button"
+        className="compose-scrim"
+        data-open={composing ? "" : undefined}
+        onClick={closeComposer}
+        tabIndex={composing ? 0 : -1}
+        aria-hidden={composing ? undefined : true}
+      >
+        <span className="sr-only">{contact.compose.close}</span>
+      </button>
+
       <div
         className="studio-stage"
         ref={stageRef}
         data-mode={mode}
-        data-stage={stageName ?? undefined}
+        data-writing={composing ? "" : undefined}
+        data-empty={letterState === "delivered" ? "" : undefined}
       >
+        {/* The scene, or nothing at all. The element is always here because
+            the scene needs somewhere to build and decides at mount whether it
+            is going to — but where it decides not to, the desk is not
+            described to anybody: a phone that draws no typewriter and no
+            letterbox must not announce two props that are not on the page. */}
         <canvas
           className="studio-canvas"
           ref={canvasRef}
-          role="img"
-          aria-label={contact.sceneAlt}
+          role={mode === "scene" ? "img" : undefined}
+          aria-label={mode === "scene" ? contact.sceneAlt : undefined}
+          aria-hidden={mode === "scene" ? undefined : true}
         />
 
         <div className="letter" ref={letterRef} data-state={letterState} data-fold="flat">
@@ -666,6 +876,7 @@ export default function ContactStudio() {
                 }}
                 value={draft.message}
                 onChange={onField("message")}
+                onFocus={openComposer}
                 placeholder={contact.placeholder}
                 aria-invalid={Boolean(errors.message)}
                 aria-describedby={errors.message ? `${fieldId("message")}-error` : undefined}
@@ -733,8 +944,12 @@ export default function ContactStudio() {
           {/* The fold layer. Three windows onto the same still copy of the sheet,
               hinged on the creases they share — see the fold block in
               app/globals.css. Identical to the live form by construction: same
-              elements, same classes, same metrics, only frozen and inert. */}
-          {sealed && (
+              elements, same classes, same metrics, only frozen and inert.
+
+              Only where there is a box to fold a letter *for*. On a phone the
+              sheet is folded the other way — see the plane below — and a
+              letter cannot be folded both ways at once. */}
+          {sealed && mode === "scene" && (
             <div className="letter-seal" aria-hidden="true">
               <div className="seal-mid">
                 <SealBand band={1} draft={sealed} dateline={dateline} />
@@ -748,13 +963,43 @@ export default function ContactStudio() {
             </div>
           )}
         </div>
+
+        {/* The plane. A sibling of the sheet rather than a child of it,
+            because the sheet carries a `perspective` and an element with one
+            is the containing block for every fixed descendant under it — the
+            plane would be pinned to the sheet it is trying to leave.
+
+            Laid exactly over that sheet at the moment of sending and given
+            the same writing to fold, so the handover is invisible; the live
+            face underneath hides in the same frame. The three attributes are
+            the three things happening to it, and the effect above sets them
+            on the beat. See the plane block in app/globals.css. */}
+        {sealed && mode === "plain" && (
+          <div
+            className="plane"
+            ref={planeRef}
+            aria-hidden="true"
+            data-fold="flat"
+            data-shape="sheet"
+            data-fly="held"
+          >
+            <div className="plane-sheet">
+              <PlaneHalf side="right" draft={sealed} dateline={dateline} />
+              <PlaneHalf side="left" draft={sealed} dateline={dateline} />
+            </div>
+            <div className="plane-dart">
+              <span className="plane-wing plane-wing--far" />
+              <span className="plane-wing plane-wing--near" />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* One slot, four things that can be standing in it. Written out rather
           than folded into one conditional: the three endings differ in what
           they *offer*, not only in what they say, and a chain of ternaries
           across a button, a link and a mail handoff reads as a puzzle. */}
-      <div className="studio-foot">
+      <div className="studio-foot" data-writing={composing ? "" : undefined}>
         {(state === "writing" || state === "sending") && (
           <>
             {/* The button names the next blank until there is no next blank.
@@ -791,7 +1036,7 @@ export default function ContactStudio() {
             </button>
             <p className="studio-aside">
               <span className="studio-note-label">{contact.delivered.label}</span>
-              {contact.delivered.line}
+              {mode === "scene" ? contact.delivered.line : contact.delivered.flown}
             </p>
           </div>
         )}
@@ -834,6 +1079,35 @@ export default function ContactStudio() {
   );
 }
 
+/** The sheet as it was at the moment of sending: the same page, frozen.
+
+    A real textarea and real inputs, readonly. Rendering these as paragraphs
+    would re-wrap the text a pixel differently and the swap from live sheet to
+    sealed one would flicker. The writing wrapper is kept for the same reason —
+    same elements, same metrics — though its cue can never show: a sealed
+    letter always has a message.
+
+    Both folds render it. Every window either of them opens is a window onto
+    this, which is what lets the paper move while the writing stays put. */
+function StillFace({ draft, dateline }: { draft: LetterDraft; dateline: string }) {
+  return (
+    <div className="letter-face">
+      <p className="letter-dateline">{dateline}</p>
+      <p className="letter-salutation">{contact.salutation}</p>
+      <div className="letter-writing">
+        <textarea className="letter-body" value={draft.message} readOnly tabIndex={-1} />
+      </div>
+      <div className="letter-sign">
+        <span className="letter-dash">—</span>
+        <span className="letter-blanks">
+          <input className="letter-blank" value={draft.name} readOnly tabIndex={-1} />
+          <input className="letter-blank" value={draft.email} readOnly tabIndex={-1} />
+        </span>
+      </div>
+    </div>
+  );
+}
+
 /** One third of the sealed sheet, shown through a window that tall. */
 function SealBand({
   band,
@@ -847,24 +1121,30 @@ function SealBand({
   return (
     <div className="seal-clip">
       <div className="seal-page" data-band={band}>
-        <div className="letter-face">
-          <p className="letter-dateline">{dateline}</p>
-          <p className="letter-salutation">{contact.salutation}</p>
-          {/* A real textarea and real inputs, readonly. Rendering these as
-              paragraphs would re-wrap the text a pixel differently and the
-              swap from live sheet to sealed one would flicker. The wrapper is
-              kept for the same reason — same elements, same metrics — though
-              its cue can never show: a sealed letter always has a message. */}
-          <div className="letter-writing">
-            <textarea className="letter-body" value={draft.message} readOnly tabIndex={-1} />
-          </div>
-          <div className="letter-sign">
-            <span className="letter-dash">—</span>
-            <span className="letter-blanks">
-              <input className="letter-blank" value={draft.name} readOnly tabIndex={-1} />
-              <input className="letter-blank" value={draft.email} readOnly tabIndex={-1} />
-            </span>
-          </div>
+        <StillFace draft={draft} dateline={dateline} />
+      </div>
+    </div>
+  );
+}
+
+/** One half of the sheet the plane is folded from, shown through a window
+    that wide. The left half is the one that turns; both are the same page,
+    slid under their own window, so the crease runs down writing that does
+    not move with it. */
+function PlaneHalf({
+  side,
+  draft,
+  dateline,
+}: {
+  side: "left" | "right";
+  draft: LetterDraft;
+  dateline: string;
+}) {
+  return (
+    <div className={`plane-half plane-half--${side}`}>
+      <div className="plane-clip">
+        <div className="plane-page">
+          <StillFace draft={draft} dateline={dateline} />
         </div>
       </div>
     </div>

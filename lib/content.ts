@@ -422,6 +422,13 @@ export const contact = {
     message: { label: "Your letter", srOnly: "Write your message" },
   },
 
+  /* The composer: on a phone, tapping the sheet lifts it clear of the page
+     and darkens everything behind it, so the letter and the keyboard are the
+     only two things on the screen. The way out is a tap anywhere off the
+     paper, and the scrim that catches that tap is the only thing on this page
+     a screen reader would otherwise find unlabelled. */
+  compose: { close: "Done writing" },
+
   send: "Seal and send",
   sending: "Posting…",
 
@@ -453,6 +460,12 @@ export const contact = {
   delivered: {
     label: "Posted",
     line: "It's in the box. I read everything, and reply to most of it.",
+    /* The same news, where there was no box. A phone draws no letterbox —
+       the letter is folded into a paper plane and thrown instead, see PLANE
+       in lib/desk-scene.ts — and telling someone their letter is in a box
+       they have just watched it fly past is the one line that would give the
+       whole apparatus away. */
+    flown: "It's in the air. I read everything, and reply to most of it.",
     again: "Write another",
   },
 
@@ -490,6 +503,21 @@ export const canvas = {
      it is worse than copy that undercounts. Where a drawing goes is explained
      by the wall and the privacy note, not by a second sentence here. */
   line: "A sheet, a handful of pens, and nobody watching.",
+
+  /* What a phone gets instead.
+
+     The Canvas is the one page on this site that cannot be made smaller and
+     still be itself: seven pens and a sheet you can draw on need a surface
+     and a hand, and on a phone the toolbar takes a third of the screen before
+     a single mark is made. Saying so plainly is better than handing someone a
+     cramped version of a thing that was meant to be generous — and the page
+     still exists, so a link to it from a phone lands somewhere that explains
+     itself rather than on a 404. */
+  handheld: {
+    label: "Come back on a laptop",
+    line: "The Canvas needs a bigger sheet than a phone has — seven pens, a surface, and room to be careless with it.",
+    back: "See the work instead",
+  },
 
   /* The sheet is decorative to a screen reader; the buttons under it do the
      work, so it gets a name and nothing else. */

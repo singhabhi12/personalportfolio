@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
+import Link from "next/link";
 import { Draw, type DrawHandle, type PenId, type Stroke } from "drawesome";
 import "drawesome/styles.css";
 
@@ -66,6 +67,22 @@ const CONFIRM_MS = 1600;
    the same reason it has to here — a custom property cannot be one. */
 const RAIL_QUERY = "(max-width: 759.98px)";
 
+/* And below the same width, the page is not offered at all.
+
+   Same number as RAIL_QUERY on purpose, and it is the honest one: it is where
+   the toolbar stops fitting along the bottom of the sheet, which is the point
+   at which the Canvas stops being the thing it was designed as. A phone was
+   getting a standing rail and four pens on a sheet the size of a postcard —
+   a cramped version of something whose whole argument is that it is generous.
+
+   A tablet held upright is over this line and keeps the whole apparatus,
+   which is right: an iPad is a better drawing surface than a trackpad.
+
+   Same @media exemption as RAIL_QUERY, and it has to stay in step with the
+   nav rule and the handheld block in app/globals.css. */
+/* token-exempt */
+const HANDHELD_QUERY = "(max-width: 759.98px)";
+
 /* Four that behave differently from each other — graphite, ballpoint, a broad
    marker, and a transparent highlighter. The other three are variations a
    phone has no room to offer. */
@@ -113,6 +130,11 @@ export default function CanvasStudio() {
      measurement: the bar's width is the library's business, and what this page
      has to decide is only whether there is room for it lying down. */
   const [rail, setRail] = useState(false);
+  /* False through the server render and the first client one, so the markup
+     both sides produce is the same and hydration has nothing to argue about.
+     The layout effect below settles it before the browser paints, so a phone
+     never sees the sheet it is not being offered. */
+  const [handheld, setHandheld] = useState(false);
 
   /* A finger on the sheet is a pen, never a scroll.
 
@@ -145,6 +167,14 @@ export default function CanvasStudio() {
   useLayoutEffect(() => {
     const query = window.matchMedia(RAIL_QUERY);
     const sync = () => setRail(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
+
+  useLayoutEffect(() => {
+    const query = window.matchMedia(HANDHELD_QUERY);
+    const sync = () => setHandheld(query.matches);
     sync();
     query.addEventListener("change", sync);
     return () => query.removeEventListener("change", sync);
@@ -240,6 +270,19 @@ export default function CanvasStudio() {
         <h1 className="canvas-line">{canvas.line}</h1>
       </header>
 
+      {handheld ? (
+        /* The whole page, on a phone. Nothing below this renders: no sheet,
+           no toolbar, no wall — and, more to the point, no Drawesome, which
+           would otherwise boot a drawing surface nobody is going to be
+           offered. The head above stays, so the page still says what it is. */
+        <div className="canvas-handheld">
+          <p className="widget-label">{canvas.handheld.label}</p>
+          <p className="canvas-handheld-line">{canvas.handheld.line}</p>
+          <Link className="btn-ink" href="/work">
+            {canvas.handheld.back}
+          </Link>
+        </div>
+      ) : (
       <div className="canvas-grid">
         <div className="canvas-desk">
           {/* The sheet, and nothing behind it: the board matches the element,
@@ -372,6 +415,7 @@ export default function CanvasStudio() {
           )}
         </aside>
       </div>
+      )}
 
       {/* Credit, on the page. Drawesome is doing the hard part. */}
       <p className="canvas-credit">

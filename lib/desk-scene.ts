@@ -398,28 +398,29 @@ export function flightPoint(t: number, from: Vec3, to: Vec3, handles: [Vec3, Vec
   ];
 }
 
-/* ---------- Two stages ---------- */
+/* ---------- The stage ---------- */
 
-/* One scene, two arrangements of it.
+/* One arrangement, and the screens wide enough to hold it.
 
-   The wide stage is the desk seen from a chair: the machine right of centre,
-   the box to its left, the letter carried across between them. That needs
-   width — the two props span 1.75 units, and squeezed into a phone the sheet
-   comes out around a hundred pixels across, which nobody can type on.
+   The desk is seen from a chair: the machine right of centre, the box to its
+   left, the letter carried across between them. That needs width — the two
+   props span 1.75 units, and squeezed into a phone the sheet comes out around
+   a hundred pixels across, which nobody can type on.
 
-   So a screen taller than it is wide gets the desk from a different seat. The
-   machine sits square at the bottom of the frame, close enough that its ends
-   run off the sides — a photograph taken standing over it — and the sheet
-   climbs straight up out of it, as wide as the screen allows. The box stands
-   further back on the desk, up and to the left, where the raised camera puts
-   it clear of the machine; the letter is drawn out, folded, and carried up and
-   away into it. Same props, same lens, same choreography — only the seat and
-   the arc are different.
+   There was a second arrangement here once, a standing seat for a screen held
+   upright, and it was the wrong answer to the right question. A phone that has
+   to hold a typewriter, a letterbox, a sheet to type on *and* the button that
+   sends it has room for none of them: the stage took most of a screen, the
+   send button sat under the fold, and the letter — the only part of the page
+   anyone came to use — was the smallest thing on it. So a phone gets the sheet
+   and nothing else, and the letter leaves as a paper plane rather than into a
+   box that is no longer drawn. See PLANE below, and the plane block in
+   app/globals.css.
 
    `platen` is derived rather than written, and `turn` reads off the box's own
    turn, so neither can disagree with the placement it belongs to. */
 export interface Stage {
-  name: "wide" | "tall";
+  name: "wide";
   props: Record<"typewriter" | "letterbox", Placement>;
   view: View;
   /** The roller's lip — where the sheet stops being inside the machine. */
@@ -444,17 +445,6 @@ function stage(spec: Omit<Stage, "platen" | "turn">): Stage {
   };
 }
 
-const TALL_PROPS: Record<"typewriter" | "letterbox", Placement> = {
-  /* Centred on the sheet rather than on itself: the platen sits a little right
-     of the machine's middle, and it is the paper the eye is on. */
-  typewriter: { fit: "width", size: 1.02, position: [-0.04, 0, 0], turn: 0 },
-  /* Well back and off to the left, turned a little further toward the letter
-     than on the wide stage — from here the letter arrives from below and in
-     front, so the lid has to face down the desk. Larger than the wide box
-     because it is a good deal further from the lens. */
-  letterbox: { fit: "height", size: 0.56, position: [-0.4, 0, -1.6], turn: 0.09 },
-};
-
 export const STAGES: Record<Stage["name"], Stage> = {
   wide: stage({
     name: "wide",
@@ -464,53 +454,23 @@ export const STAGES: Record<Stage["name"], Stage> = {
     slot: SLOT,
     flight: FLIGHT_HANDLES,
   }),
-  tall: stage({
-    name: "tall",
-    props: TALL_PROPS,
-    /* A higher seat — standing over the desk rather than sitting at it — so
-       the far end of the desk is in the frame and the box on it stands clear
-       above the machine. The frame is the sheet and a little desk either
-       side, tall enough for the sheet at its ceiling plus the machine's
-       working half below it; the keyboard's front rows run off the bottom,
-       which is what a close shot does. */
-    view: {
-      direction: [0, 0.42, 1],
-      target: [0, 0.56, -0.05],
-      frame: { width: 0.68, height: 1.24 },
-    },
-    /* Drawn up and toward the lens — a page taken out of the machine by
-       someone standing over it. */
-    held: [0, 0.8, 0.32],
-    slot: [-0.38, 0.48, -1.6],
-    /* Up first, then back down the desk: the letter is lifted clear of the
-       machine before it travels, and arrives at the box on its way down. */
-    flight: [
-      [0.05, 0.98, 0.2],
-      [-0.28, 0.92, -0.9],
-    ],
-  }),
 };
 
 /* ---------- Where the scene is worth building ---------- */
 
-/* Which stage a screen gets, if any.
+/* Width and height both matter, and for different reasons. Too narrow and the
+   stage cannot hold both props *and* a readable sheet; too short and it can
+   hold them but not within one screen, and the send would play half above the
+   fold and half below it. The width is the same 820px call §11 already makes
+   for the desk collage, and the height is not a guess: it is the fixed chrome
+   on that page plus --studio-h-min, the shortest stage the sheet is still
+   legible on. The pair has to match the fitted-layout guard in
+   app/globals.css, or it would build a scene the stylesheet refuses to make
+   room for.
 
-   Width and height both matter, and for different reasons. Too narrow and the
-   wide stage cannot hold both props *and* a readable sheet; too short and it
-   can hold them but not within one screen, and the send would play half above
-   the fold and half below it. The wide stage is the same 820px call §11
-   already makes for the desk collage, and its height is not a guess: it is
-   the fixed chrome on that page plus --studio-h-min, the shortest stage the
-   sheet is still legible on. The pair has to match the fitted-layout guard in
-   app/globals.css, or one of them would build a scene the other refuses to
-   make room for.
-
-   Under it, a screen that is taller than it is wide — a phone held upright, a
-   tablet in portrait — gets the tall stage instead, provided it has the height
-   for the sheet to climb: the stage there is a fixed tall box the page scrolls
-   past, sized in app/globals.css against the same `--studio-h-tall`. Anything
-   else — a phone on its side, a short window — stays flat: same form, same
-   fold, no scene, and scrolling is the right answer again.
+   Under either threshold there is no scene at all: same form, same sheet, no
+   props — and the phone layout in app/globals.css gives that sheet the screen
+   the props used to take.
 
    B1 exempts @media breakpoints from the token rule because custom properties
    do not work in them; a matchMedia query is the same breakpoint by another
@@ -518,17 +478,29 @@ export const STAGES: Record<Stage["name"], Stage> = {
 export const SCENE_QUERIES: Record<Stage["name"], string> = {
   /* token-exempt */
   wide: "(min-width: 820px) and (min-height: 760px)",
-  /* token-exempt */
-  tall: "(max-width: 819.98px) and (min-height: 600px) and (orientation: portrait)",
 };
 
 /** The stage this window can hold, or null for the flat form. Browser-only. */
 export function stageFor(): Stage | null {
-  for (const name of ["wide", "tall"] as const) {
-    if (window.matchMedia(SCENE_QUERIES[name]).matches) return STAGES[name];
-  }
-  return null;
+  return window.matchMedia(SCENE_QUERIES.wide).matches ? STAGES.wide : null;
 }
+
+/* Where tapping the sheet opens the composer.
+
+   Two conditions, and both are doing work. The screen has to be one with no
+   desk on it — the complement of the query above, which is the same pair of
+   numbers read the other way — because on the wide stage the sheet is already
+   the largest thing on the screen and there is nothing to lift it away from.
+   And the pointer has to be coarse, because the whole point of the composer
+   is the half of the screen a keyboard takes: a laptop window dragged narrow
+   has no keyboard to clear and would get a modal for no reason.
+
+   It has to stay in step with the composer block in app/globals.css, which
+   carries the same query — the stylesheet does the lifting and this decides
+   whether to ask for it. Same @media exemption as SCENE_QUERIES. */
+export const COMPOSE_QUERY =
+  /* token-exempt */
+  "(pointer: coarse) and (max-width: 819.98px), (pointer: coarse) and (max-height: 759.98px)";
 
 /* The send plays for everyone.
 
@@ -617,9 +589,6 @@ export const FLAP = {
   closeEnd: 880,
 };
 
-/** Total length of a send. Also the timeout the network call is raced against. */
-export const SEND_DURATION = Math.max(MARKS.recoilEnd, MARKS.flapAt + FLAP.closeEnd);
-
 /* The quiet version, for `?motion=still`: no feed, no flight, no arc across the
    desk. The letter is sealed and gone where it stood.
 
@@ -628,6 +597,66 @@ export const SEND_DURATION = Math.max(MARKS.recoilEnd, MARKS.flapAt + FLAP.close
    the letter without ever admitting it. So the box still opens and still shuts,
    and the panel below changes over while it is doing it. */
 export const STILL_DURATION = 240;
+
+/* ---------- The paper plane ---------- */
+
+/* What the send is where there is no scene: every phone, and any desktop whose
+   browser will not give the page a WebGL context.
+
+   With no letterbox drawn there is nothing for a letter to be posted into, and
+   "the sheet slides up and fades" — which is what used to happen here — is a
+   form clearing itself, not a letter going anywhere. So the sheet is folded
+   into the one thing a sheet of paper becomes when there is no box: a dart,
+   which is then thrown.
+
+   Three beats and a flight, each one a real fold rather than a dissolve:
+
+     crease   the sheet folds in half down its middle, the writing going
+              inside, the way you start any plane.
+     dart     the halved sheet's nose is folded down and the silhouette
+              becomes a dart. The paper stops being a letter here.
+     bank     the dart turns to face where it is going and rocks back once,
+              which is the wrist before a throw.
+     flight   and it goes, to the corner of the screen.
+
+   Milliseconds from the button press, and they overlap for the same reason the
+   scene's do: played strictly one after another the same four beats read as
+   four pictures rather than one gesture. The fold durations are --dur-fold's
+   sibling in app/globals.css and the two have to stay in step — the numbers
+   here are what the component switches the states on, and the stylesheet is
+   what actually moves the paper. */
+export const PLANE = {
+  /** In half, down the middle. */
+  creaseAt: 0,
+  /** Nose down, wings out. */
+  dartAt: 360,
+  /** Turned toward the corner it is about to leave by, and rocked back. */
+  bankAt: 700,
+  /** Thrown. */
+  flightAt: 900,
+  flightEnd: 1900,
+  /** The panel below changes over while the plane is still in the air — the
+      same overlap the scene takes at MARKS.deliveredAt, and for the same
+      reason: an acknowledgement that waits for the animation to finish reads
+      as a page that was thinking about it. */
+  deliveredAt: 1450,
+};
+
+/** Total length of a plane send. */
+export const PLANE_DURATION = PLANE.flightEnd;
+
+/* How far past the corner the plane is thrown, as a multiple of the sheet's
+   own width.
+
+   It is a smaller number than it looks like it should be, and deliberately.
+   The plane is out of sight the moment it crosses the edge, so everything
+   past that point is an animation nobody is watching — throw it far enough
+   and the visible part of a one-second flight is the first quarter-second of
+   it, which reads as the letter being snatched away rather than thrown. Just
+   past the corner keeps nearly the whole arc on screen, and the fade at the
+   end of `plane-away` is a safety net rather than the exit. */
+export const PLANE_OVERSHOOT = 0.7;
+
 
 /* Easing. `outCubic` for anything arriving, `inOutCubic` for anything that both
    leaves and arrives, `outBack` for the single moment that should overshoot —
