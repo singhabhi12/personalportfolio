@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import WorkCards from "./WorkCards";
 import WorkFolders from "./WorkFolders";
 import { work } from "@/lib/content";
@@ -10,6 +10,24 @@ type View = "folders" | "cards";
 /* Remembered per browser, as a convenience rather than a setting: nothing
    reads it back but this page, and it is fine for it to come back empty. */
 const STORAGE_KEY = "work-view";
+
+/* Where the drawer is not offered.
+
+   The same 820px the stylesheet already bends the drawer at, and bending it
+   is what gave the game away: by the time the fan is flattened to nothing,
+   the front folder's step is nothing, and the six tabs have stopped stepping
+   right, there is no drawer left — only a stack of cards with a folder's
+   chrome around them, which is what the cards view already is, done properly.
+
+   So a phone gets the cards. Not a fallback: nine on the table at once, a
+   real headline over them, and no floating button asking a question with one
+   answer.
+
+   token-exempt: a media query is a breakpoint, and B1 exempts those in CSS
+   for the same reason it has to here. It has to stay in step with the 820px
+   drawer block in app/globals.css. */
+/* token-exempt */
+const HANDHELD_QUERY = "(max-width: 820px)";
 
 const readStored = (): View | null => {
   try {
@@ -34,6 +52,19 @@ export default function WorkView() {
   /* Whether the visitor has switched at all. The drawer plays its opening
      beat once, on arrival; a switch back to it is not an arrival. */
   const [switched, setSwitched] = useState(false);
+  /* False through the server render and the first client one, so both sides
+     produce the same markup and hydration has nothing to argue about. The
+     layout effect settles it before the browser paints, so a phone never
+     sees the drawer it is not being offered. */
+  const [handheld, setHandheld] = useState(false);
+
+  useLayoutEffect(() => {
+    const query = window.matchMedia(HANDHELD_QUERY);
+    const sync = () => setHandheld(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
 
   /* Server and first client render agree on the drawer; the remembered
      choice lands a frame later, before the drawer has done more than sit
@@ -56,7 +87,9 @@ export default function WorkView() {
     }
   };
 
-  const cards = view === "cards";
+  /* On a phone the remembered choice is not consulted and not overwritten —
+     someone who picked the drawer on a laptop still has it there. */
+  const cards = handheld || view === "cards";
   const other: View = cards ? "folders" : "cards";
 
   return (
@@ -81,16 +114,22 @@ export default function WorkView() {
 
       {/* The switch. Floats in the corner rather than sitting in the page, so
           it is in the same place at the top of the drawer and at the foot of
-          the ninth card. It shows the view it would take you to. */}
-      <button
-        type="button"
-        className="view-fab"
-        aria-label={work.switchTo[other]}
-        title={work.switchTo[other]}
-        onClick={() => choose(other)}
-      >
-        {cards ? <FolderIcon /> : <CardsIcon />}
-      </button>
+          the ninth card. It shows the view it would take you to.
+
+          Gone on a phone, where there is only one view to be in. A button
+          that offers the view you are already looking at is worse than no
+          button, and not rendering it takes it out of the tab order too. */}
+      {!handheld && (
+        <button
+          type="button"
+          className="view-fab"
+          aria-label={work.switchTo[other]}
+          title={work.switchTo[other]}
+          onClick={() => choose(other)}
+        >
+          {cards ? <FolderIcon /> : <CardsIcon />}
+        </button>
+      )}
     </section>
   );
 }
