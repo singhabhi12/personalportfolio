@@ -9,10 +9,12 @@ import { ARTWORK_SIZES, artworkAt, nowPlaying } from "@/lib/listening";
 
    A server component that runs at build (lib/listening.ts): the cover, its
    colours and the link are looked up once and frozen into the page, so no visitor
-   waits on Apple and no token reaches the browser. Without a key on the
-   machine doing the build, the card keeps the title and artist from
-   lib/content and presses a plain black record with a blank label — never an
-   empty card.
+   waits on Apple and no token reaches the browser. A build with no MusicKit
+   key still gets the cover, the link and the preview — those come from the
+   keyless search — and only the cover's own colours are lost, so the record
+   is pressed in lib/content's blank black instead. If Apple cannot be reached
+   at all the card keeps the title and artist from lib/content and presses a
+   blank-labelled record — never an empty card.
 
    The label is rendered here rather than by WidgetCard so it can sit beside
    the disc instead of above it; the card is a row, not a stack.
