@@ -8,9 +8,15 @@ import { stamp, whisper } from "@/lib/content";
    Cards never touch the viewport edge — the frame's padding guarantees it. */
 export default function PageFrame({
   active,
+  bare = false,
   children,
 }: {
   active: NavKey;
+  /** No whisper and no stamp, only the capsule: for a page that is one
+      screen of its own and has no corner or foot to spare. Home is — on a
+      laptop the capsule floats over its photograph rather than taking a row
+      (see "Home" in app/globals.css). */
+  bare?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -26,29 +32,33 @@ export default function PageFrame({
       <div className="frame" data-page={active}>
         {/* Phase 2 cursor-play hook. Harmless static text until then — the
             pointer is what makes it read as the cursor's own aside. */}
-        <span className="whisper" data-whisper aria-hidden="true">
-          <svg
-            className="whisper-cursor"
-            viewBox="0 0 12 14"
-            width={11}
-            height={13}
-            focusable="false"
-          >
-            <path d="M1 1 L11 7.6 L6.2 8.3 L4.3 12.8 Z" fill="var(--color-muted)" />
-          </svg>
-          {whisper}
-        </span>
+        {!bare && (
+          <span className="whisper" data-whisper aria-hidden="true">
+            <svg
+              className="whisper-cursor"
+              viewBox="0 0 12 14"
+              width={11}
+              height={13}
+              focusable="false"
+            >
+              <path d="M1 1 L11 7.6 L6.2 8.3 L4.3 12.8 Z" fill="var(--color-muted)" />
+            </svg>
+            {whisper}
+          </span>
+        )}
 
         <NavCapsule active={active} />
 
         <main id="main">{children}</main>
 
-        <footer className="stamp">
-          <div>
-            <StampTime /> · {stamp.weather}
-          </div>
-          <div>{stamp.copyright}</div>
-        </footer>
+        {!bare && (
+          <footer className="stamp">
+            <div>
+              <StampTime /> · {stamp.weather}
+            </div>
+            <div>{stamp.copyright}</div>
+          </footer>
+        )}
       </div>
     </div>
   );

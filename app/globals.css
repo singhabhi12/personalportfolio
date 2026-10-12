@@ -59,6 +59,16 @@
 
   /* Shape */
   --radius-card: 24px;
+  /* The work stage — the tinted recess a project's cover sits in on /work.
+     A step darker than the page rather than lighter, so the cover reads as
+     set into the page rather than laid on top of it; the covers themselves
+     bring every ground from white to warm grey, and a recess is the one
+     frame that flatters all of them. The shot's shadow is softer and wider
+     than --shadow-image, which is a hairline meant for pictures sitting
+     directly on paper — in here the picture is floating. */
+  --work-stage: #ecebe5;
+  --work-stage-pad: 20px;
+  --shadow-stage: 0 1px 2px rgba(31, 31, 31, 0.08), 0 8px 20px rgba(31, 31, 31, 0.1);
   --radius-image: 12px;
   --radius-pill: 100px;
   --radius-icon: 8px;
@@ -153,9 +163,46 @@
   /* The nav capsule as a material: a mostly-white fill the page shows
      through, a blur so what shows through is a colour and not a word, and a
      hairline of light along the top edge. */
-  --nav-fill: rgba(255, 255, 255, 0.72);
-  --nav-blur: blur(18px) saturate(1.5);
-  --nav-edge: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  /* Liquid Glass, the regular variant (components/NavCapsule.tsx). Less
+     blur than the frosted capsule it replaces — glass that bends light
+     rather than scattering it — with the luminosity lifted so a label on it
+     stays legible over a photograph as well as over the paper. */
+  --lg-tint: rgba(255, 255, 255, 0.34);
+  --lg-backdrop: blur(8px) saturate(1.9) brightness(1.08);
+  /* The rim's light: bright where it faces the light, a whisper elsewhere. */
+  --lg-rim: 1.5px;
+  --lg-rim-hot: rgba(255, 255, 255, 0.95);
+  --lg-rim-warm: rgba(255, 255, 255, 0.5);
+  --lg-rim-cool: rgba(255, 255, 255, 0.12);
+  /* The body's own light: a lit top lip and a glow pooling at the foot,
+     which is what reads as thickness. */
+  --lg-body-light: inset 0 1px 1px rgba(255, 255, 255, 0.65), inset 0 -10px 18px -10px rgba(255, 255, 255, 0.55);
+  /* The shadow adapts to what is under it: soft on the paper, deeper over a
+     photograph, as the material's does over busy content. */
+  --lg-shadow: 0 1px 2px rgba(31, 31, 31, 0.06), 0 8px 24px rgba(31, 31, 31, 0.08);
+  --lg-shadow-media: 0 2px 6px rgba(31, 31, 31, 0.14), 0 14px 34px rgba(31, 31, 31, 0.2);
+  /* Labels on glass: vibrant ink rather than the page's muted grey, which
+     washes out over a photograph. */
+  --lg-label: rgba(31, 31, 31, 0.62);
+  /* The selection lens: thicker glass inside the bar. */
+  --lg-lens-fill: rgba(255, 255, 255, 0.58);
+  --lg-lens-light: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(31, 31, 31, 0.04), 0 1px 3px rgba(31, 31, 31, 0.1);
+  --lg-lens-h: 36px;
+  /* Where the lens is: the current link's box, written by the component. */
+  --lens-x: 0px;
+  --lens-w: 0px;
+  /* Light from within, on a press. */
+  --lg-glow: rgba(255, 255, 255, 0.75);
+  --lg-glow-reach: 120px;
+  /* The give: wider and flatter while held, then a spring back past rest. */
+  --lg-press-x: 1.035;
+  --lg-press-y: 0.95;
+  --ease-gel: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-gel: 420ms;
+  --dur-lens: 460ms;
+  /* Reduced transparency: frostier, obscuring more — Apple's own answer. */
+  --lg-tint-frost: rgba(255, 255, 255, 0.9);
+  --lg-backdrop-frost: blur(24px) saturate(1.4);
   /* Where it sticks: far enough in that its shadow never touches the edge. */
   --nav-top: 16px;
   /* The filled button, pressed at: one step up from the ink, so a pointer on
@@ -170,7 +217,6 @@
   /* Metrics */
   --hairline: 1px;
   --focus-ring: 2px;
-  --dot-size: 6px;
   --offscreen: -9999px;
   --nav-height: 48px;
   --nav-gap: 26px;
@@ -181,18 +227,44 @@
   --frame-pad-x: 40px;
   --frame-pad-top: 40px;
   --section-gap-lg: 112px;
-  --desk-gap: 40px;
-  --exp-max: 400px;
-  --exp-col-year: 96px;
-  /* The two desk photographs are the only part of the collage that can give
-     height without costing legibility, so they scale with the viewport and the
-     text does not. Floors are the smallest crop that still reads as a photo. */
-  --portrait-h: clamp(140px, 19vh, 250px);
-  --featured-shot-h: clamp(104px, 15vh, 200px);
-  /* Restored below 820px, where the collage is a full-width single column and
-     a viewport-scaled height would letterbox both images. */
-  --portrait-h-sm: 240px;
-  --featured-shot-h-sm: 200px;
+  /* Home — one screen of cards, after dannpetty.com. Tighter than the rest
+     of the site on purpose: the reference's density is the point, and the
+     page has to fit a laptop's viewport with nothing to scroll. */
+  --home-max: 1680px;
+  --home-pad: 20px;
+  --home-gap: 16px;
+  --home-card-pad: 20px;
+  --home-radius: 20px;
+  --home-inner-radius: 12px;
+  --text-name: 18px;
+  --avatar-size: 56px;
+  /* Where the face is in the portrait, and how to bring it to the circle's
+     centre: the offset is centre minus focus, the zoom is how close. */
+  --avatar-focus: 58% 22%;
+  --avatar-shift: -8% 28%;
+  --avatar-zoom: 2.6;
+  --social-size: 36px;
+  --social-icon: 16px;
+  --pill-h: 36px;
+  --pill-h-lg: 40px;
+  --pill-pad-x: 14px;
+  --tool-chip: 34px;
+  --insta-gap: 6px;
+  /* The floors the flexible pictures shrink to before the layout gives up
+     fitting the screen. */
+  --product-stage-min: 88px;
+  /* The hero's dots: a resting dot and the stretched current one. */
+  --dot-rest: 6px;
+  --dot-current: 18px;
+  /* …and the smaller set a long roster closes up to. */
+  --dot-rest-dense: 5px;
+  --dot-current-dense: 14px;
+  --dot-gap-dense: 3px;
+  --hc-pill-fill: rgba(31, 31, 31, 0.55);
+  /* The location card's dotted ground, after the reference's globe. */
+  --location-dot: 1.5px;
+  --location-grid: 9px;
+  --insta-dim: 0.86;
   --contact-max: 460px;
   --btn-height: 48px;
   --btn-pad-x: 28px;
@@ -209,11 +281,6 @@
      own. Read as one gesture of just under half a second. */
   --delay-lightbox-figure: 90ms;
 
-  /* Collage lifts — how far each desk object tucks under the one above it. */
-  --lift-1: -12px;
-  --lift-2: -18px;
-  --lift-3: -22px;
-  --lift-4: -8px;
 
   /* Contact studio — the typewriter, the sheet, and the box it posts to.
      The stage holds one shape so the composition the camera solves for is the
@@ -341,27 +408,51 @@
   --plane-yaw: 24deg;
   --plane-shrink: 0.3;
 
-  /* The Canvas — the desk handed over. The stage is the table, the board
-     Drawesome letterboxes inside it is the paper, and the wall below holds
-     what has been pinned.
+  /* Fun — the board, and the record beside it. The record's column is fixed:
+     one that grew with the window would be three figures changing size for no
+     reason. Wide enough for "Won Lost Drawn" on one line with air around it. */
+  --record-col: 312px;
 
-     `--canvas-sheet` is read by components/CanvasStudio.tsx as well as used
-     here: it is painted into the exported SVG, which travels away from this
-     stylesheet and cannot carry a var() with it. Declared once, consumed in
-     both places — never written a second time in the component. */
-  --canvas-sheet: #ffffff;
-  /* The wall's column. Two pins across at a size a scribble still reads at,
-     and wide enough that a pin's caption — a short date and the button that
-     takes it down — stays on one line. */
-  --wall-col: 312px;
-  /* The sheet's floor in the one-screen layout, and its height in the stacked
-     one — where the toolbar is a 491px rail and has to stand inside it. */
-  --canvas-stage-min: 380px;
-  /* The floor is the rail's 491px plus its inset top and bottom: on a short
-     phone the sheet cannot be smaller than the toolbar standing in it. */
-  --canvas-stage-h: clamp(535px, 66vh, 620px);
-  --pin-min: 130px;
-  --shadow-sheet-flat: 0 1px 2px rgba(31, 31, 31, 0.08), 0 6px 18px rgba(31, 31, 31, 0.08);
+  /* Gomoku — the board in the drawer under the sheet.
+
+     A goban is wood, and the temptation on a cream page is to make it another
+     white card with a grid on it. That board reads as a spreadsheet. The wood
+     is desaturated and warmed until it belongs beside the paper rather than
+     fighting it — the same move the work stage makes — and it is the one
+     object on this site allowed its own material, because the whole point of
+     a board is that it is a thing on the desk.
+
+     The lines are brown rather than grey: ink drawn on wood takes the wood's
+     colour, and a neutral grid floats above the board instead of being cut
+     into it. */
+  --goban-wood: #dcb882;
+  --goban-wood-edge: #c89f66;
+  --goban-line: rgba(74, 50, 20, 0.42);
+  --goban-rule: rgba(74, 50, 20, 0.62);
+  --goban-star: rgba(74, 50, 20, 0.8);
+  /* The stone a pointer is holding over an empty intersection — the move it
+     would make, at a quarter weight. */
+  --goban-ghost: rgba(31, 31, 31, 0.22);
+  /* The board's ceiling. Any bigger and a 15×15 grid on a laptop is a table
+     rather than a board you can take in at a glance. */
+  --goban-max: 560px;
+
+  /* The stones. Two lacquer discs lit from the upper left, which is the whole
+     of what makes them read as objects rather than filled circles — one
+     highlight, one shadow under them, nothing else. */
+  --stone-size: 86%;
+  --stone-black: radial-gradient(circle at 34% 28%, #6b6b68, #2a2a28 38%, #121210 72%);
+  --stone-white: radial-gradient(circle at 34% 28%, #ffffff, #e4e0d8 72%);
+  --shadow-stone: 0 1px 2px rgba(31, 31, 31, 0.35), 0 2px 5px rgba(31, 31, 31, 0.18);
+  /* A white stone on tan wood needs no edge. The same stone shrunk into a line
+     of type, on cream paper, is a pale disc on a pale ground — so the small
+     one gets a rim and the one on the board does not. */
+  --stone-rim: rgba(31, 31, 31, 0.26);
+  /* The mark on the stone just played, so a board can be read without having
+     watched it filled. */
+  --stone-mark-size: 26%;
+  --stone-chip: 10px;
+  --tally-figure: 22px;
 
   /* Work — the drawer. Five states, measured off the Figma frames.
 
@@ -833,45 +924,142 @@ ul { list-style: none; }
   pointer-events: none;
 }
 
-/* Frosted rather than white, so that whatever scrolls under it is seen to.
-   A lit top edge is what makes it read as a material with a thickness rather
-   than a white shape with a shadow. The saturate() keeps the paper's warmth
-   from going grey through the blur. */
+/* Liquid Glass. The reasoning, and Apple's guidance it follows, is at the top
+   of components/NavCapsule.tsx; this is the material.
+
+   Layered, back to front: the backdrop (refracted where the browser can,
+   always blurred and lifted), the tint, the body's own light, the moving rim
+   (::before), the selection lens, the labels, and the press glow (::after)
+   over everything, not catching the pointer. */
+@property --lg-angle {
+  syntax: '<angle>';
+  inherits: true;
+  initial-value: 315deg;
+}
+
 .nav-capsule {
+  position: relative;
+  isolation: isolate;
   display: inline-flex;
   align-items: center;
   gap: var(--nav-gap);
   height: var(--nav-height);
   padding: 0 var(--space-6);
-  background: var(--nav-fill);
-  -webkit-backdrop-filter: var(--nav-blur);
-  backdrop-filter: var(--nav-blur);
+  background: var(--lg-tint);
+  -webkit-backdrop-filter: var(--lg-backdrop);
+  backdrop-filter: var(--lg-backdrop);
   border-radius: var(--radius-pill);
-  box-shadow: var(--nav-edge), var(--shadow-card);
+  box-shadow: var(--lg-body-light), var(--lg-shadow);
   pointer-events: auto;
+  /* The gel: what the press below springs back with. */
+  transition: transform var(--dur-gel) var(--ease-gel), box-shadow var(--dur-mid) var(--ease);
+}
+/* Lensing, where the browser can run the filter on a backdrop. */
+.nav-capsule[data-refract] { backdrop-filter: url(#nav-glass) var(--lg-backdrop); }
+
+.nav-glass-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* The rim. A ring of light the width of --lg-rim, cut out of a conic
+   gradient whose bright side faces the pointer (--lg-angle, set by the
+   component). The mask keeps only the ring. */
+.nav-capsule::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  padding: var(--lg-rim);
+  background: conic-gradient(
+    from var(--lg-angle),
+    var(--lg-rim-hot),
+    var(--lg-rim-cool) 22%,
+    var(--lg-rim-cool) 40%,
+    var(--lg-rim-warm) 50%,
+    var(--lg-rim-cool) 60%,
+    var(--lg-rim-cool) 78%,
+    var(--lg-rim-hot)
+  );
+  -webkit-mask: linear-gradient(black 0 0) content-box, linear-gradient(black 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(black 0 0) content-box exclude, linear-gradient(black 0 0);
+  pointer-events: none;
+  transition: --lg-angle var(--dur-mid) var(--ease);
+}
+
+/* Light from within. Starts under the finger and spreads as it fades in. */
+.nav-capsule::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle var(--lg-glow-reach) at var(--lg-glow-x, 50%) var(--lg-glow-y, 50%),
+    var(--lg-glow),
+    transparent
+  );
+  mix-blend-mode: soft-light;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-mid) var(--ease);
+}
+.nav-capsule[data-pressed]::after { opacity: 1; transition-duration: var(--dur-fast); }
+.nav-capsule[data-pressed] {
+  transform: scale(var(--lg-press-x), var(--lg-press-y));
+  transition-duration: var(--dur-press);
+  transition-timing-function: var(--ease);
+}
+
+/* The selection lens: a pill of thicker glass behind the current link, and
+   the thing that travels. Its place is the link's box plus a margin out of
+   the gap either side; the component writes the link's box. Before it has
+   (first paint, or no script) the current link carries the same pill itself,
+   so the lens is never missing — only not yet free to move. */
+.nav-lens,
+.nav-capsule:not([data-lens]) .nav-link[aria-current='page']::before {
+  position: absolute;
+  top: 50%;
+  height: var(--lg-lens-h);
+  border-radius: var(--radius-pill);
+  background: var(--lg-lens-fill);
+  box-shadow: var(--lg-lens-light);
+  pointer-events: none;
+}
+.nav-lens {
+  left: 0;
+  z-index: 0;
+  width: calc(var(--lens-w) + var(--nav-gap) * 0.9);
+  transform: translate(calc(var(--lens-x) - var(--nav-gap) * 0.45), -50%);
+  opacity: 0;
+  transition:
+    transform var(--dur-lens) var(--ease-gel),
+    width var(--dur-lens) var(--ease-gel),
+    opacity var(--dur-fast) var(--ease);
+}
+.nav-capsule[data-lens] .nav-lens { opacity: 1; }
+.nav-capsule[data-instant] .nav-lens { transition: none; }
+.nav-capsule:not([data-lens]) .nav-link[aria-current='page']::before {
+  content: '';
+  left: calc(var(--nav-gap) * -0.45);
+  right: calc(var(--nav-gap) * -0.45);
+  transform: translateY(-50%);
+  z-index: -1;
 }
 
 /* A link presses. Text-only, so the whole word gives, not a box around it. */
 .nav-link {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
   font-size: var(--text-body);
   font-weight: var(--weight-medium);
-  color: var(--color-muted);
+  color: var(--lg-label);
   transition: color var(--dur-fast) var(--ease-hover), transform var(--dur-press) var(--ease);
 }
 .nav-link:hover { color: var(--color-ink); }
 .nav-link:active { transform: scale(var(--press-scale)); }
 .nav-link[aria-current='page'] { color: var(--color-ink); }
-
-.nav-dot {
-  width: var(--dot-size);
-  height: var(--dot-size);
-  border-radius: var(--radius-pill);
-  background: var(--color-status);
-  flex: none;
-}
 
 /* ---------- Shared primitives ---------- */
 
@@ -1011,7 +1199,7 @@ sup.marker { font-size: var(--text-label); }
    /contact, where the section is the whole page. */
 main > .section:first-child,
 main > .contact:first-child,
-main > .canvas:first-child { margin-top: 0; }
+main > .fun:first-child { margin-top: 0; }
 
 .shot {
   border-radius: var(--radius-image);
@@ -1020,239 +1208,590 @@ main > .canvas:first-child { margin-top: 0; }
   object-fit: cover;
 }
 
-/* ---------- The desk ---------- */
+/* ---------- Home ---------- */
 
-.desk-grid {
+/* After dannpetty.com, in the site's own paper, white and gradient: no nav
+   capsule, no stamp, a tight gutter, and cards in three tracks — the profile
+   down the left, photographs in the middle, where-and-what down the right.
+
+   Phone first: one column, in the order components/Desk.tsx writes it. A
+   tablet puts the two outer tracks side by side over the middle one; a laptop
+   gets the four columns, and when it is tall enough the page is fixed to the
+   viewport (the block at the end of this section) so nothing scrolls. */
+.frame[data-page='home'] {
+  max-width: var(--home-max);
+  padding: var(--home-pad);
+}
+
+/* The nav capsule sits where it sits on every other route: --frame-pad-top
+   from the top of the viewport, at every width. Home cannot inherit that by
+   having the same padding — its gutter is the bento's --home-pad, which is
+   tighter than the rest of the site — so the capsule is pushed the
+   difference instead, and the two stay in step wherever --frame-pad-top is
+   restated.
+
+   Where the page scrolls — a phone, a tablet, a short screen — this is the
+   site's own sticky capsule, one card-gap above the grid; on a laptop it
+   floats over the photograph instead (the fit block below). */
+.frame[data-page='home'] > .nav-wrap {
+  margin-top: calc(var(--frame-pad-top) - var(--home-pad));
+  margin-bottom: var(--home-gap);
+}
+
+.home {
   display: grid;
-  grid-template-columns: 42fr 58fr;
-  gap: var(--desk-gap);
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--home-gap);
 }
-
-/* Left — manifesto, bare on the paper, sticky so the voice follows the visitor.
-   It stops under the capsule, not under the top edge: the nav is sticky too,
-   and two things pinned to the same line land on each other. */
-.manifesto {
-  position: sticky;
-  top: calc(var(--nav-top) + var(--nav-height) + var(--space-4));
-  padding: var(--space-1) 0;
-}
-
-/* One line, three weights: the name lands, the verb recedes, the subject is
-   the only underline on the page. */
-.manifesto-headline {
-  font-size: var(--text-headline);
-  font-weight: var(--weight-regular);
-  line-height: var(--leading-headline);
-  letter-spacing: var(--tracking-display);
-  color: var(--color-ink);
-  /* Balanced so a two-line headline breaks evenly instead of orphaning the
-     subject onto a line of its own. */
-  text-wrap: balance;
-}
-.mh-name,
-.mh-stop { font-weight: var(--weight-semibold); }
-.mh-verb { color: var(--color-body); }
-.mh-subject {
-  font-weight: var(--weight-semibold);
-  color: var(--color-ink);
-  text-decoration: underline;
-  text-decoration-thickness: var(--underline-weight);
-  text-underline-offset: var(--underline-offset);
-}
-.mh-subject:hover { color: var(--color-accent); }
-
-/* Wide gaps so each statement lands as its own beat, not a bio paragraph.
-   The panel sets the measure now, so the line block no longer caps its own. */
-.manifesto-lines {
+.home-col {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--home-gap);
+  min-height: 0;
 }
-.manifesto-lines p {
-  font-size: var(--text-manifesto);
-  font-weight: var(--weight-regular);
-  line-height: var(--leading-manifesto);
-  color: var(--color-body);
-}
-
-/* A note, not a label — sentence case and untracked, so it reads as the
-   answer to the marker above rather than another section heading. */
-.manifesto-footnote {
-  font-size: var(--text-label);
-  line-height: var(--leading-body);
-  color: var(--color-muted);
-  margin-top: var(--footnote-gap);
-}
-
-/* De-carded experience timeline, plain on the paper */
-.exp { margin-top: var(--space-12); max-width: var(--exp-max); }
-.exp-heading { margin-bottom: var(--space-3); }
-
-.exp-row {
+.home-mid {
   display: grid;
-  grid-template-columns: var(--exp-col-year) 1fr auto;
-  gap: var(--space-4);
-  align-items: baseline;
-  padding: var(--space-3) 0;
-  border-bottom: var(--hairline) solid var(--color-line);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--home-gap);
+  min-height: 0;
 }
-.exp-row:last-child { border-bottom: none; }
 
-.exp-year { font-size: var(--text-body); color: var(--color-muted); }
-.exp-role { font-size: var(--text-body); font-weight: var(--weight-medium); color: var(--color-ink); }
-.exp-field {
-  font-family: var(--font-label);
+/* ---- The card ---- */
+
+.hcard {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-card);
+  border-radius: var(--home-radius);
+  padding: var(--home-card-pad);
+  box-shadow: var(--shadow-card);
+  color: var(--color-ink);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+}
+a.hcard { transition: transform var(--dur-press) var(--ease); }
+a.hcard:active { transform: scale(var(--press-scale-card)); }
+
+/* The reference's card header: the name of the thing in ink on the left, a
+   quiet fact about it on the right. */
+.hcard-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
   font-size: var(--text-label);
   font-weight: var(--weight-medium);
-  letter-spacing: var(--tracking-label);
-  color: var(--color-muted);
+  line-height: var(--leading-label);
 }
-
-/* Right — the arranged desk. Objects overlap; rotation is layout, not motion. */
-.collage {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 0;
-  padding: var(--space-2) var(--space-1) 0;
-}
-
-/* The figure only places and rotates; the white frame around the photograph is
-   its own box so the caption sits on the paper below it, not inside the frame. */
-.desk-portrait {
-  align-self: flex-end;
-  width: 74%;
-  transform: rotate(-2.5deg);
-  z-index: 2;
-}
-
-.portrait-frame {
-  position: relative;
-  background: var(--color-card);
-  border-radius: var(--radius-card);
-  padding: var(--frame-pad);
-  box-shadow: var(--shadow-card);
-}
-
-.desk-portrait img { height: var(--portrait-h); object-fit: cover; filter: grayscale(1); }
-
-.portrait-caption {
-  font-family: var(--font-script);
-  font-size: var(--text-script);
-  font-weight: 700;
-  line-height: var(--leading-script);
-  letter-spacing: var(--tracking-script);
-  color: var(--color-accent);
-  text-align: center;
-  margin-top: var(--space-2);
-}
-
-/* The annotation: the words, the arrow, and the one fade that carries the loop
-   over its own seam. inline-block so it is the width of the words — which is
-   what the arrow hangs off and what the wipe's percentages are measured across.
-
-   The arrow inside is absolutely positioned, so the caption keeps exactly the
-   height it had. That is not tidiness: the cooking card below hangs off this
-   figure by a negative margin, and a caption that grew by the height of an
-   arrow would push the bottom half of the collage down with it. */
-.caption-mark {
-  position: relative;
-  display: inline-block;
-  animation: caption-hold var(--cycle-caption) linear infinite both;
-}
-
-@keyframes caption-hold {
-  0%, 93.333% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-/* Written, not faded in. A slanted edge sweeping right is the closest a wipe
-   gets to a nib, and it keeps Caveat's own letterforms — the alternative,
-   hand-drawn SVG letters, would freeze the caption's words into path data and
-   take them out of lib/content.ts, which is where copy is edited. */
-.caption-ink {
-  display: inline-block;
-  animation: caption-write var(--cycle-caption) var(--ease-write) infinite both;
-}
-
-@keyframes caption-write {
-  0% { clip-path: polygon(-20% -25%, 0% -25%, -7% 125%, -20% 125%); }
-  24%, 100% { clip-path: polygon(-20% -25%, 118% -25%, 111% 125%, -20% 125%); }
-}
-
-/* Hangs off the end of the words and rises past them into the frame's bottom
-   corner. Anchored to the text rather than to the middle of the card, so the
-   copy in lib/content.ts can change length and the arrow still starts where the
-   last letter stops. */
-.caption-arrow {
-  position: absolute;
-  left: 100%;
-  bottom: 0;
-  margin-left: var(--space-1);
-  width: var(--caption-arrow-w);
-  height: var(--caption-arrow-h);
-  overflow: visible;
-  fill: none;
-  stroke: var(--color-accent);
-  stroke-width: var(--caption-stroke);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* Drawn rather than revealed — and drawn in two strokes, because a hand does
-   not draw an arrowhead in the same movement as the shaft it caps.
-
-   The gap is twice the path, and the undrawn offset overshoots 1 rather than
-   sitting on it. Both halves of that matter. At an offset of exactly 1 the dash
-   is parked flush against the path's start and its round cap pokes back past
-   zero — a coral dot on the photograph for the second before the arrow exists.
-   Overshooting parks the cap clear, but with a gap of 1 the pattern repeats
-   soon enough that the *next* dash walks in at the far end instead. A gap of 2
-   leaves no second dash to walk in. */
-.caption-arrow path { stroke-dasharray: 1 2; }
-
-.caption-arrow-shaft {
-  animation: caption-shaft var(--cycle-caption) var(--ease) infinite both;
-}
-.caption-arrow-head {
-  animation: caption-head var(--cycle-caption) var(--ease) infinite both;
-}
-
-@keyframes caption-shaft {
-  0%, 20.8% { stroke-dashoffset: 1.05; }
-  34.667%, 100% { stroke-dashoffset: 0; }
-}
-@keyframes caption-head {
-  0%, 34.667% { stroke-dashoffset: 1.05; }
-  40%, 100% { stroke-dashoffset: 0; }
-}
-
-/* The quiet version, and the state everything falls back to if these animations
-   never run at all: no wipe, no draw, no fade — the finished annotation, which
-   is what every one of the rules above ends on anyway. */
-:root[data-motion='still'] .caption-mark,
-:root[data-motion='still'] .caption-ink,
-:root[data-motion='still'] .caption-arrow-shaft,
-:root[data-motion='still'] .caption-arrow-head {
-  animation: none !important;
-}
+.hcard-head > :last-child { color: var(--color-muted); }
 
 /* The one gradient surface on this page. */
-.desk-cooking {
-  align-self: flex-start;
-  width: 64%;
-  margin-top: var(--lift-1);
-  margin-left: var(--space-1);
+.hcard--gradient {
   background: var(--gradient-feature);
-  border-radius: var(--radius-card);
-  padding: var(--card-padding);
   box-shadow: var(--shadow-gradient);
   color: var(--color-on-dark);
-  transform: rotate(2deg);
-  z-index: 3;
 }
-.desk-cooking .widget-label { color: var(--color-on-dark); opacity: 0.9; margin-bottom: var(--space-3); }
+.hcard--gradient .hcard-head > :last-child { color: var(--color-on-dark-muted); }
+.hcard--gradient .cooking-headline {
+  font-size: var(--text-card-title);
+  line-height: var(--leading-card-title);
+  margin-bottom: var(--space-1);
+}
+
+/* The two pills: a quiet one on the panel grey, and the ink one that is a
+   card's call to action, the full width of the card. */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  max-width: 100%;
+  height: var(--pill-h);
+  padding: 0 var(--pill-pad-x);
+  border-radius: var(--radius-pill);
+  background: var(--color-panel);
+  color: var(--color-ink);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background var(--dur-fast) var(--ease-hover), transform var(--dur-press) var(--ease);
+}
+.pill:hover { background: var(--color-panel-rule); }
+.pill:active { transform: scale(var(--press-scale)); }
+.pill--ink {
+  align-self: stretch;
+  height: var(--pill-h-lg);
+  background: var(--color-ink);
+  color: var(--color-on-dark);
+}
+.pill--ink:hover { background: var(--color-ink-hover); color: var(--color-on-dark); }
+a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
+
+/* ---- Profile ---- */
+
+.profile-avatar {
+  display: block;
+  flex: none;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-bottom: var(--space-3);
+  background: var(--color-panel);
+}
+/* The portrait is a landscape print of a person by the water; the avatar is
+   a circle. Scaled in around the face rather than shrinking the whole print. */
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--avatar-focus);
+  translate: var(--avatar-shift);
+  scale: var(--avatar-zoom);
+  transform-origin: var(--avatar-focus);
+  filter: grayscale(1);
+}
+.profile-name {
+  font-size: var(--text-name);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-card-title);
+  letter-spacing: var(--tracking-lead);
+}
+.profile-role { color: var(--color-body); }
+
+.profile-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  color: var(--color-body);
+  text-wrap: pretty;
+}
+.profile-link {
+  color: var(--color-ink);
+  font-weight: var(--weight-medium);
+  text-decoration: underline;
+  text-decoration-thickness: var(--hairline);
+  text-underline-offset: var(--underline-offset);
+}
+.profile-link:hover { color: var(--color-accent); }
+.profile-note { color: var(--color-muted); }
+
+/* Socials and the email, pinned to the card's foot so the card can stand as
+   tall as its column without the two drifting mid-way. */
+.profile-foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: auto;
+  padding-top: var(--space-4);
+}
+.profile-socials { display: flex; gap: var(--space-2); }
+.social {
+  display: grid;
+  place-items: center;
+  width: var(--social-size);
+  height: var(--social-size);
+  border-radius: var(--radius-pill);
+  background: var(--color-panel);
+  color: var(--color-ink);
+  transition: background var(--dur-fast) var(--ease-hover), transform var(--dur-press) var(--ease);
+}
+.social:hover { background: var(--color-panel-rule); }
+.social:active { transform: scale(var(--press-scale)); }
+.social svg { width: var(--social-icon); height: var(--social-icon); fill: currentColor; }
+
+/* ---- Where I've been ---- */
+
+.exp-list { display: flex; flex-direction: column; }
+.exp-list li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-top: var(--hairline) solid var(--color-line);
+}
+.exp-list li:first-child { border-top: none; padding-top: 0; }
+.exp-list li:last-child { padding-bottom: 0; }
+.exp-company { font-weight: var(--weight-medium); }
+.exp-field { color: var(--color-muted); }
+.exp-years {
+  font-size: var(--text-label);
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The one-line version, for when the card above is not on the page. */
+.profile-previously { display: none; }
+
+/* ---- The hero: photographs ---- */
+
+.hc {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--home-radius);
+  overflow: hidden;
+  background: var(--color-panel);
+  box-shadow: var(--shadow-card);
+  /* What the dot row takes out of the caption's width, so the two can share
+     the bottom edge without ever meeting. A long roster widens it. */
+  --hc-dots-w: var(--space-24);
+}
+.hc[data-dense='true'] { --hc-dots-w: calc(var(--space-24) + var(--space-16)); }
+.hc-frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+/* The caption, in a dark pill on the picture's lower-left — the reference's
+   own treatment, which reads on sky and on shadow alike. */
+.hc-caption {
+  position: absolute;
+  left: var(--space-3);
+  bottom: var(--space-3);
+  max-width: calc(100% - var(--hc-dots-w) - var(--space-12));
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-icon);
+  background: var(--hc-pill-fill);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  color: var(--color-on-dark);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.hc-title { flex: none; }
+.hc-shot {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-on-dark-muted);
+}
+.hc-week {
+  font-family: var(--font-label);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-micro);
+  text-transform: uppercase;
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+.hc-dots {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--hc-pill-fill);
+}
+/* A dot is small to look at and a full finger to hit: the hit area is the
+   button, the dot is its ::before. */
+.hc-dot {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+.hc-dot::before {
+  content: '';
+  width: var(--dot-rest);
+  height: var(--dot-rest);
+  border-radius: var(--radius-pill);
+  background: var(--color-on-dark-muted);
+  transition: width var(--dur-mid) var(--ease), background var(--dur-fast) var(--ease-hover);
+}
+.hc-dot[aria-current='true']::before { width: var(--dot-current); background: var(--color-on-dark); }
+/* One photograph per city fills the row: the dots close up rather than push
+   the pill across the picture. Smaller, but they are a place in the set first
+   and a target second — the frame holds on hover, so there is no hurry. */
+.hc[data-dense='true'] .hc-dots { gap: var(--dot-gap-dense); }
+.hc[data-dense='true'] .hc-dot::before { width: var(--dot-rest-dense); height: var(--dot-rest-dense); }
+.hc[data-dense='true'] .hc-dot[aria-current='true']::before { width: var(--dot-current-dense); }
+@media (hover: hover) and (pointer: fine) {
+  .hc-dot:hover::before { background: var(--color-on-dark); }
+}
+
+/* ---- Tools ---- */
+
+/* One row, always: on a narrow card the last icons run off the edge the way
+   the reference's client logos do, rather than opening a second row. */
+.tool-chips {
+  display: flex;
+  gap: var(--space-2);
+  overflow: hidden;
+}
+.tool-chip { flex: none; }
+.tool-chip img {
+  width: var(--tool-chip);
+  height: var(--tool-chip);
+  border-radius: var(--radius-icon);
+}
+
+/* ---- Product (the featured project) ---- */
+
+.product { gap: var(--space-1); }
+.product-stage {
+  display: block;
+  aspect-ratio: 16 / 10;
+  margin-bottom: var(--space-3);
+  border-radius: var(--home-inner-radius);
+  overflow: hidden;
+  background: var(--work-stage);
+}
+.product-stage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.product-title {
+  font-size: var(--text-card-title);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-card-title);
+  transition: color var(--dur-fast) var(--ease-hover);
+}
+.product:hover .product-title { color: var(--color-accent); }
+.product-line {
+  color: var(--color-body);
+  margin-bottom: var(--space-4);
+}
+
+/* ---- @whatabhisaw ---- */
+
+.insta-handle { color: var(--color-ink); }
+.insta-handle:hover { color: var(--color-accent); }
+.insta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: var(--insta-gap);
+  margin-bottom: var(--space-4);
+}
+.insta-tile {
+  display: block;
+  height: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-icon);
+  overflow: hidden;
+  transition: transform var(--dur-press) var(--ease);
+}
+.insta-tile:active { transform: scale(var(--press-scale)); }
+.insta-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-size: cover;
+  transition: opacity var(--dur-fast) var(--ease-hover);
+}
+@media (hover: hover) and (pointer: fine) {
+  .insta-tile:hover img { opacity: var(--insta-dim); }
+}
+.insta .pill--ink { margin-top: auto; }
+
+/* ---- Kind words ---- */
+
+.desk-quote {
+  background: var(--color-card);
+  border-radius: var(--home-radius);
+  padding: var(--home-card-pad);
+  box-shadow: var(--shadow-card);
+}
+.desk-quote .micro-label { display: block; margin-bottom: var(--space-3); }
+
+/* ---- Location ---- */
+
+/* The reference sets a dotted globe behind its location; this is the same
+   idea at the paper's own weight — a field of dots fading in from the right. */
+.location {
+  position: relative;
+  overflow: hidden;
+  gap: var(--space-1);
+}
+.location::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 0 45%;
+  background-image: radial-gradient(var(--color-panel-rule) var(--location-dot), transparent var(--location-dot));
+  background-size: var(--location-grid) var(--location-grid);
+  -webkit-mask-image: linear-gradient(to right, transparent, black);
+  mask-image: linear-gradient(to right, transparent, black);
+  pointer-events: none;
+}
+.location-city { font-weight: var(--weight-semibold); }
+.location-from,
+.local-time {
+  font-size: var(--text-label);
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Work covers ---- */
+
+/* The cover sits in the same tinted recess the /work cards use, and its name
+   sits on the card under it. */
+.cover {
+  gap: var(--space-3);
+  padding: var(--space-3);
+}
+.cover img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: var(--home-inner-radius);
+  background: var(--work-stage);
+}
+.cover-caption {
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--space-2) var(--space-1);
+}
+.cover-title {
+  font-weight: var(--weight-semibold);
+  transition: color var(--dur-fast) var(--ease-hover);
+}
+.cover:hover .cover-title { color: var(--color-accent); }
+.cover-line {
+  color: var(--color-muted);
+  font-size: var(--text-label);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Wider than a phone ---- */
+
+@media (min-width: 640px) {
+  .home-mid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hc { grid-column: 1 / -1; aspect-ratio: 16 / 9; }
+}
+
+/* A tablet: the two outer tracks side by side, the photographs under them. */
+@media (min-width: 760px) {
+  .home {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      'left right'
+      'mid  mid';
+  }
+  .home-left { grid-area: left; }
+  .home-right { grid-area: right; }
+  .home-mid { grid-area: mid; }
+}
+
+/* A laptop: the reference's four columns, the photographs across the middle
+   two. The middle track is a subgrid so its two columns are exactly the
+   page's, not an approximation of them. */
+@media (min-width: 1000px) {
+  .home {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-areas: none;
+  }
+  .home-left { grid-area: 1 / 1; }
+  .home-mid {
+    grid-area: 1 / 2 / 2 / 4;
+    grid-template-columns: subgrid;
+    grid-template-rows: auto auto;
+    align-content: start;
+  }
+  .home-right { grid-area: 1 / 4; }
+}
+
+/* …and tall enough: one screen, nothing to scroll. The page is the viewport
+   less its gutter; every column is a flex stack whose pictures take whatever
+   height the text cards leave them, so the cards meet the bottom edge at any
+   height from a short laptop to a desktop monitor. */
+@media (min-width: 1000px) and (min-height: 680px) {
+  .home {
+    height: calc(100dvh - var(--home-pad) * 2);
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .home-mid { grid-template-rows: minmax(0, 1fr) auto; }
+  .hc { aspect-ratio: auto; min-height: 0; }
+
+  /* The capsule floats over the top of the photograph instead of taking a
+     row: the photograph spans the middle two of four equal columns, so the
+     page's centre is the photograph's centre, and the capsule lands at the
+     top-centre spot it holds on every other page. Nothing is given up — the
+     grid keeps the full height. The capsule is frosted glass already, so it
+     reads on sky and stone alike; the wrap stays transparent to the pointer
+     so the photograph around it is still a link. */
+  .frame[data-page='home'] > .nav-wrap {
+    position: absolute;
+    top: var(--frame-pad-top);
+    left: 0;
+    right: 0;
+    margin: 0;
+  }
+  /* Over a photograph, the glass casts the deeper of its two shadows. */
+  .frame[data-page='home'] .nav-capsule { --lg-shadow: var(--lg-shadow-media); }
+
+  .profile { flex: 1 1 auto; min-height: 0; }
+  .product { flex: 1 1 auto; }
+  .product-stage { flex: 1 1 0; min-height: var(--product-stage-min); aspect-ratio: auto; }
+  .insta { flex: 1 1 auto; }
+
+  .home-right .cover { flex: 1 1 0; min-height: 0; }
+  .home-right .cover img { flex: 1 1 0; min-height: 0; aspect-ratio: auto; }
+}
+
+/* A short laptop gives the photographs the room: the kind words wait for a
+   screen tall enough to carry them, and below that the profile gives up its
+   "Previously" line and a smaller avatar before anything is clipped. */
+@media (min-width: 1000px) and (min-height: 680px) and (max-height: 860px) {
+  .home-mid .desk-quote { display: none; }
+}
+@media (min-width: 1000px) and (min-height: 680px) and (max-height: 879.98px) {
+  .exp-card { display: none; }
+  .profile-previously { display: block; }
+}
+@media (min-width: 1000px) and (min-height: 680px) and (max-height: 740px) {
+  .profile-previously { display: none; }
+  .profile-avatar { --avatar-size: var(--social-size); }
+}
+
+/* A phone: the site's 16px gutter, and one column in an order of its own.
+   The track wrappers step aside (`display: contents`) so every card is a
+   direct item of the grid and can be ordered: who, then the photographs
+   straight after, then what is being built, then the rest. The camera
+   settings leave the caption — a place name is what fits a phone's width. */
+@media (max-width: 759.98px) {
+  .home-col,
+  .home-mid { display: contents; }
+  .profile { order: 1; }
+  .hc { order: 2; }
+  .insta { order: 3; }
+  .hcard--gradient { order: 4; }
+  .product { order: 5; }
+  .exp-card { order: 6; }
+  .tools-card { order: 7; }
+  .desk-quote { order: 8; }
+  .location { order: 9; }
+  .cover { order: 10; }
+}
+@media (max-width: 640px) {
+  .frame[data-page='home'] { --home-pad: var(--space-4); }
+  .hc-shot { display: none; }
+  /* A phone's frame is too narrow for a long dot row and a caption on the one
+     edge, so the row takes the opposite corner and gives the caption the whole
+     of the bottom. */
+  .hc[data-dense='true'] .hc-dots { top: var(--space-3); bottom: auto; }
+  .hc[data-dense='true'] .hc-caption { max-width: calc(100% - var(--space-12)); }
+}
+
+/* The availability card's lines. */
 .cooking-headline {
   font-size: var(--text-lead);
   font-weight: var(--weight-semibold);
@@ -1261,44 +1800,11 @@ main > .canvas:first-child { margin-top: 0; }
 }
 .cooking-sub { font-size: var(--text-body); line-height: var(--leading-body); opacity: 0.92; }
 
-.desk-featured {
-  align-self: flex-end;
-  width: 90%;
-  margin-top: var(--lift-2);
-  display: block;
-  background: var(--color-card);
-  border-radius: var(--radius-card);
-  padding: var(--space-5);
-  box-shadow: var(--shadow-card);
-  transform: rotate(-1deg);
-  z-index: 1;
-  /* Deep enough that the kind-words card tucks under blank card, not under the
-     outcome line — the two opposing rotations eat ~11px of clearance. */
-  padding-bottom: var(--space-12);
-  transition: transform var(--dur-press) var(--ease);
-}
-/* The card is the link, so the card is what presses — still at its tilt. */
-.desk-featured:active { transform: rotate(-1deg) scale(var(--press-scale-card)); }
-.desk-featured .shot { height: var(--featured-shot-h); object-fit: cover; margin-bottom: var(--space-3); }
-.desk-featured:hover .card-title { color: var(--color-accent); }
-
-.desk-quote {
-  align-self: flex-start;
-  width: 66%;
-  margin-top: var(--lift-3);
-  margin-left: var(--space-3);
-  background: var(--color-card);
-  border-radius: var(--radius-card);
-  padding: var(--space-5);
-  box-shadow: var(--shadow-card);
-  transform: rotate(1.6deg);
-  z-index: 2;
-}
 
 /* Every kind word is on the page at once, all of them in the one grid cell, so
    the card stands at the height of the longest and holds it. A card that resized
-   on each rotation would drag the tools panel — which tucks under it by a
-   negative margin — up and down the collage every four seconds.
+   on each rotation would drag its whole column up and down every four
+   seconds.
 
    The cross-fade is the only part of this that is motion, and the reduced-motion
    block at the foot of this file flattens it to a swap. Whether the card rotates
@@ -1315,20 +1821,6 @@ main > .canvas:first-child { margin-top: 0; }
   transition: opacity var(--dur-quote) var(--ease);
 }
 .quote-leaf[data-current] { opacity: 1; pointer-events: auto; }
-
-/* A panel, not a card: the white dock inside it needs a surface to sit on. */
-.desk-tools {
-  align-self: flex-end;
-  width: 58%;
-  margin-top: var(--lift-4);
-  margin-right: var(--space-2);
-  background: var(--color-panel);
-  border-radius: var(--radius-panel);
-  padding: var(--space-5);
-  transform: rotate(-1deg);
-  z-index: 1;
-}
-.desk-tools .micro-label { display: block; margin-bottom: var(--space-3); }
 
 /* Card title + outcome, shared by featured and work cards */
 .card-title {
@@ -2127,29 +2619,69 @@ main > .canvas:first-child { margin-top: 0; }
   grid-template-columns: 1fr 1fr;
   gap: var(--grid-gutter);
 }
+/* No panel and no shadow: the card is the stage plus the words under it, and
+   the only drawn surface is the recess the cover sits in. */
 .work-card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  background: var(--color-card);
-  border-radius: var(--radius-card);
-  padding: var(--space-5);
-  box-shadow: var(--shadow-card);
+  gap: var(--space-4);
   color: var(--color-ink);
   transition: transform var(--dur-press) var(--ease);
 }
 .work-card:hover .card-title { color: var(--color-accent); }
 .work-card:active { transform: scale(var(--press-scale-card)); }
+
+.work-stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  background: var(--work-stage);
+  border-radius: var(--radius-card);
+  padding: var(--work-stage-pad);
+}
 /* Every shot is 16:10 whatever it was shot at, so the two columns stay level. */
-.work-card .shot { aspect-ratio: 16 / 10; margin-bottom: var(--space-2); }
-.work-card-head {
+.work-shot {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: var(--radius-image);
+  box-shadow: var(--shadow-stage);
+}
+/* The caption line, and the chip if the project carries one — the chip stays
+   on the right so a row of stages has its tags in a column down the page. */
+.work-stage-foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
+  /* The shot is padded off the recess on three sides and the caption takes
+     the fourth, so the two share one optical margin rather than stacking a
+     gap on top of a pad. */
+  padding: 0 var(--space-1);
 }
-.work-card .card-outcome { color: var(--color-muted); }
-.work-card-meta { margin-top: var(--space-1); }
+.work-stage-caption {
+  font-family: var(--font-label);
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-micro);
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* Name then line, on one baseline. It wraps on a narrow column, which is the
+   one place this parts company with a fixed two-word descriptor — the names
+   are short and the lines are sentences, and a sentence that wraps under its
+   own name still reads as one thought. */
+.work-card-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+}
+.work-card-desc {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-muted);
+}
 
 /* ---------- Gallery ---------- */
 
@@ -2362,8 +2894,9 @@ main > .canvas:first-child { margin-top: 0; }
 .lightbox-caption {
   align-self: flex-start;
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--space-3);
+  gap: var(--space-1) var(--space-3);
   margin-top: var(--space-3);
   font-family: var(--font-label);
   font-size: var(--text-label);
@@ -2371,6 +2904,12 @@ main > .canvas:first-child { margin-top: 0; }
   letter-spacing: var(--tracking-label);
 }
 .lightbox-title { color: var(--color-on-dark); }
+/* The camera line, set like the margin of a contact sheet: quieter than the
+   title, tabular so the numbers do not jitter as the arrows step through. */
+.lightbox-shot {
+  color: var(--color-on-dark-muted);
+  font-variant-numeric: tabular-nums;
+}
 
 /* ---------- Contact ---------- */
 
@@ -3373,27 +3912,24 @@ main > .canvas:first-child { margin-top: 0; }
 .contact-email:hover,
 .contact-email:focus-visible { color: var(--color-accent); }
 
-/* ---------- The Canvas ---------- */
+/* ---------- Fun ---------- */
 
-/* The one page that hands the desk over.
+/* One board, one opponent, and a record of how it has gone. The page was the
+   Canvas — a sheet and seven pens — and the drawing is gone: a page that hands
+   the desk over should hand over the thing that works everywhere, and a board
+   needs a thumb where a sheet needed a surface and a hand. That is also why
+   nothing here has a width below which it stops being offered.
 
-   Built like /contact and not like /work: an apparatus rather than a stack of
-   sections, so it opens with the same head in the same classes, it fits one
-   screen, and the wall stands beside the sheet instead of below it. What you
-   have already drawn should be in sight while you draw the next one — a wall
-   you have to scroll to is a folder, not a wall.
+   The board itself is in components/Gomoku.tsx; its own rules start a few
+   screens down. What is above them is the page around it. */
 
-   Drawesome's own chrome is scoped to `.sd` and carries its own tokens. Only
-   `--workspace` is set from here, and only so that the surface can never show
-   a colour this page did not choose. */
+.fun { max-width: var(--page-max); margin-top: var(--section-gap-lg); }
 
-.canvas { max-width: var(--page-max); margin-top: var(--section-gap-lg); }
-
-.canvas-head { max-width: var(--reading-max); margin-bottom: var(--space-6); }
+.fun-head { max-width: var(--reading-max); margin-bottom: var(--space-6); }
 
 /* The lead face, exactly as /contact sets it — same size, same weight, same
    measure. Two pages that are built the same way should read the same way. */
-.canvas-line {
+.fun-line {
   font-size: var(--text-lead);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-lead);
@@ -3401,65 +3937,64 @@ main > .canvas:first-child { margin-top: 0; }
   color: var(--color-ink);
   max-width: var(--contact-max);
 }
+.fun-note {
+  margin-top: var(--space-2);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-body);
+}
 
-/* Sheet and wall. Stacked by default and side by side only where there is
+/* Board and record. Stacked by default and side by side only where there is
    genuinely room for both — see the one-screen block at the foot of this
    section for what "room" means here. */
-.canvas-grid {
+.fun-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--card-gap);
   align-items: stretch;
 }
 
-.canvas-desk {
+.gomoku-desk {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  gap: var(--space-4);
 }
 
-/* The sheet itself — a white card, like every other object on this site. The
-   board matches the element, so there is nothing behind the paper to see; the
-   radius is inherited by Drawesome's root, which is why it is set here rather
-   than on an inner wrapper. */
-.canvas-stage {
-  --workspace: var(--canvas-sheet);
-  height: var(--canvas-stage-h);
-  background: var(--color-card);
-  border-radius: var(--radius-card);
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
-  /* The toolbar is dragged around inside this box; a text selection picked up
-     mid-drag is never what was meant. */
-  user-select: none;
-  -webkit-user-select: none;
-  /* A finger here draws. Declared on the stage as well as on Drawesome's own
-     surface, because Safari reads the property off whichever element the
-     touch starts on — and the toolbar's tray and the sheet's rounded corners
-     are this element, not the surface. The callout is iOS's long-press menu,
-     which a slow first stroke would otherwise open; the overscroll rule keeps
-     a stroke that runs off the sheet from bouncing the page. */
-  touch-action: none;
-  -webkit-touch-callout: none;
-  overscroll-behavior: contain;
-}
+/* ---------- Gomoku ---------- */
 
-/* The same foot /contact puts under its stage: the one ink button, a quiet
-   companion, and a note that is not asking to be read first. */
-.canvas-foot {
+/* Whose move it is, and the way out of a finished game. Above the board rather
+   than in the panel beside it, so it is next to the thing it is about on the
+   wide layout and the narrow one alike. */
+/* Centred rather than spread to the column's ends. The column is as wide as
+   the sheet was and the board is square, so there is daylight on both sides of
+   it — and a status line pinned to the far left of that column is not above
+   the board, it is beside it. Two items with air between them sit over the
+   board at any size it ends up. */
+.gomoku-head {
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-wrap: wrap;
-  gap: var(--studio-gap);
-  margin-top: var(--space-5);
+  gap: var(--space-3) var(--space-8);
+  margin-bottom: var(--space-4);
 }
+.gomoku-state {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-body);
+  color: var(--color-body);
+}
+/* A finished game is the one thing on this page worth saying in full ink. */
+.gomoku-state[data-over] { color: var(--color-ink); }
 
-/* Pinning is the page's one filled button. Confirmed, it goes accent for a
-   second and a half — the receipt is the button itself, not a toast. */
-.btn-ink[data-confirmed] { background: var(--color-accent); }
-
-/* Everything beside the ink button: a real button that carries no weight. */
-.canvas-quiet {
+/* The way out of a game. A real button that carries no weight — the page has
+   no filled button to be quiet beside any more, but the type is the same: this
+   is an action, not a link. */
+.gomoku-new {
   border: none;
   background: none;
   padding: 0;
@@ -3470,122 +4005,224 @@ main > .canvas:first-child { margin-top: 0; }
   cursor: pointer;
   transition: color var(--dur-fast) var(--ease-hover);
 }
-.canvas-quiet:hover { color: var(--color-accent); }
-.canvas-quiet[disabled] { color: var(--color-muted); cursor: default; }
-.canvas-quiet[disabled]:hover { color: var(--color-muted); }
+.gomoku-new:hover { color: var(--color-accent); }
 
-/* Nothing leaves the browser, and nobody should have to infer that from the
-   word "pin". Sits at the far end of the foot, out of the way. */
-.canvas-privacy {
-  margin-left: auto;
+/* The small disc that stands in for a stone in a line of type — in the status
+   line and in the legend. Not a glyph: ● and ○ are different widths in every
+   face and sit on different baselines. */
+.stone-mark {
+  flex: none;
+  width: var(--stone-chip);
+  height: var(--stone-chip);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-card);
+}
+.stone-mark[data-stone='black'] { background: var(--stone-black); }
+.stone-mark[data-stone='white'] {
+  background: var(--stone-white);
+  box-shadow: 0 0 0 var(--hairline) var(--stone-rim);
+}
+
+/* The board is square and the column it sits in is not. Stacked — the page
+   scrolling like every other page here — the board is sized by the width it
+   is given, and the stage is only there to centre it. Fitted to one screen it
+   has to answer to the height as well, which is the block at the foot of this
+   section. */
+.gomoku-stage {
+  display: flex;
+  justify-content: center;
+  min-height: 0;
+}
+
+/* The wood. The outermost lines sit half a cell in from the edge because the
+   intersections are laid out as cells with a line through each cell's middle —
+   so the margin of wood around the grid is the board's own geometry and not a
+   padding anything has to be kept in step with.
+
+   `aspect-ratio` with a `max-height` is what fits it to the short axis: where
+   the column is shorter than it is wide the height binds and the width follows
+   it down, and where it is not the width binds and the height follows. */
+.goban {
+  position: relative;
+  width: min(100%, var(--goban-max));
+  aspect-ratio: 1;
+  background: var(--goban-wood);
+  border-radius: var(--radius-icon);
+  box-shadow:
+    inset 0 0 0 var(--hairline) var(--goban-wood-edge),
+    var(--shadow-card);
+  /* A finger on the board plays; it does not pick the page up. */
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Lines and marked points, in one picture under the squares. Hairlines in
+   screen pixels rather than board units: a grid that thickens with the board
+   is a grid drawn at the wrong weight on every size but one. */
+.goban-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.goban-lines line {
+  stroke: var(--goban-line);
+  stroke-width: var(--hairline);
+  vector-effect: non-scaling-stroke;
+}
+.goban-edge {
+  fill: none;
+  stroke: var(--goban-rule);
+  stroke-width: var(--ring-w);
+  vector-effect: non-scaling-stroke;
+}
+.goban-star { fill: var(--goban-star); }
+
+/* The squares, over the lines. Fifteen rows of fifteen, each cell centred on
+   an intersection — which is what puts the stones on the lines rather than
+   between them. */
+.goban-squares {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: repeat(15, 1fr);
+}
+.goban-row { display: grid; grid-template-columns: repeat(15, 1fr); }
+.goban-cell { display: flex; min-width: 0; }
+
+.goban-square {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  cursor: pointer;
+  /* The square is the hit area and the stone is drawn inside it, so a stone
+     that lifts or rings on a win is not clipped by its own button. */
+  overflow: visible;
+}
+.goban-square[aria-disabled] { cursor: default; }
+.goban-square:focus-visible {
+  outline: var(--focus-ring) solid var(--color-accent);
+  outline-offset: calc(var(--focus-ring) * -1);
+}
+
+/* The move a pointer is about to make, at a quarter weight. Only ever on an
+   empty intersection on your own turn — which is exactly the squares that are
+   not aria-disabled, so the rule needs no second condition. */
+@media (hover: hover) and (pointer: fine) {
+  .goban-square:not([aria-disabled]):hover::before {
+    content: '';
+    width: var(--stone-size);
+    aspect-ratio: 1;
+    border-radius: var(--radius-pill);
+    background: var(--goban-ghost);
+  }
+}
+
+/* A stone. The disc is the gradient; what makes it an object on a board is the
+   shadow under it, so the shadow is not optional. */
+.stone {
+  width: var(--stone-size);
+  aspect-ratio: 1;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-stone);
+  /* Set down rather than switched on. Under reduced motion the global rule
+     takes the duration out and the stone simply appears, which is the right
+     answer: nothing here is being explained by the movement. */
+  animation: stone-down var(--dur-fast) var(--ease);
+}
+.stone[data-stone='black'] { background: var(--stone-black); }
+.stone[data-stone='white'] { background: var(--stone-white); }
+
+/* The stone just played. A board nobody watched being filled is unreadable
+   without it — this is the move you are answering. */
+.stone[data-last]::after {
+  content: '';
+  display: block;
+  width: var(--stone-mark-size);
+  height: var(--stone-mark-size);
+  margin: auto;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+}
+
+/* The five that finished it. */
+.stone[data-won] {
+  box-shadow: 0 0 0 var(--ring-w) var(--color-accent), var(--shadow-stone);
+}
+
+@keyframes stone-down {
+  from { transform: scale(var(--lightbox-scale)); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+/* Which colour you are, under the board, so nobody has to deduce it from the
+   fact that the first stone was theirs. */
+.gomoku-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2) var(--space-6);
+  margin-top: var(--space-4);
   font-family: var(--font-label);
   font-size: var(--text-label);
   line-height: var(--leading-label);
   color: var(--color-muted);
-  text-align: right;
 }
+.gomoku-side { display: inline-flex; align-items: center; gap: var(--space-2); }
 
-/* ---------- The wall ---------- */
+/* The record: three figures and the promise that they go no further than this
+   browser.
 
-/* A panel, not a card: a flat surface one value step below the paper, with the
-   white pins floating on top of it. The panel carries no shadow — the objects
-   inside it do, and that is what makes it read as a surface. */
-.canvas-wall {
+   A panel, not a card: a flat surface one value step below the paper with the
+   figures sitting on it. The panel carries no shadow — that is what makes it
+   read as a surface rather than another card laid on the page. */
+.gomoku-record {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  gap: var(--space-4);
   padding: var(--panel-pad-lg);
   background: var(--color-panel);
   border-radius: var(--radius-panel);
 }
-.canvas-wall > .widget-label { margin-bottom: var(--space-4); }
+.gomoku-record > .widget-label { margin-bottom: var(--space-4); }
 
-/* The question asked before a pin overwrites an unpinned sheet. One bar for
-   the whole wall — there is only ever one sheet to lose. */
-.canvas-confirm {
-  flex: none;
-  padding: var(--space-3) var(--space-4);
-  margin-bottom: var(--space-4);
-  background: var(--color-card);
-  border-radius: var(--radius-icon);
-  box-shadow: var(--shadow-card);
-  font-size: var(--text-body);
-  line-height: var(--leading-body);
-  color: var(--color-ink);
-}
-.canvas-confirm-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  margin-top: var(--space-2);
-}
-
-.canvas-empty {
+/* An empty record says so rather than showing three noughts and nothing. */
+.gomoku-none {
   font-size: var(--text-body);
   line-height: var(--leading-body);
   color: var(--color-muted);
 }
-/* Below the pins rather than instead of them: this one is the wall telling you
-   it is full, and it should not push the pins out of view to say so. */
-.canvas-pins + .canvas-empty { margin-top: var(--space-4); }
-
-/* As many across as the row allows while the wall is a full-width band under
-   the sheet. In the side column it becomes exactly two — see the one-screen
-   block. */
-.canvas-pins {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--pin-min), 1fr));
-  gap: var(--space-4);
-  align-content: start;
-  min-height: 0;
-  /* The gutter is padded rather than margined so a hovering pin's lift is not
-     clipped once this becomes a scroll box. */
-  margin-inline: calc(var(--space-2) * -1);
-  padding-inline: var(--space-2);
-  padding-block: var(--space-1);
-}
-
-.pin-open {
-  display: block;
-  width: 100%;
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
-}
-.pin-open:focus-visible { outline: none; }
-.pin-open:focus-visible .pin-shot {
-  box-shadow: 0 0 0 var(--focus-ring) var(--color-accent), var(--shadow-sheet-flat);
-}
-
-/* The thumbnail is the drawing rebuilt from its strokes, so a pin and an
-   export are the same picture. The paper under it is painted here as well as
-   in the SVG — a transparent gap at the edges would read as a hole. */
-.pin-shot {
-  width: 100%;
-  height: auto;
-  background: var(--canvas-sheet);
-  border-radius: var(--radius-image);
-  box-shadow: var(--shadow-sheet-flat);
-  transition: transform var(--dur-fast) var(--ease);
-}
-@media (hover: hover) and (pointer: fine) {
-  .pin-open:hover .pin-shot { transform: translateY(var(--lift-4)); }
-}
-.pin-open:active .pin-shot { transform: scale(var(--press-scale-card)); transition-duration: var(--dur-press); }
-
-/* One line, always: two labels that wrap onto four is what a caption in a
-   narrow column does if nothing stops it. */
-.pin-caption {
+.tally {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
-  white-space: nowrap;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+  margin-bottom: var(--space-4);
 }
-
-.pin-remove {
+.tally-figure { display: flex; flex-direction: column; gap: var(--space-1); }
+.tally-count {
+  font-family: var(--font-label);
+  font-size: var(--tally-figure);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-display);
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+/* Taking the record down. Set in the micro label so it reads as the small
+   destructive thing it is, and goes to the status colour under a pointer. */
+.gomoku-forget {
+  align-self: flex-start;
   border: none;
   background: none;
   padding: 0;
@@ -3599,95 +4236,128 @@ main > .canvas:first-child { margin-top: 0; }
   cursor: pointer;
   transition: color var(--dur-fast) var(--ease-hover);
 }
-.pin-remove:hover { color: var(--color-status); }
+.gomoku-forget:hover { color: var(--color-status); }
 
-/* Credit, on the page rather than in a comment. Drawesome is doing the part of
-   this page that is actually hard. Sized like the stamp it sits above, because
-   that is where a colophon belongs. */
-.canvas-credit {
+/* What is on the other side of the board. Set in body type rather than the
+   label face: it is a paragraph to be read once, not a caption. */
+.gomoku-about {
   margin-top: var(--space-6);
   padding-top: var(--space-4);
-  border-top: var(--hairline) solid var(--color-line);
+  border-top: var(--hairline) solid var(--color-panel-rule);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-body);
+}
+
+/* Pushed to the foot of the panel, because it is not what anyone came to
+   read — and said anyway, because "record" should not have to imply an
+   account. */
+.gomoku-privacy {
+  margin-top: auto;
+  padding-top: var(--space-4);
   font-family: var(--font-label);
   font-size: var(--text-label);
   line-height: var(--leading-label);
   color: var(--color-muted);
 }
-.canvas-credit a { color: var(--color-body); text-decoration: underline; }
-.canvas-credit a:hover { color: var(--color-accent); }
+
 
 /* One screen, no scroll — the same treatment /contact gets, and for the same
-   reason: this is one apparatus rather than a stack of sections, and a wall
-   you have to scroll to is a folder. The long note above the /contact block
-   carries the argument and the `svh` reasoning; only the two thresholds differ,
-   because this page is bound by a different thing.
+   reason: this is one apparatus rather than a stack of sections, and a record
+   you have to scroll to is a filing cabinet.
 
-   Width: the toolbar is a fixed 633px and is clipped by the sheet it lies on,
-   so the sheet needs 673px with its inset. The wall takes 312px and the gap
+   Width: the board wants its 560px, the record column takes 312px and the gap
    24px, and the frame takes 80px off the viewport before any of them — which
-   puts the floor at 1089px. 1120px, so it is not decided by a rounding error.
+   puts the floor at 976px. 1120px, so the board is not sitting at its cap with
+   the panel squeezed against it.
 
-   Height: below this the sheet is pushed to its 380px floor and the column
-   overflows anyway, which is a scroll with extra steps.
+   Height: below 800px the board is pushed under 380px and the column overflows
+   anyway, which is a scroll with extra steps.
 
-   Under either threshold the wall comes down off the side, the sheet takes the
-   full width, and the page scrolls like every other page here — which is the
-   right answer once the composition no longer fits.
+   Under either threshold the record comes down off the side, the board takes
+   the full width, and the page scrolls like every other page here — which is
+   the right answer once the composition no longer fits, and is exactly what a
+   phone gets.
 
    The chain has to be unbroken: every box between the frame and the stage
-   passes the height down, or the stage falls back to its floor and the slack
+   passes the height down, or the board falls back to its cap and the slack
    collects in whichever ancestor stopped forwarding it. */
 @media (min-width: 1120px) and (min-height: 800px) {
-  .frame[data-page='canvas'] {
+  .frame[data-page='fun'] {
     min-height: 100svh;
     display: flex;
     flex-direction: column;
     padding-bottom: var(--space-8);
   }
-  .frame[data-page='canvas'] > main {
+  .frame[data-page='fun'] > main {
     flex: 1;
     display: flex;
     min-height: 0;
   }
-  .frame[data-page='canvas'] .canvas {
+  .frame[data-page='fun'] .fun {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
     margin-top: var(--space-8);
   }
-  /* Every gap above and below the sheet is height the sheet does not get, so
+  /* Every gap above and below the board is height the board does not get, so
      each one is cut to the smallest that still separates. */
-  .frame[data-page='canvas'] > .nav-wrap { margin-bottom: var(--space-6); }
-  .frame[data-page='canvas'] .canvas-head {
+  .frame[data-page='fun'] > .nav-wrap { margin-bottom: var(--space-6); }
+  .frame[data-page='fun'] .fun-head {
     max-width: none;
     margin-bottom: var(--space-4);
   }
-  .frame[data-page='canvas'] .canvas-line { max-width: none; }
+  .frame[data-page='fun'] .fun-line { max-width: none; }
 
-  /* The wall takes its column, and the sheet takes whatever is left on both
-     axes. A fixed column, because a wall that grows with the window is a wall
-     whose pins change size for no reason. */
-  .frame[data-page='canvas'] .canvas-grid {
+  /* The record takes its column, and the board takes whatever is left on both
+     axes. A fixed column, because a record that grows with the window is a
+     record whose figures change size for no reason. */
+  .frame[data-page='fun'] .fun-grid {
     flex: 1;
     min-height: 0;
-    grid-template-columns: minmax(0, 1fr) var(--wall-col);
+    grid-template-columns: minmax(0, 1fr) var(--record-col);
+    /* The row has to be allowed to be shorter than what is in it, or the one
+       thing in the grid with a fixed shape sets the page's height and the
+       whole chain above gives up. */
+    grid-template-rows: minmax(0, 1fr);
   }
-  .frame[data-page='canvas'] .canvas-stage {
-    flex: 1;
-    height: auto;
-    min-height: var(--canvas-stage-min);
-  }
-  .frame[data-page='canvas'] .canvas-wall { padding: var(--card-padding); }
 
-  /* Exactly two across, and the column scrolls itself once there are more than
-     fit. The scroll lives here so the page never gains one. */
-  .frame[data-page='canvas'] .canvas-pins {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* The board, fitted to whichever axis runs out first.
+
+     A square is the one shape on this page that cannot be talked down: asked
+     for 560px of height it takes 560px, and every box above it dutifully
+     passes that demand up until the page is taller than the screen and the
+     one-screen layout has quietly stopped being one. `max-height` does not fix
+     it — with a definite width the ratio is what gives way, and the board comes
+     out oblong.
+
+     So the stage becomes a size container. That does two things at once: its
+     contents stop contributing to its own height, which is what lets the chain
+     above collapse to the screen again, and `cqh` becomes a length the board
+     can be measured in. The board is then the smallest of the three things
+     that bound it — the column's width, the stage's height, and the size past
+     which a 15×15 grid is a table rather than a board.
+
+     Only in here. Stacked, the stage has no height to contain, and a size
+     container with nothing to measure against is a board 0px tall. */
+  .frame[data-page='fun'] .gomoku-stage {
+    flex: 1;
+    align-items: center;
+    container-type: size;
+  }
+  .frame[data-page='fun'] .goban {
+    width: min(100%, 100cqh, var(--goban-max));
+  }
+
+  /* And the panel beside it keeps its own scroll rather than giving the page
+     one. */
+  .frame[data-page='fun'] .gomoku-record {
+    padding: var(--card-padding);
     overflow-y: auto;
   }
 
-  .frame[data-page='canvas'] .stamp { margin-top: var(--space-4); }
+  .frame[data-page='fun'] .stamp { margin-top: var(--space-4); }
 }
 
 /* ---------- Footer stamp ---------- */
@@ -4518,67 +5188,29 @@ main > .canvas:first-child { margin-top: 0; }
    rather than beside each one because a transition list is replaced whole,
    and each of these already carries its colour transition above. A disabled
    button does not press; there is nothing behind it to hear. */
-.canvas-quiet,
-.pin-remove,
+.gomoku-new,
+.gomoku-forget,
 .folder-close,
 .folder-tap,
 .studio-again {
   transition: color var(--dur-fast) var(--ease-hover), transform var(--dur-press) var(--ease);
 }
-.canvas-quiet:not([disabled]):active,
-.pin-remove:active,
+.gomoku-new:active,
+.gomoku-forget:active,
 .folder-close:active,
 .folder-tap:active,
 .studio-again:active { transform: scale(var(--press-scale)); }
 
 /* ---------- Responsive ---------- */
 
-/* Short and wide — the ordinary laptop. The single stack is ~987px tall and
-   mostly text, so no amount of scaling fits it into a 700–1000px viewport
-   while keeping the copy readable. Here the desk reflows into two columns and
-   the objects sit beside each other instead of tucking under, which halves the
-   height to ~485px. Above 1080px tall the approved single stack returns.
-
-   Keyed on height, not width: it is the viewport's height that the stack
-   overflows. The min-width guard keeps two columns off narrow screens, where
-   each card would be too cramped to be worth the saving. */
+/* Short and wide — the ordinary laptop. The chrome above a page gives back
+   some height so more of the page lands above the fold. */
 @media (min-width: 1000px) and (max-height: 1080px) {
-  /* Chrome above the desk is 152px of the budget; these return 48px of it. */
+  /* Chrome above the page is 152px of the budget; these return 48px of it. */
   :root {
     --frame-pad-top: 24px;
   }
   .nav-wrap { margin-bottom: var(--space-8); }
-
-  .collage {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      'portrait cooking'
-      'featured quote'
-      'featured tools';
-    /* Wide enough to swallow the rotation overhang — a 300px card at 2.5deg
-       reaches ~9px past its own box, and two neighbours lean into the gap. */
-    gap: var(--space-5);
-    align-content: start;
-    padding: var(--space-2) var(--space-3) 0;
-  }
-
-  /* The stack's overlap is expressed in negative margins and part-widths; in
-     the grid the cells do that job, so both are reset. Rotation stays — it is
-     what keeps this a desk rather than a dashboard. */
-  .collage > * {
-    width: 100%;
-    margin: 0;
-    align-self: start;
-  }
-
-  .desk-portrait { grid-area: portrait; }
-  .desk-cooking { grid-area: cooking; }
-  .desk-quote { grid-area: quote; }
-  .desk-tools { grid-area: tools; }
-
-  /* Nothing tucks under the featured card here, so its clearance is dead space. */
-  .desk-featured { grid-area: featured; padding-bottom: var(--space-5); }
 }
 
 /* Below this the page's left column costs more than it gives: a ~230px column
@@ -4687,18 +5319,9 @@ main > .canvas:first-child { margin-top: 0; }
   }
 }
 
-/* The desk flattens: objects stop overlapping and stack as plain cards. */
 @media (max-width: 820px) {
-  /* Full-width single column — a viewport-scaled height would letterbox both
-     photographs, so the fixed crops come back. */
-  :root {
-    --portrait-h: var(--portrait-h-sm);
-    --featured-shot-h: var(--featured-shot-h-sm);
-  }
-  .desk-grid { grid-template-columns: 1fr; gap: var(--space-8); }
   .work-grid { grid-template-columns: 1fr; }
   .view-fab { right: var(--space-4); bottom: var(--space-4); }
-  .manifesto { position: static; }
   .whisper { display: none; }
   /* Two of the three things `--i` does stop meaning anything at this width. A
      fan that insets the back folder by 130px of a 340px screen is not
@@ -4726,99 +5349,33 @@ main > .canvas:first-child { margin-top: 0; }
   }
   .folder-headline { font-size: var(--text-headline); }
   .folder-actions { flex-wrap: wrap; gap: var(--space-4); }
-  .collage { gap: var(--space-5); padding: 0; }
-  .collage > * {
-    transform: none;
-    margin: 0;
-    align-self: stretch;
-    width: 100%;
-  }
-  /* Nothing overlaps here, so the clearance padding is just dead space. */
-  .desk-featured { padding-bottom: var(--space-5); }
-  .exp-row { grid-template-columns: var(--exp-col-year) 1fr; }
-  .exp-field { display: none; }
   .section, .contact { margin-top: var(--section-gap); }
 }
 
-/* A tablet held upright. The manifesto has already taken the full width (the
-   two-column desk gives way at 820px), and under it a single stack of desk
-   objects letterboxes both photographs across 700–800px of screen. The same
-   two-column arrangement the short laptop uses fits here — a portrait, a
-   card, the featured shot beside the quote and the tools — and it halves the
-   scroll. Everything the short-laptop block resets is reset here, for the
-   same reasons — and it sits after the flattening block above, which it has
-   to override where the two disagree. */
-@media (min-width: 700px) and (max-width: 820px) {
-  .collage {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      'portrait cooking'
-      'featured quote'
-      'featured tools';
-    gap: var(--space-5);
-    align-content: start;
-    padding: var(--space-2) var(--space-3) 0;
-  }
-  .collage > * {
-    width: 100%;
-    margin: 0;
-    align-self: start;
-  }
-  .desk-portrait { grid-area: portrait; }
-  .desk-cooking { grid-area: cooking; }
-  .desk-quote { grid-area: quote; }
-  .desk-tools { grid-area: tools; }
-  .desk-featured { grid-area: featured; padding-bottom: var(--space-5); }
-  /* Two photographs side by side again, so the viewport-scaled heights the
-     wide desk uses come back — the fixed phone crops were for one column. */
-  :root {
-    --portrait-h: clamp(140px, 24vh, 250px);
-    --featured-shot-h: clamp(104px, 18vh, 200px);
-  }
-}
+/* The board on a phone.
 
-/* The Canvas, below the width its toolbar can lie down in.
+   There used to be a gate here: under 760px the Canvas was not offered at all,
+   the link came off the capsule, and the page said come back on a laptop. That
+   was honest about a drawing surface — seven pens and a sheet need a hand and
+   room to be careless with it. A board needs a thumb. So the gate is gone, and
+   the only thing left to do at this width is hand the board the whole screen.
 
-   Drawesome's bar is a fixed 633px with everything on it, and it is clipped by
-   the surface it sits on — so under this width it stands up as a rail on the
-   right instead. That is a JS decision (the placement prop), and this is the
-   CSS half of it: a rail is 491px tall, so the sheet has to be taller than
-   that. Must stay in step with RAIL_QUERY in components/CanvasStudio.tsx.
-   760px is where the bar stops fitting: the frame gives the stage 80px less
-   than the viewport, and the bar wants 673px of it — so a tablet held upright
-   keeps the bar, and a phone gets the rail.
-
-   By this width the page is already the stacked, scrolling version — the
-   one-screen layout gives up at 1120px, well above here. All that is left to
-   do is give the foot's three items somewhere to go: on a phone the row wraps,
-   and a note pushed to the far end of a wrapped row lands nowhere. */
+   The grid is already one column here; what it cannot do by itself is let the
+   board use the page's gutter. On a 320px phone the frame's padding takes 48px
+   off a 15-wide grid, which is the difference between a 19px cell and a 16px
+   one — and 16px is where a thumb starts missing. So the board alone breaks
+   out of the gutter, and nothing else on the page moves. */
 @media (max-width: 759.98px) {
-  .canvas-foot { gap: var(--space-4) var(--space-6); }
-  .canvas-privacy { margin-left: 0; flex-basis: 100%; text-align: left; }
+  .gomoku-stage {
+    margin-inline: calc(var(--frame-pad-x) * -1);
+  }
+  /* Edge to edge, so a radius would be cutting the corners off the screen. */
+  .goban { border-radius: 0; }
 
-  /* And under the same width the Canvas is not offered at all — the link
-     comes off the capsule, and the page itself says why. `display: none`
-     rather than a dimmed link, so it leaves the tab order and the nav's
-     reading order with its appearance. Same line as HANDHELD_QUERY in
-     components/CanvasStudio.tsx, which decides the other half. */
-  .nav-link[data-handheld='off'] { display: none; }
-}
-
-/* What the page says instead. Sized to the reading measure and nothing else:
-   it is a sentence and a way out, not a layout. */
-.canvas-handheld {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-4);
-  max-width: var(--contact-max);
-  margin-top: var(--space-8);
-}
-.canvas-handheld-line {
-  font-size: var(--text-body);
-  line-height: var(--leading-body);
-  color: var(--color-muted);
+  /* Everything in the record reads down the page now rather than beside the
+     board, so the panel stops reserving a foot for the privacy line and simply
+     ends after it. */
+  .gomoku-privacy { margin-top: 0; }
 }
 
 @media (max-width: 640px) {
@@ -4831,9 +5388,6 @@ main > .canvas:first-child { margin-top: 0; }
   .frame { padding-bottom: var(--space-16); }
   .nav-wrap { margin-bottom: var(--space-12); }
   .nav-capsule { padding: 0 var(--space-5); }
-  .canvas-pins {
-    --pin-min: 96px;
-  }
   .widget--lg { padding: var(--card-padding); }
   .contact-card { padding: var(--space-8); }
   .lightbox { padding: var(--space-5); }
@@ -4881,6 +5435,15 @@ main > .canvas:first-child { margin-top: 0; }
   .link-sweep { transition-duration: var(--dur-fast), 0.01ms !important; }
   .quote-leaf { transition-duration: var(--dur-quote) !important; }
   .gp-shot { transition-duration: var(--dur-slide) !important; }
+  /* Liquid Glass, as Apple reduces it: the elastic goes — no give on a press,
+     no spring past rest, the lens moves without travelling — and the light
+     from within keeps its fade, which moves nothing. */
+  .nav-capsule[data-pressed] { transform: none; }
+  .nav-capsule::after { transition-duration: var(--dur-mid) !important; }
+  /* The squares in the @whatabhisaw row stop leaning in and dim instead —
+     still an answer to the pointer, with nothing travelling. */
+  .insta-tile:hover img { transform: none; opacity: var(--insta-dim); }
+  .insta-tile img { transition: opacity var(--dur-fast) var(--ease-hover) !important; }
   .lightbox { animation-duration: var(--dur-mid) !important; }
   .lightbox-figure {
     animation-name: lightbox-in !important;
@@ -5005,11 +5568,13 @@ main > .canvas:first-child { margin-top: 0; }
    dark room behind a photograph a darker, unblurred one. Nothing is lost but
    the see-through. */
 @media (prefers-reduced-transparency: reduce) {
-  .nav-capsule {
-    background: var(--color-card);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    box-shadow: var(--shadow-card);
+  /* Apple's answer for Liquid Glass: frostier, obscuring more of what is
+     behind it, and no lensing. */
+  .nav-capsule,
+  .nav-capsule[data-refract] {
+    background: var(--lg-tint-frost);
+    -webkit-backdrop-filter: var(--lg-backdrop-frost);
+    backdrop-filter: var(--lg-backdrop-frost);
   }
   .gp-cta {
     background: var(--color-card);
@@ -5028,7 +5593,21 @@ main > .canvas:first-child { margin-top: 0; }
 /* And more contrast: the floating surfaces get a drawn edge, so they are
    bounded by a line and not only by a shadow. */
 @media (prefers-contrast: more) {
+  /* Liquid Glass under more contrast goes predominantly white, with a
+     contrasting border, and its labels go to full ink. */
   .nav-capsule,
+  .nav-capsule[data-refract] {
+    background: var(--color-card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .nav-capsule::before { background: var(--color-ink); padding: var(--hairline); }
+  .nav-link { color: var(--color-ink); }
+  .nav-lens,
+  .nav-capsule:not([data-lens]) .nav-link[aria-current='page']::before {
+    background: var(--color-panel);
+    box-shadow: 0 0 0 var(--hairline) var(--color-ink);
+  }
   .gp-cta,
   .view-fab { box-shadow: 0 0 0 var(--hairline) var(--color-ink), var(--shadow-card); }
   .gp-cta { color: var(--color-ink); background: var(--color-card); text-shadow: none; }

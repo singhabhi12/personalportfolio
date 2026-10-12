@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { photos } from "@/lib/content";
+import { photos, shotLine } from "@/lib/content";
 import OpticalGrid, { supportsOpticalGrid } from "./OpticalGrid";
 
 /* Gallery ⁕ — the photos. A strip of them rolling past a lens (OpticalGrid),
@@ -208,6 +208,7 @@ export default function Gallery() {
             />
             <div className="lightbox-caption">
               <span className="lightbox-title">{current.title}</span>
+              {shotLine(current) && <span className="lightbox-shot">{shotLine(current)}</span>}
             </div>
           </div>
         </div>

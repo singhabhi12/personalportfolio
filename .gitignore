@@ -68,3 +68,9 @@ next-env.d.ts
 /IMG_*.jpg
 # Finder duplicate of a build output
 /out 2
+# The Instagram source library — 9GB of originals, full-res exports, graded
+# and cropped passes, video exports and LUTs. Inputs only, same as /raw and
+# /Portfolio Images: what the site serves is the derivatives in public/gallery.
+# GitHub refuses files this size and would not be a sensible home for them
+# anyway; they stay on the machine that shot them.
+/Images for Instagram

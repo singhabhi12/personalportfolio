@@ -21,24 +21,109 @@ export const identity = {
   intro: "https://cal.com/",
 };
 
-/* The manifesto: short declarative lines, sentence case, no periods needed.
-   Bare on the paper, never in a card. */
+/* The manifesto: short declarative lines. The first two are the bio on the
+   home page's profile card. */
 export const manifesto = [
   "I design for messy problems — structure first, then speed, then story.",
   "Three years across event tech, Web3, and marketplaces. 100K+ people have used what I shipped.",
   "I'd rather ship it than debate it. Based in Hamburg, looking for the next team.",
 ];
 
-/* Asterisk-prefixed footnote at the stack bottom (§4). */
-export const manifestoFootnote = "* Less talking, more shipping.";
 
 export const whisper = "morning. look around…";
 
 /* The home page's one gradient card. Carries the availability signal. */
 export const cooking = {
   label: "Currently cooking ☺",
-  headline: "Building Stampp — an iOS app that turns your photos into collectible postage stamps.",
-  sub: "Also open to UX & product roles. Hamburg or remote.",
+  headline: "Open to UX & product roles.",
+  sub: "Hamburg or remote — and building Stampp on the side.",
+};
+
+/* Photography — the second thread on the home page. The Instagram page is
+   @whatabhisaw; the pictures on the site are the full-resolution originals
+   (lib/gallery.ts), never pulled from Instagram, so nothing here depends on a
+   token that expires. Keys are named rather than sliced, so reordering the
+   gallery cannot change what the home page shows. */
+export const photography = {
+  handle: "whatabhisaw",
+  href: "https://www.instagram.com/whatabhisaw/",
+  follow: "Follow on Instagram",
+  /* The big frame in the middle of home: the Home page Photos set — one run
+     through Helsinki, Tallinn, Riga, Vilnius and down to Vienna, Bratislava
+     and Budapest. Only photographs from that set belong here; the rest of the
+     gallery is reached through the frame, not shown in it. Change the first
+     frame to change the photo of the week.
+
+     Ordered so the city changes on every turn until the set runs out of
+     cities, rather than showing four Helsinki frames in a row.
+
+     `focus` overrides the photograph's own object-position (lib/gallery.ts)
+     for this frame and nothing else. On a laptop the frame is a letterbox
+     near 2:1 — far wider than the 4:3 and 3:4 originals — so a crop set for
+     the near-square Life tile can cut the dome off a church. Every frame was
+     checked against that letterbox and again at the phone's 4:3; only the one
+     below needed a crop of its own. */
+  hero: {
+    label: "Photo of the week",
+    frames: [
+      { key: "helsinki-cathedral-street" },
+      { key: "tallinn-nevsky" },
+      { key: "hamburg-alster-sail" },
+      { key: "budapest-tram" },
+      { key: "riga-bunting" },
+      { key: "helsinki-red-cottage" },
+      { key: "vilnius-upper-castle" },
+      { key: "hamburg-canal-dusk" },
+      { key: "tallinn-roofs" },
+      { key: "bratislava-cumil" },
+      { key: "helsinki-suomenlinna" },
+      { key: "budapest-parliament" },
+      { key: "hamburg-tower-blossom" },
+      { key: "tallinn-skyline" },
+      { key: "vienna-cathedral", focus: "50% 70%" },
+      { key: "helsinki-tram-street" },
+      { key: "hamburg-atlantic-flags" },
+      { key: "budapest-boulevard" },
+      { key: "tallinn-courtyard" },
+      { key: "hamburg-elbphilharmonie-bare-trees" },
+    ] as { key: string; focus?: string }[],
+  },
+  /* The six squares on the Instagram card — older shots, for range. */
+  squares: [
+    "cherry-blossoms-2025",
+    "aurora-lights-pinneberg",
+    "elbphilharmonie-hamburg",
+    "alsterwinters",
+    "jaipur",
+    "amsterdam",
+  ],
+};
+
+/* Home is one screen of cards, after dannpetty.com: the profile card down the
+   left, photographs in the middle, where-and-what down the right. */
+export const home = {
+  role: "UX & Product Designer",
+  bio: manifesto.slice(0, 2),
+  /* The routes, said as a list the way the reference lists its experiments. */
+  explore: {
+    label: "Around here:",
+    links: [
+      { label: "Work", note: "case studies", href: "/work" },
+      { label: "Life", note: "about, places, photos", href: "/life" },
+      { label: "Fun", note: "play me at gomoku", href: "/fun" },
+      { label: "Contact", note: "write me a letter", href: "/contact" },
+    ],
+  },
+  location: {
+    city: "Based in Hamburg, DE",
+    from: "From Jaipur, IN",
+    timeZone: "Europe/Berlin",
+  },
+  tools: { label: "Tools", note: "every day" },
+  featured: { label: "Building", cta: "Read the case study" },
+  /* The two covers down the right-hand column. */
+  covers: ["substrac", "truts"],
+  experience: { label: "Where I've been", note: "2021–26" },
 };
 
 export interface Role {
@@ -288,20 +373,6 @@ export const projectHref = (project: Project) =>
 export const featured =
   projects.find((p) => p.slug === "stampp") ?? projects.find((p) => p.srcSet) ?? projects[0];
 
-/* The manifesto card's headline, composed in three parts — <name> <verb>
-   <subject> — so the weight mix (bold name, plain verb, underlined subject) is
-   copy rather than markup. The subject is a live link to what it names. */
-/* What is being built right now. Kept separate from `featured` — they agree
-   today, but the desk's showcase and the thing on the bench will drift apart
-   again. */
-const current = projects.find((p) => p.slug === "stampp") ?? featured;
-
-export const headline = {
-  verb: "is building",
-  subject: current.title,
-  href: projectHref(current),
-};
-
 /* Case study scaffolding, kept as the fallback. All nine cases are written in
    lib/case-studies.ts and the page prefers those; a project added to `projects`
    before its copy exists renders this instead — a visible placeholder, never
@@ -368,12 +439,6 @@ export const tools: Tool[] = [
   { name: "ChatGPT", icon: "/tools/chatgpt.svg" },
 ];
 
-/* The desk shows the four that are open every day; the strip on /life carries
-   the whole tray. Named, not sliced, so reordering the list cannot change what
-   sits on the desk. */
-export const deskTools: Tool[] = ["Figma", "Claude", "VS Code", "Xcode"].map(
-  (name) => tools.find((tool) => tool.name === name)!
-);
 
 /* What is on right now. Title and artist by hand; everything else the card
    shows — the artwork, the album, the year, the Apple Music link, the 30s
@@ -493,73 +558,72 @@ export const contact = {
   aside: "or just email me",
 };
 
-/* The Canvas: the one page that gives the desk back to the visitor. Sheet,
-   pens, and a wall to pin the results to. Everything the page can say lives
-   here — including the states only an empty wall or a full one ever show. */
-export const canvas = {
-  label: "The Canvas",
-  /* One line in the lead face, the way /contact opens. Not "seven pens": a
-     phone is offered four, and copy that contradicts the toolbar in front of
-     it is worse than copy that undercounts. Where a drawing goes is explained
-     by the wall and the privacy note, not by a second sentence here. */
-  line: "A sheet, a handful of pens, and nobody watching.",
+/* Fun: the one page that gives the desk back to the visitor. A board, an
+   opponent, and nothing it wants from you.
 
-  /* What a phone gets instead.
+   Everything the page can say lives here, including the states only a finished
+   game or an empty record ever show. */
+export const fun = {
+  label: "Fun",
+  /* One line in the lead face, the way /contact opens. Both names, because
+     that is how the game is written wherever it is actually played. */
+  line: "Five in a row · 五子棋",
+  note: "You are black, and black goes first.",
 
-     The Canvas is the one page on this site that cannot be made smaller and
-     still be itself: seven pens and a sheet you can draw on need a surface
-     and a hand, and on a phone the toolbar takes a third of the screen before
-     a single mark is made. Saying so plainly is better than handing someone a
-     cramped version of a thing that was meant to be generous — and the page
-     still exists, so a link to it from a phone lands somewhere that explains
-     itself rather than on a 404. */
-  handheld: {
-    label: "Come back on a laptop",
-    line: "The Canvas needs a bigger sheet than a phone has — seven pens, a surface, and room to be careless with it.",
-    back: "See the work instead",
+  /* The board is a picture to a screen reader until it is a grid of squares;
+     the grid inside it is what carries the game. */
+  boardLabel: "Gomoku board, 15 by 15",
+
+  /* The line above the board — the only thing on the page that says whose
+     move it is. One of these at a time. */
+  state: {
+    you: "Your turn",
+    thinking: "Thinking…",
+    won: "Five in a row. You win.",
+    lost: "Five in a row. The machine wins.",
+    drawn: "Board full, nobody got five.",
   },
 
-  /* The sheet is decorative to a screen reader; the buttons under it do the
-     work, so it gets a name and nothing else. */
-  surfaceLabel: "Drawing surface",
+  /* Spoken, not shown: the visible line goes back to "Your turn", which does
+     not tell anyone what just happened on the board. */
+  replied: (square: string) => `White played ${square}.`,
 
-  pin: "Pin to the wall",
-  /* The pin button's own receipt, for a second and a half. */
-  pinned: "Pinned ✓",
-  download: "Download PNG",
-  /* Base filename for the export; Drawesome adds the extension. */
-  downloadName: "canvas",
+  /* The same button all through a finished game too — "Play again" and "New
+     game" are one action, and two labels for it is two things to read. */
+  again: "New game",
 
-  /* The wall under the sheet. */
-  wall: {
-    label: "The wall",
-    empty: "Nothing pinned yet. The wall fills up as you draw.",
-    open: "Put back on the sheet",
-    remove: "Take down",
-    /* Shown once the wall is at WALL_MAX and the oldest is being dropped. */
-    full: "The wall holds twelve. Pinning a thirteenth takes the oldest down.",
-
-    /* Putting a pin back overwrites the sheet and its undo history, so an
-       unpinned drawing gets asked about first. */
-    confirm: "There's something on the sheet that isn't pinned.",
-    replace: "Replace it",
-    keep: "Keep drawing",
+  /* Under the board, so nobody has to work out which colour they are from the
+     fact that the first stone was theirs. */
+  legend: {
+    you: "You",
+    ai: "The machine",
+    black: "Black",
+    white: "White",
   },
 
-  /* Nothing here leaves the browser, and a visitor should not have to guess
-     that from the word "save". */
-  privacy: "Pinned drawings live in this browser only — nothing is uploaded.",
-
-  /* Drawesome is doing the actual drawing. Credit belongs on the page, not in
-     a comment nobody reads. */
-  credit: {
-    lead: "Pens, ink, and toolbar by",
-    name: "Drawesome",
-    href: "https://github.com/benjitaylor/drawesome",
-    author: "Benji Taylor",
-    authorHref: "https://benji.org/drawesome",
-    licence: "MIT",
+  /* The panel beside the board. A tally and nothing else: no streaks, no
+     rating, no encouragement. */
+  record: {
+    label: "The record",
+    won: "Won",
+    lost: "Lost",
+    drawn: "Drawn",
+    none: "No games yet. The first one is the one it learns nothing from.",
+    /* What is on the other side of the board, said plainly. It is a hundred
+       lines of arithmetic and the page should not let anyone think it is more
+       than that — nor less: the limit named in the last sentence is the real
+       one, and it is where a patient player wins. */
+    about:
+      "It reads every empty square twice — once for the shape it would make, once for the shape it would deny — and plays the best of them. It will take a win and it will never walk past a four. What it cannot do is set a trap four moves out, which is where you beat it.",
+    /* Nothing here leaves the browser, and nobody should have to infer that
+       from the word "record". */
+    privacy: "The tally lives in this browser only — nothing is uploaded.",
+    forget: "Forget the record",
   },
+
+  /* How a square is named when there is no pointer to put on it. */
+  square: (square: string) => `${square}, empty`,
+  squareHeld: (square: string, colour: string) => `${square}, ${colour}`,
 };
 
 export const stamp = {
