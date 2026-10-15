@@ -62,7 +62,7 @@ export interface MapPin {
 }
 
 /* The same six places the SVG plots, phrased for a callout rather than a
-   tooltip. Jaipur carries "home" instead of a year, so it reads as a word. */
+   tooltip. Mumbai carries "home" instead of a year, so it reads as a word. */
 export const mapPins: MapPin[] = places.map((place) => ({
   title: place.city,
   subtitle:

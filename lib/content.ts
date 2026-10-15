@@ -118,7 +118,7 @@ export const home = {
   },
   location: {
     city: "Based in Hamburg, DE",
-    from: "From Jaipur, IN",
+    from: "From Mumbai, IN",
     timeZone: "Europe/Berlin",
     /* The city the weather is read for (lib/weather.ts). Named rather than
        given coordinates: lib/places already holds Hamburg's, and one pair of

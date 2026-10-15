@@ -15,9 +15,9 @@ export interface Place {
 
 /* Every city the gallery actually stands in, ordered Hamburg-outward — the
    travel line below is drawn between the first entry and the last, so Hamburg
-   stays at one end of it and Jaipur at the other. Hamburg and Jaipur carry the
-   year they became home rather than a visit; the rest carry the year of the
-   photographs. */
+   stays at one end of it and Mumbai at the other. Hamburg carries the year it
+   became home and Mumbai the word, since it was home before any of this; the
+   rest carry the year of the photographs. */
 const cities: Omit<Place, "photoCount">[] = [
   { city: "Hamburg", country: "DE", lat: 53.55, lng: 9.99, year: "2021" },
   { city: "Pinneberg", country: "DE", lat: 53.66, lng: 9.8, year: "2025" },
@@ -34,8 +34,8 @@ const cities: Omit<Place, "photoCount">[] = [
   { city: "Vienna", country: "AT", lat: 48.21, lng: 16.37, year: "2025" },
   { city: "Bratislava", country: "SK", lat: 48.15, lng: 17.11, year: "2025" },
   { city: "Budapest", country: "HU", lat: 47.5, lng: 19.04, year: "2025" },
-  { city: "Mumbai", country: "IN", lat: 19.08, lng: 72.88, year: "2026" },
-  { city: "Jaipur", country: "IN", lat: 26.91, lng: 75.79, year: "home" },
+  { city: "Jaipur", country: "IN", lat: 26.91, lng: 75.79, year: "2023" },
+  { city: "Mumbai", country: "IN", lat: 19.08, lng: 72.88, year: "home" },
 ];
 
 /* Counted from the gallery rather than written down twice, so a photo added to

@@ -5262,7 +5262,7 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
 
   /* The map strip takes its card's slack. 3:1 is its floor, not its ratio —
      `aspect-ratio` sizes it before it grows — and the ceiling is a third
-     taller than it is wide, because a window on Hamburg-to-Jaipur much past
+     taller than it is wide, because a window on Hamburg-to-Mumbai much past
      that is a window on the sea. */
   .life-bento .places {
     display: flex;
@@ -5514,7 +5514,7 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
 
 /* ---------- Places widget ---------- */
 
-/* A wide, short strip: the pins run from Hamburg to Jaipur, which is a lot
+/* A wide, short strip: the pins run from Hamburg to Mumbai, which is a lot
    of longitude and not much latitude, and the height it gives up goes to the
    photograph below. The SVG stretches to fill (preserveAspectRatio="none"),
    so projected dot percentages map linearly onto the viewBox at any ratio. */
