@@ -3,9 +3,12 @@ import PlacesMap from "./PlacesMap";
 import { placesCountLabel } from "@/lib/content";
 
 /* Places ◎ — the live Apple map (MapKit JS), then the count line beneath it.
-   The city list that used to follow the count is gone: the map is the list,
-   and the strip it lives in is kept short so the photograph below gets the
-   height instead.
+   The city list that used to follow the count is gone: the map is the list.
+
+   The strip it lives in is 3:1 at its shortest and grows from there: on Life
+   this is the card that squares its track up with the others, and a map is the
+   one thing on that track with no height of its own to lose (app/globals.css,
+   "Life"). `.places` is the handle that rule reaches it by.
 
    This card no longer honours §10's "no map library" rule, and the inline-SVG
    sketch that used to stand in for one is gone. Two consequences worth knowing:
@@ -15,7 +18,7 @@ import { placesCountLabel } from "@/lib/content";
    projection are untouched. */
 export default function PlacesWidget() {
   return (
-    <WidgetCard label="Places" glyph="◎" className="side-full">
+    <WidgetCard label="Places" glyph="◎" className="places">
       <PlacesMap />
 
       <p className="places-count">{placesCountLabel}</p>

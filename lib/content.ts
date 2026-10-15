@@ -40,55 +40,57 @@ export const cooking = {
 };
 
 /* Photography — the second thread on the home page. The Instagram page is
-   @whatabhisaw; the pictures on the site are the full-resolution originals
-   (lib/gallery.ts), never pulled from Instagram, so nothing here depends on a
-   token that expires. Keys are named rather than sliced, so reordering the
-   gallery cannot change what the home page shows. */
+   @mehunabhi; the pictures on the site are the full-resolution originals
+   (lib/gallery.ts), so the hero and the gallery depend on no token at all.
+   Keys are named rather than sliced, so reordering the gallery cannot change
+   what the home page shows.
+
+   The one exception is the six squares below: with a token in the environment
+   they are replaced by the account's real posts (lib/instagram.ts), and
+   without one they are what they always were. Everything else on this site
+   stays local on purpose. */
 export const photography = {
-  handle: "whatabhisaw",
-  href: "https://www.instagram.com/whatabhisaw/",
+  handle: "mehunabhi",
+  href: "https://www.instagram.com/mehunabhi/",
   follow: "Follow on Instagram",
   /* The big frame in the middle of home: the Home page Photos set — one run
-     through Helsinki, Tallinn, Riga, Vilnius and down to Vienna, Bratislava
-     and Budapest. Only photographs from that set belong here; the rest of the
-     gallery is reached through the frame, not shown in it. Change the first
-     frame to change the photo of the week.
+     through Helsinki, Tallinn, Riga and Vilnius, with Hamburg at home and one
+     frame from Budapest. Only photographs from that set belong here; the rest
+     of the gallery is reached through the frame, not shown in it. Change the
+     first frame to change the photo of the week.
 
-     Ordered so the city changes on every turn until the set runs out of
-     cities, rather than showing four Helsinki frames in a row.
+     Ordered so the city changes on every turn, including across the wrap back
+     to the first frame, rather than showing four Helsinki frames in a row.
 
      `focus` overrides the photograph's own object-position (lib/gallery.ts)
      for this frame and nothing else. On a laptop the frame is a letterbox
      near 2:1 — far wider than the 4:3 and 3:4 originals — so a crop set for
      the near-square Life tile can cut the dome off a church. Every frame was
-     checked against that letterbox and again at the phone's 4:3; only the one
-     below needed a crop of its own. */
+     checked against that letterbox and again at the phone's 4:3; none of the
+     ones left needs a crop of its own, so the override is unused — it stays
+     for the next frame that does. */
   hero: {
     label: "Photo of the week",
     frames: [
       { key: "helsinki-cathedral-street" },
-      { key: "tallinn-nevsky" },
       { key: "hamburg-alster-sail" },
-      { key: "budapest-tram" },
       { key: "riga-bunting" },
       { key: "helsinki-red-cottage" },
       { key: "vilnius-upper-castle" },
       { key: "hamburg-canal-dusk" },
       { key: "tallinn-roofs" },
-      { key: "bratislava-cumil" },
       { key: "helsinki-suomenlinna" },
-      { key: "budapest-parliament" },
       { key: "hamburg-tower-blossom" },
       { key: "tallinn-skyline" },
-      { key: "vienna-cathedral", focus: "50% 70%" },
       { key: "helsinki-tram-street" },
       { key: "hamburg-atlantic-flags" },
       { key: "budapest-boulevard" },
       { key: "tallinn-courtyard" },
-      { key: "hamburg-elbphilharmonie-bare-trees" },
     ] as { key: string; focus?: string }[],
   },
-  /* The six squares on the Instagram card — older shots, for range. */
+  /* The six squares on the Instagram card — older shots, for range. What the
+     card shows when there is no Instagram token to show the real posts with,
+     and still the shape the grid is built to. */
   squares: [
     "cherry-blossoms-2025",
     "aurora-lights-pinneberg",
@@ -118,11 +120,15 @@ export const home = {
     city: "Based in Hamburg, DE",
     from: "From Jaipur, IN",
     timeZone: "Europe/Berlin",
+    /* The city the weather is read for (lib/weather.ts). Named rather than
+       given coordinates: lib/places already holds Hamburg's, and one pair of
+       numbers written twice is a pair that can disagree with itself. */
+    weatherCity: "Hamburg",
   },
   tools: { label: "Tools", note: "every day" },
   featured: { label: "Building", cta: "Read the case study" },
   /* The two covers down the right-hand column. */
-  covers: ["substrac", "truts"],
+  covers: ["substrac", "jobtrac"],
   experience: { label: "Where I've been", note: "2021–26" },
 };
 
@@ -574,6 +580,10 @@ export const fun = {
      the grid inside it is what carries the game. */
   boardLabel: "Gomoku board, 15 by 15",
 
+  /* The quiet fact on the head card, the way every other card on the site
+     carries one: how big the board is. */
+  size: "15 × 15",
+
   /* The line above the board — the only thing on the page that says whose
      move it is. One of these at a time. */
   state: {
@@ -630,8 +640,26 @@ export const stamp = {
   /* Phase 2 makes the time live; see components/StampTime.tsx. */
   place: "HAM",
   time: "09:12",
+  /* The weather line is Apple's now (lib/weather.ts, components/Weather.tsx).
+     This is what the footer says until the reading arrives, and what it keeps
+     saying in an environment with no WeatherKit key — so it has to be true of
+     Hamburg in general rather than of today. */
   weather: "warm, good day for shipping",
   copyright: `© ${new Date().getFullYear()} Abhishek Singh`,
+};
+
+/* The weather line's own words. The reading itself is Apple's — see
+   lib/weather.ts for how it is read and components/Weather.tsx for where it
+   lands — and WeatherKit's terms ask for the data to be credited where it is
+   shown, with the credit linking to Apple's attribution page. The footer
+   carries that credit, which is every page; the location card on home shows
+   the same reading bare, because the credit for it is already in the foot of
+   the page it sits on. */
+export const weather = {
+  credit: "Apple Weather",
+  creditHref: "https://developer.apple.com/weatherkit/data-source-attribution/",
+  /* The card's label, for the reading on home's location card. */
+  cardLabel: "Weather in Hamburg",
 };
 
 /* About page. Whole page under 400 words (§7).

@@ -16,10 +16,21 @@ export interface Sticker {
   width: number;
   /** Resting rotation, degrees. Stickers are never quite straight. */
   tilt: number;
-  /** Where it sits on the two-column layout, as fractions of the sticker
-      layer's width and height. Kept off the prose: corners of the cards, the
-      gap beside the heading, over the photographs. */
-  desk: [x: number, y: number];
+  /** Where it lies in the pile along the foot of the page, before anyone has
+      touched it: x as a fraction of the layer's width, y as a fraction of the
+      pile band's height (app/globals.css, "The pile"). Nine stickers tipped
+      out in two loose rows — they overlap, they are not square to anything,
+      and not one of them is on a card, which is the point. The page reads as
+      its own cards until a visitor drags one up onto them.
+
+      Measured off the band rather than off the layer, so the pile stays at
+      the foot whatever the cards above it do: the grid is a different height
+      at every width, and a fraction of the whole layer would walk up into the
+      prose as it re-flowed.
+
+      They used to rest scattered over the cards in an arrangement Abhishek
+      dragged by hand; that one is in git, up to the commit before this. */
+  pile: [x: number, y: number];
   /** Where it sits in the one-column band above the page on a phone. Two rows
       of a loose sheet — the band is short, so they overlap on purpose. */
   pocket: [x: number, y: number];
@@ -34,8 +45,8 @@ export const stickers: Sticker[] = [
     size: [613, 429],
     width: 170,
     tilt: 8,
-    desk: [0.45, -0.01],
-    pocket: [0.13, 0.3],
+    pile: [0.09, 0.38],
+    pocket: [0.13, 0.38],
     note: "Eight-year-old me begged for this. Grown-up me has no time. Valorant, sometimes.",
   },
   {
@@ -43,7 +54,7 @@ export const stickers: Sticker[] = [
     size: [640, 552],
     width: 140,
     tilt: -12,
-    desk: [0.95, 0.03],
+    pile: [0.41, 0.66],
     pocket: [0.38, 0.28],
     note: "The best thing Apple has made. Yes, I know the laptop is listening.",
   },
@@ -52,11 +63,8 @@ export const stickers: Sticker[] = [
     size: [441, 640],
     width: 150,
     tilt: -7,
-    /* Over the gap between the columns, a little above the photo tile's
-       bottom-left corner — that corner is the "View gallery" pill, and the
-       link's only label has to be readable at rest. */
-    desk: [0.52, 0.56],
-    pocket: [0.64, 0.3],
+    pile: [0.3, 0.38],
+    pocket: [0.64, 0.38],
     note: "Headphones are an accessory. Also earmuffs. Winter-approved.",
   },
   {
@@ -64,7 +72,7 @@ export const stickers: Sticker[] = [
     size: [347, 640],
     width: 95,
     tilt: 7,
-    desk: [0.857, 0.61],
+    pile: [0.82, 0.66],
     pocket: [0.9, 0.32],
     note: "Photos, bossing AI agents around from the sofa, and calls home.",
   },
@@ -73,9 +81,7 @@ export const stickers: Sticker[] = [
     size: [270, 612],
     width: 80,
     tilt: 12,
-    /* Set down on the Listening card's top-right corner, under the deck and
-       clear of the song's text and its two controls. */
-    desk: [0.975, 0.82],
+    pile: [0.19, 0.66],
     pocket: [0.25, 0.72],
     note: "No wings so far. Does keep me awake long enough to ship.",
   },
@@ -84,9 +90,7 @@ export const stickers: Sticker[] = [
     size: [479, 640],
     width: 130,
     tilt: -9,
-    /* Hangs off the Listening card's bottom-right corner — only its top edge
-       is on the card, and nothing sits under it there. */
-    desk: [0.93, 1.09],
+    pile: [0.73, 0.38],
     pocket: [0.52, 0.74],
     note: "Bought to complete the ecosystem. Now it does chess and Netflix. Mostly Netflix.",
   },
@@ -95,20 +99,30 @@ export const stickers: Sticker[] = [
     size: [640, 465],
     width: 180,
     tilt: -6,
-    desk: [0.442, 1.03],
+    pile: [0.52, 0.38],
     pocket: [0.78, 0.72],
     note: "My love. If this dies, so do I. Metaphorically. Mostly.",
+  },
+  {
+    /* The ninth, and the one spot on the desk nobody dragged it to: the gap
+       the macbook leaves above the AirPods, which is the only hole in the
+       arrangement wide enough to take a sphere. Held off the record to its
+       right on purpose — the disc is a control, and a sticker over its left
+       edge takes the hover that plays the preview. */
+    id: "homepod",
+    size: [640, 616],
+    width: 115,
+    tilt: 9,
+    pile: [0.62, 0.66],
+    pocket: [0.92, 0.74],
+    note: "Another piece of the Apple ecosystem. Minds the lights and the plugs, and plays something easy while I work.",
   },
   {
     id: "me",
     size: [595, 640],
     width: 120,
     tilt: 6,
-    /* On the photograph's top-left corner, over the sky — the one place a
-       whole face fits without covering prose or a control. Not the bottom
-       edge: the page clips there, and a lid can lose its bottom half where a
-       face cannot. */
-    desk: [0.615, 0.31],
+    pile: [0.91, 0.38],
     pocket: [0.1, 0.74],
     note: "That's me. The outfit is AI. The face, sadly, is not.",
   },

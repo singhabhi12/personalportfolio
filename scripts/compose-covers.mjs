@@ -28,16 +28,18 @@ const TALL = 2360;
 const DROP = 140;
 const GAP = 150;
 
-const covers = {
-  substrac: ["subscriptions", "dashboard", "insights"],
-  stampp: ["collections", "passport", "result"],
-};
+/* Empty: Substrac and Stampp are drawn covers now, made in Figma at 16:10 and
+   dropped straight into raw/projects/. The composition below stays because the
+   next phone-only project will want it — but a slug listed here overwrites its
+   file, so a project only belongs in this map while it has no cover of its
+   own. */
+const covers = {};
 
 /* Marks, and how much of the sheet's width each takes. A wordmark is wide
-   and short, so it sits at under half the width to keep clear air around it. */
-const marks = {
-  kolsetu: 0.42,
-};
+   and short, so it sits at under half the width to keep clear air around it.
+   Empty for the same reason as `covers`: Kolsetu has a drawn cover now, and
+   the logo card is what a project gets only until it does. */
+const marks = {};
 
 const rounded = (w, h, r) =>
   Buffer.from(`<svg width="${w}" height="${h}"><rect width="${w}" height="${h}" rx="${r}" ry="${r}"/></svg>`);

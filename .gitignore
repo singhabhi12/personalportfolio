@@ -65,6 +65,10 @@ next-env.d.ts
 # and build-assets; the served derivatives live in public/cases and
 # public/projects. GitHub is not a place for 19MB of originals.
 /Portfolio Images
+# the drawn covers, exported from Figma at 3200x2000 (16:10) — the source for
+# raw/projects, which build-assets turns into what public/projects serves.
+# Inputs only, same as the folders above.
+/Project Covers
 /IMG_*.jpg
 # Finder duplicate of a build output
 /out 2
@@ -74,3 +78,7 @@ next-env.d.ts
 # GitHub refuses files this size and would not be a sensible home for them
 # anyway; they stay on the machine that shot them.
 /Images for Instagram
+
+# Tokens pasted into notes files. The real place for a token is .env.local,
+# which .env* above already covers; this is in case one lands here first.
+*token*.md

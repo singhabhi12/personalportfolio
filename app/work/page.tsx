@@ -12,7 +12,7 @@ export const metadata: Metadata = {
    folder or card opens /work/[slug]. */
 export default function Work() {
   return (
-    <PageFrame active="work">
+    <PageFrame active="work" bento>
       <WorkView />
     </PageFrame>
   );

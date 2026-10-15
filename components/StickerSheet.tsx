@@ -12,10 +12,9 @@ import { stickers, stickerSrc } from "@/lib/stickers";
 
 /* The desk items, stuck to the Life page.
 
-   Eight die-cut stickers laid over the cards — the controller beside the
-   heading, the AirPods on a corner of the map, the rest over the photograph and
-   hanging off the bottom edge. Each one can be picked up and put down anywhere
-   on the page. Nothing happens when they move, and where they end up is
+   Nine die-cut stickers, tipped out in a pile along the foot of the page and
+   left there until someone moves one. Each can be picked up and put down
+   anywhere on the page — over a card, over the prose, half off an edge. Nothing happens when they move, and where they end up is
    forgotten on reload. The one thing a sticker has to say is on its back: hold
    it, and a line in the site's aside hand appears beside it (lib/stickers.ts);
    let go, and it is gone.
@@ -33,11 +32,12 @@ import { stickers, stickerSrc } from "@/lib/stickers";
      line so the missing corner appears folded down onto the front. One
      registered property, --peel, drives both, so hover can transition it.
    - Position is a fraction of the sticker layer, not a pixel. The layer is the
-     card grid on a wide screen and a short band above it on a phone, and a
-     fraction lands somewhere sensible in either. A sticker that has never been
-     moved has no --x/--y at all: the CSS falls back to its resting spot for
-     the layout it is in (lib/stickers.ts), so the phone and the desk each get
-     their own arrangement without a script deciding which one applies.
+     card grid and the pile band under it on a wide screen, and a short band
+     above the cards on a phone; a fraction lands somewhere sensible in either.
+     A sticker that has never been moved has no --pos-x/--pos-y at all: the CSS
+     falls back to its resting spot for the layout it is in (lib/stickers.ts),
+     so the phone and the desk each get their own arrangement without a script
+     deciding which one applies.
    - The lean is a number in degrees the CSS adds to the resting tilt. It
      follows the pointer's horizontal speed and decays to nothing once the
      pointer stops, so a sticker held still hangs straight.
@@ -164,8 +164,8 @@ export default function StickerSheet({ children }: { children: ReactNode }) {
                the desk sizes its photographs. */
             "--w": `${sticker.width}px`,
             "--tilt": sticker.tilt,
-            "--dx": sticker.desk[0],
-            "--dy": sticker.desk[1],
+            "--pile-x": sticker.pile[0],
+            "--pile-y": sticker.pile[1],
             "--px": sticker.pocket[0],
             "--py": sticker.pocket[1],
             "--z": order[sticker.id] ?? 0,
@@ -174,7 +174,15 @@ export default function StickerSheet({ children }: { children: ReactNode }) {
             /* Height over width, so the CSS can find the sticker's rendered
                height and set the note clear of its edge. */
             "--ratio": sticker.size[1] / sticker.size[0],
-            ...(spot && { "--x": spot.x, "--y": spot.y }),
+            /* A moved sticker is placed off the layer; a resting one off the
+               pile band at the foot of it, which is a different anchor (see
+               "The pile" in app/globals.css). Two anchors cannot be one
+               fallback chain of numbers, so a drag hands the CSS the finished
+               lengths and the resting spot stays the fallback. */
+            ...(spot && {
+              "--pos-x": `${spot.x * 100}%`,
+              "--pos-y": `${spot.y * 100}%`,
+            }),
           } as CSSProperties;
 
           return (

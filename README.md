@@ -46,6 +46,7 @@ components/
   ListeningWidget    the song on now, as a record on the desk (Life)
   VinylDisc          the record: cover on the label, hover to play (client)
   StampTime          isolated so Phase 2 can make it live
+  Weather            the sky over Hamburg, from WeatherKit (client)
   ToolsRow, Contact, NavCapsule
 lib/
   content.ts         all copy — edit here, never in JSX
@@ -55,6 +56,7 @@ lib/
   places.ts          travel data + the lat/lng projection and clustering
   maps.ts            MapKit token, pins, and the computed map region
   listening.ts       Apple Music developer token + the catalog lookup (build)
+  weather.ts         WeatherKit token + the current reading (server)
   generated/         written by the pipelines; do not edit
 scripts/
   check-tokens.mjs   the token rule, enforced
@@ -265,6 +267,88 @@ animation, which is what gives it a spin-up and a wind-down. It plays under
 `prefers-reduced-motion` on the letter fold's argument (it is the thing the
 pointer asked for, and it stops the moment the pointer leaves); `?motion=still`
 holds the disc still while the sound still plays.
+
+## The weather (Apple WeatherKit)
+
+The weather in the footer stamp — and the line under the clock on home's
+location card — is Hamburg's current conditions, read from Apple's
+[WeatherKit](https://developer.apple.com/weatherkit/) REST API by
+`lib/weather.ts`.
+
+Unlike the song next door this cannot be a build-time read: weather frozen
+into static HTML is wrong within the hour. So the pages stay static, the
+reading is served by `app/api/weather`, and `components/Weather.tsx` fills the
+line in on the client the way `LocalTime` fills in the clock. Apple is asked
+**once every 15 minutes**, not once a visit: the `fetch` inside `lib/weather.ts`
+is cached and the route sends the same number out as `s-maxage`.
+
+**Setup** (needs a paid Apple Developer Program membership):
+
+1. Apple Developer → Certificates, Identifiers & Profiles → **Identifiers** →
+   **+** → **Services IDs** → a description and a reverse-domain identifier
+   (e.g. `eu.yourdomain.weather`). That identifier is the *service* ID. No App
+   ID is needed for the REST API: Apple's help article notes that every
+   registered Services ID is eligible for WeatherKit. Needs the Account Holder
+   or Admin role.
+2. → **Keys** → new key with **WeatherKit** enabled (a different key from
+   MusicKit's; one such key covers every Services ID on the team). Download
+   the `.p8` — Apple offers it once — and put it in the project root as
+   `AuthKey_<KEY_ID>.p8` (`.gitignore` keeps it out of the repo).
+3. Set them in `.env.local`:
+
+   ```bash
+   WEATHERKIT_SERVICE_ID=com.yourdomain.weather  # from step 1
+   WEATHERKIT_KEY_ID=ZZZZZZZZZZ                  # from the file name
+   WEATHERKIT_TEAM_ID=XXXXXXXXXX                 # optional — falls back to
+                                                 # APPLE_MUSIC_TEAM_ID
+   ```
+
+4. On Vercel, where the file is not, paste the file's contents into
+   `WEATHERKIT_PRIVATE_KEY` alongside the IDs.
+
+A WeatherKit token names the service as well as the key — `<team>.<service>`
+in the JWT header, the service again as `sub` — which is the one way it
+differs from the MusicKit token signed in `lib/listening.ts`. Both are ES256,
+signed with Node's own `crypto`, no SDK.
+
+The city is `home.location.weatherCity` in `lib/content.ts`; its coordinates
+come from `lib/places.ts`, so they are the ones already on the map rather than
+a second copy. Apple's condition codes are turned into the words the footer
+says in `PHRASES` — each one has to read after "and", so "thundery" rather
+than "thunderstorms" — and a code with no words falls through to the
+temperature on its own.
+
+**The sky.** The location card is painted with the weather: the empty right
+half the dotted ground used to hold on its own becomes one of nine skies —
+clear, partly cloudy, overcast, fog, wind, rain, sleet, snow, thunder — with
+night variants for the first three, picked by Apple's own `daylight` flag
+rather than by a clock. `components/WeatherSky.tsx` only names the painting;
+the paintings are in `app/globals.css` under "The sky", and they are gradients
+alone: nothing to request, nothing to decode, a few hundred bytes for the set.
+
+Two rules hold them together. The sky paints **under** the dotted ground, which
+is held back to `--sky-dots` while it is there, so what is left reads as the
+card's own stipple over the weather. And it is masked in from the left, with
+`--sky-fade-in` set past the end of the longest line the card can hold ("11°
+and raining on and off"), so the words always sit on plain paper — checked at
+phone width, where the card is narrowest.
+
+Nine rather than Apple's forty condition codes: a drizzle and a downpour look
+the same through a window. `CONDITIONS` in `lib/weather.ts` is one table
+mapping each code to both its words and its sky, so a code can never have one
+without the other.
+
+**With no key**, or with Apple refusing, the route answers 503, the footer
+keeps the static line in `stamp.weather`, and the location card shows no
+weather at all — the page is exactly what it was before the feature existed.
+
+WeatherKit's terms ask for the data to be credited where it is shown — the
+Apple Weather trademark, and a link to the sources behind the reading — so the
+footer carries an **Apple Weather** link to Apple's
+[data source attribution](https://developer.apple.com/weatherkit/data-source-attribution/)
+page. (The `weatherkit.apple.com/legal-attribution.html` URL older guides give
+redirects there.) The location card shows the reading bare: the credit for it
+is already in the foot of the same page.
 
 ## The letterbox (Resend)
 

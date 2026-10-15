@@ -16,12 +16,15 @@ export const metadata: Metadata = {
    component, which is the whole of what this route ships. */
 export default function FunPage() {
   return (
-    <PageFrame active="fun">
+    <PageFrame active="fun" bento>
       <div className="fun">
-        {/* The same head /contact opens with: a label, then one line in the
-            lead face. Pages built the same way should open the same way. */}
-        <header className="fun-head">
-          <p className="widget-label">{fun.label}</p>
+        {/* The head card every bento page opens with: the label and a quiet
+            fact about the thing, then one line in the lead face. */}
+        <header className="hcard fun-head">
+          <p className="hcard-head">
+            <span>{fun.label}</span>
+            <span>{fun.size}</span>
+          </p>
           <h1 className="fun-line">{fun.line}</h1>
           <p className="fun-note">{fun.note}</p>
         </header>

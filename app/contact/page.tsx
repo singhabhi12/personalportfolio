@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 /* Contact: the writing desk. Server-rendered form, scene layered over it. */
 export default function ContactPage() {
   return (
-    <PageFrame active="contact">
+    <PageFrame active="contact" bento>
       <Contact />
     </PageFrame>
   );

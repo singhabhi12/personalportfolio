@@ -6,7 +6,7 @@ import Desk from "@/components/Desk";
    and the stamp; the nav capsule stays, floating over the photograph. */
 export default function Home() {
   return (
-    <PageFrame active="home" bare>
+    <PageFrame active="home" bare bento>
       <Desk />
     </PageFrame>
   );

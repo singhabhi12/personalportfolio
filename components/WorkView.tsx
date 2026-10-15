@@ -3,7 +3,18 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import WorkCards from "./WorkCards";
 import WorkFolders from "./WorkFolders";
-import { work } from "@/lib/content";
+import { filed, projects, work } from "@/lib/content";
+
+/* The fields the nine are about, read off the projects' own tags rather than
+   written down a second time: a project that gains a tag gains a chip. */
+const fields = [...new Set(projects.map((project) => project.tag).filter(Boolean))];
+
+/* The span the work covers, from the projects' own timelines ("2023",
+   "2021–2022"). Every year on the page, earliest to latest. */
+const years = projects.flatMap((project) => project.timeline.match(/\d{4}/g) ?? []);
+const span = years.length
+  ? `${years.reduce((a, b) => (a < b ? a : b))}–${years.reduce((a, b) => (a > b ? a : b))}`
+  : "";
 
 type View = "folders" | "cards";
 
@@ -93,24 +104,52 @@ export default function WorkView() {
   const other: View = cards ? "folders" : "cards";
 
   return (
-    <section className="section" id="work">
-      {cards ? (
-        <div className="work-head">
+    <section className="work-bento" id="work" data-view={cards ? "cards" : "folders"}>
+      {/* The head card. It names the route on both views and changes only what
+          it has to: in the cards view it sets the headline, because nothing
+          else on the page says it; in the drawer view the front folder says
+          it, so the card keeps the label and the sentence and lets the folder
+          have the words. The h1 lives here either way — a route with no h1 has
+          no name in a screen reader's outline and none in a search result. */}
+      <div className="hcard work-head">
+        <p className="hcard-head">
+          <span>Work</span>
+          <span>
+            {cards ? span : `${filed.length} filed · ${projects.length} in all`}
+          </span>
+        </p>
+
+        {cards ? (
           <h1 className="work-title">
             {work.headline.cards}
             <span className="work-title-sub">{work.headlineSub}</span>
           </h1>
-          <p className="work-line">{work.line}</p>
-        </div>
-      ) : (
-        /* Off the page rather than out of it. The design does not want a
-           heading over the drawer — but a route with no h1 has no name in a
-           screen reader's outline and none in a search result either, so
-           the words stay and only the type goes. */
-        <h1 className="sr-only">Work</h1>
-      )}
+        ) : (
+          <h1 className="sr-only">Work</h1>
+        )}
 
-      {cards ? <WorkCards /> : <WorkFolders settled={switched} />}
+        <p className="work-line">{work.line}</p>
+
+        {fields.length > 0 && (
+          <p className="work-fields">
+            {fields.map((field) => (
+              <span className="tag-chip" key={field}>
+                {field}
+              </span>
+            ))}
+          </p>
+        )}
+      </div>
+
+      {/* The nine fall straight into the grid's tracks; the drawer takes a
+          seat of its own across them, capped at the width it is drawn for. */}
+      {cards ? (
+        <WorkCards />
+      ) : (
+        <div className="work-seat">
+          <WorkFolders settled={switched} />
+        </div>
+      )}
 
       {/* The switch. Floats in the corner rather than sitting in the page, so
           it is in the same place at the top of the drawer and at the foot of

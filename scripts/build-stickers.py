@@ -35,6 +35,7 @@ ITEMS = {
     "airpods": ("airpods-pro-2.png", None),  # already transparent
     "ipad": ("ipad-10th-gen-engraving-select-202212-silver-wifi_FMT_WHH.jpeg", 12),
     "macbook": ("refurb-mbp16-m3-max-pro-spaceblack-202402_AV4.jpeg", 24),
+    "homepod": ("homepod-mini-orange.jpg", 14),
     "me": ("0A00CE9A-FF85-4DE2-B64F-77D54936BDCC.PNG", PORTRAIT),
 }
 

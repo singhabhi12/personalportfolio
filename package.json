@@ -22,6 +22,7 @@
     "next": "16.3.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "sharp": "^0.35.3",
     "three": "^0.185.1"
   },
   "devDependencies": {
@@ -35,7 +36,6 @@
     "@types/three": "^0.185.4",
     "meshoptimizer": "^1.2.0",
     "playwright": "^1.62.1",
-    "sharp": "^0.35.3",
     "typescript": "^5"
   }
 }

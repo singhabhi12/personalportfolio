@@ -6,18 +6,22 @@ import {
   home,
   identity,
   photoByKey,
-  photoCount,
   photography,
   portrait,
   projectHref,
   projects,
   shotLine,
   tools,
+  weather,
   type Photo,
 } from "@/lib/content";
+import { recentPosts, SQUARE, type PostKind } from "@/lib/instagram";
 import DeskQuote from "./DeskQuote";
 import HeroCarousel, { type HeroSlide } from "./HeroCarousel";
 import LocalTime from "./LocalTime";
+import StoryRing from "./StoryRing";
+import Weather from "./Weather";
+import WeatherSky from "./WeatherSky";
 
 /* Home, after dannpetty.com: one screen of cards, in the site's own paper,
    white and gradient. Three tracks — the profile down the left, photographs
@@ -52,29 +56,54 @@ const slides: HeroSlide[] = photography.hero.frames.flatMap((frame) => {
 
 const squares = byKey(photography.squares);
 
+/* What the link around a real Instagram square says it is. There are no
+   captions on this API path (lib/instagram.ts says why), so the label is the
+   kind and the date — true, rather than a description nobody wrote. */
+const KIND_WORDS: Record<PostKind, string> = {
+  image: "Photo",
+  video: "Video",
+  album: "Album",
+};
+
+const postLabel = (kind: PostKind, taken: string) =>
+  `${KIND_WORDS[kind]}${taken ? ` from ${taken}` : ""} — open on Instagram`;
+
 const covers = home.covers
   .map((slug) => projects.find((project) => project.slug === slug))
   .filter((project) => project?.srcSet);
 
 const previously = experience.map((role) => role.role.split(" — ")[1]).filter(Boolean);
 
-export default function Desk() {
+export default async function Desk() {
+  /* The real posts behind the six squares, or null in an environment with no
+     Instagram token — in which case the card is the local originals it always
+     was. Awaited here rather than fetched in the browser on purpose: six posts
+     are right for an hour, so they belong in the prerendered HTML, and
+     lib/instagram's fetch is what holds them for that hour. */
+  const posts = await recentPosts();
+
   return (
     <div className="home">
       {/* ---- Left: who ---- */}
       <div className="home-col home-left">
         <section className="hcard profile" aria-label="About">
-          <span className="profile-avatar">
-            <img
-              src={portrait.image}
-              srcSet={portrait.srcSet}
-              /* token-exempt: media conditions, same as @media — CSS vars don't apply */
-              sizes="64px"
-              alt={portrait.alt}
-              width={portrait.width}
-              height={portrait.height}
-            />
-          </span>
+          {/* The portrait, and around it the ring when there is a story live
+              on the account. The circle is rendered here on the server; the
+              wrapper is a client component that only ever decides whether it
+              is a plain span or the link to the story (components/StoryRing). */}
+          <StoryRing>
+            <span className="profile-avatar">
+              <img
+                src={portrait.image}
+                srcSet={portrait.srcSet}
+                /* token-exempt: media conditions, same as @media — CSS vars don't apply */
+                sizes="64px"
+                alt={portrait.alt}
+                width={portrait.width}
+                height={portrait.height}
+              />
+            </span>
+          </StoryRing>
           <h1 className="profile-name">{identity.name}</h1>
           <p className="profile-role">
             {home.role} — building{" "}
@@ -211,31 +240,61 @@ export default function Desk() {
               >
                 @{photography.handle}
               </a>
-              <span>{photoCount} photos</span>
             </p>
+            {/* The real posts when there is a token to read them with, and the
+                local originals when there is not. Same grid either way — three
+                columns of squares, styled once in app/globals.css — so the card
+                does not change shape with the environment it is served from. */}
             <ul className="insta-grid">
-              {squares.map((photo) => (
-                <li key={photo.key}>
-                  <Link className="insta-tile" href="/gallery" aria-label={`${photo.title} — open the gallery`}>
-                    <img
-                      src={photo.src}
-                      srcSet={photo.srcSet}
-                      /* token-exempt: media conditions, same as @media — CSS vars don't apply */
-                      sizes="120px"
-                      alt=""
-                      width={photo.width}
-                      height={photo.height}
-                      loading="lazy"
-                      decoding="async"
-                      /* token-exempt: focal point and LQIP data URI from the photo manifest */
-                      style={{
-                        objectPosition: photo.focus,
-                        ...(photo.lqip ? { backgroundImage: `url(${photo.lqip})` } : {}),
-                      }}
-                    />
-                  </Link>
-                </li>
-              ))}
+              {posts
+                ? posts.map((post) => (
+                    <li key={post.id}>
+                      <a
+                        className="insta-tile"
+                        href={post.permalink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={postLabel(post.kind, post.taken)}
+                      >
+                        <img
+                          /* Our own route, never Instagram's CDN: the signed
+                             URL expires sooner than this page is held. */
+                          src={post.src}
+                          alt=""
+                          /* The square the route resizes to, said out loud.
+                             Instagram's own dimensions are not in the listing
+                             and would be the wrong ones anyway — what arrives
+                             here is already cropped to a square. */
+                          width={SQUARE}
+                          height={SQUARE}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </a>
+                    </li>
+                  ))
+                : squares.map((photo) => (
+                    <li key={photo.key}>
+                      <Link className="insta-tile" href="/gallery" aria-label={`${photo.title} — open the gallery`}>
+                        <img
+                          src={photo.src}
+                          srcSet={photo.srcSet}
+                          /* token-exempt: media conditions, same as @media — CSS vars don't apply */
+                          sizes="120px"
+                          alt=""
+                          width={photo.width}
+                          height={photo.height}
+                          loading="lazy"
+                          decoding="async"
+                          /* token-exempt: focal point and LQIP data URI from the photo manifest */
+                          style={{
+                            objectPosition: photo.focus,
+                            ...(photo.lqip ? { backgroundImage: `url(${photo.lqip})` } : {}),
+                          }}
+                        />
+                      </Link>
+                    </li>
+                  ))}
             </ul>
             <a className="pill pill--ink" href={photography.href} target="_blank" rel="noopener noreferrer">
               {photography.follow} <span aria-hidden="true">↗</span>
@@ -249,9 +308,11 @@ export default function Desk() {
       {/* ---- Right: where, and the work ---- */}
       <div className="home-col home-right">
         <section className="hcard location" aria-label="Location">
+          <WeatherSky />
           <p className="location-city">{home.location.city}</p>
           <p className="location-from">{home.location.from}</p>
           <LocalTime timeZone={home.location.timeZone} />
+          <Weather className="location-weather" label={weather.cardLabel} />
         </section>
 
         {covers.map(

@@ -29,32 +29,32 @@ export const assetManifest: Record<string, GeneratedAsset> = {
   "evmet": {
     "src": "/projects/evmet.jpg",
     "srcSet": "/projects/evmet-800.webp 800w, /projects/evmet-1600.webp 1600w",
-    "width": 5760,
-    "height": 3240
+    "width": 3200,
+    "height": 2000
   },
   "jobtrac": {
     "src": "/projects/jobtrac.jpg",
-    "srcSet": "/projects/jobtrac-800.webp 800w, /projects/jobtrac-1454.webp 1454w",
-    "width": 1454,
-    "height": 850
+    "srcSet": "/projects/jobtrac-800.webp 800w, /projects/jobtrac-1600.webp 1600w",
+    "width": 3200,
+    "height": 2000
   },
   "kolsetu": {
     "src": "/projects/kolsetu.jpg",
     "srcSet": "/projects/kolsetu-800.webp 800w, /projects/kolsetu-1600.webp 1600w",
-    "width": 4800,
-    "height": 3000
+    "width": 3200,
+    "height": 2000
   },
   "stampp": {
     "src": "/projects/stampp.jpg",
     "srcSet": "/projects/stampp-800.webp 800w, /projects/stampp-1600.webp 1600w",
-    "width": 4800,
-    "height": 3000
+    "width": 3200,
+    "height": 2000
   },
   "substrac": {
     "src": "/projects/substrac.jpg",
     "srcSet": "/projects/substrac-800.webp 800w, /projects/substrac-1600.webp 1600w",
-    "width": 4800,
-    "height": 3000
+    "width": 3200,
+    "height": 2000
   },
   "truts": {
     "src": "/projects/truts.jpg",

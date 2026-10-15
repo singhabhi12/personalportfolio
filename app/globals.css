@@ -121,6 +121,14 @@
   --dock-gap: 6px;
   --dock-icon: 50px;
   --dock-pad: 8px;
+  /* The deck on /life, which gives up the tray and takes the card's width
+     instead ("The deck, in a card"). The ceiling is the icons' own size —
+     the two PNGs in the set are 88 square, and past that they are being
+     enlarged rather than shown. The radius is a share rather than a number so
+     it travels with them: 18% is what the tray's 8px is at 44px. */
+  --deck-cols: 4;
+  --deck-icon-max: 88px;
+  --radius-app-icon: 18%;
   --ring-w: 2px;
   --radius-bubble: 14px;
   --bubble-pad-x: 10px;
@@ -227,14 +235,16 @@
   --frame-pad-x: 40px;
   --frame-pad-top: 40px;
   --section-gap-lg: 112px;
-  /* Home — one screen of cards, after dannpetty.com. Tighter than the rest
-     of the site on purpose: the reference's density is the point, and the
-     page has to fit a laptop's viewport with nothing to scroll. */
-  --home-max: 1680px;
-  --home-pad: 20px;
-  --home-gap: 16px;
-  --home-card-pad: 20px;
-  --home-radius: 20px;
+  /* The bento — one screen of cards, after dannpetty.com. It started as the
+     home page's own grid and is now the site's: Home, Work, Life and Fun are
+     all laid out on it, and /contact borrows its gutter. Tighter than the
+     rest of the site on purpose — the reference's density is the point, and
+     a page has to fit a laptop's viewport with nothing to scroll. */
+  --bento-max: 1680px;
+  --bento-pad: 20px;
+  --bento-gap: 16px;
+  --bento-card-pad: 20px;
+  --bento-radius: 20px;
   --home-inner-radius: 12px;
   --text-name: 18px;
   --avatar-size: 56px;
@@ -243,6 +253,22 @@
   --avatar-focus: 58% 22%;
   --avatar-shift: -8% 28%;
   --avatar-zoom: 2.6;
+  /* The ring Instagram puts around an avatar when something is live, in this
+     page's proportions: a thin band with a breath of paper between it and the
+     portrait, both drawn outside the circle so the face does not shrink on the
+     days there is a story. The paint is the only chroma on a grayscale
+     portrait, which is the entire point of it — it is a signal, not a trim,
+     and it is Instagram's own sweep because that is the thing being quoted. */
+  --story-ring: 2px;
+  --story-gap: 3px;
+  --story-paint: conic-gradient(from 150deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5, #feda75);
+  /* The reel the ring opens. A story is a 9:16 thing held in one hand, so the
+     frame is sized the way a phone holds it even on a desktop — tall, and
+     never the width of the screen. */
+  --story-frame-h: 86vh;
+  --story-frame-w: 92vw;
+  --story-segment-h: 3px;
+  --story-segment-gap: 4px;
   --social-size: 36px;
   --social-icon: 16px;
   --pill-h: 36px;
@@ -264,6 +290,67 @@
   /* The location card's dotted ground, after the reference's globe. */
   --location-dot: 1.5px;
   --location-grid: 9px;
+
+  /* The sky — the weather painted into the location card. Nine of them, built
+     out of gradients alone: nothing to request, nothing to decode, a few
+     hundred bytes in the stylesheet. They are pitched quieter than Apple's
+     photographic skies because they sit on warm paper beside ink rather than
+     behind white type, and because the dotted ground still reads through them.
+     See "The sky" below for how they are composed. */
+  --sky-fade-in: 44%;
+  --sky-fade-full: 92%;
+  /* How far the dots are held back once there is a sky under them. */
+  --sky-dots: 0.5;
+
+  --sky-day-a: #86c1e6;
+  --sky-day-b: #f1f6fa;
+  --sky-sun: rgba(255, 219, 145, 0.85);
+  --sky-night-a: #2e3e5c;
+  --sky-night-b: #93a1b8;
+  --sky-moon: rgba(236, 241, 248, 0.72);
+
+  --sky-cloud: rgba(255, 255, 255, 0.82);
+  /* Cloud over a night sky is lit from below by nothing at all; at the day
+     cloud's strength it reads as a lens flare rather than weather. */
+  --sky-cloud-dim: rgba(255, 255, 255, 0.42);
+  --sky-cloud-a: #ccd4dc;
+  --sky-cloud-b: #eef1f3;
+  --sky-cloud-night-a: #414b5c;
+  --sky-cloud-night-b: #99a2af;
+
+  --sky-fog-a: #d7d7d3;
+  --sky-fog-b: #f0efec;
+  --sky-fog-band: rgba(255, 255, 255, 0.5);
+
+  --sky-rain-a: #90a8bc;
+  --sky-rain-b: #dde5ea;
+  --sky-rain-streak: rgba(255, 255, 255, 0.5);
+
+  --sky-snow-a: #bed3e5;
+  --sky-snow-b: #f4f8fb;
+  --sky-flake: rgba(255, 255, 255, 0.9);
+
+  --sky-storm-a: #596375;
+  --sky-storm-b: #b4bcc7;
+
+  --sky-wind-a: #d1dce2;
+  --sky-wind-b: #f2f6f7;
+  --sky-wisp: rgba(255, 255, 255, 0.66);
+
+  /* The weathers' own measures: a raindrop's width and spacing, a fog band, a
+     snowflake and its grid, a wind wisp. */
+  --sky-streak: 1px;
+  --sky-streak-gap: 7px;
+  --sky-flake-size: 1.6px;
+  --sky-flake-grid: 13px;
+  /* A second, finer fall on a grid that does not divide into the first, so
+     the two never line up into a halftone. */
+  --sky-flake-small: 1.1px;
+  --sky-flake-grid-2: 19px;
+  --sky-flake-offset: 6px;
+  --sky-flake-dim: rgba(255, 255, 255, 0.62);
+  --sky-wisp-h: 2px;
+  --sky-wisp-gap: 19px;
   --insta-dim: 0.86;
   --contact-max: 460px;
   --btn-height: 48px;
@@ -436,6 +523,9 @@
   /* The board's ceiling. Any bigger and a 15×15 grid on a laptop is a table
      rather than a board you can take in at a glance. */
   --goban-max: 560px;
+  /* What the page around it is worth: the board at its ceiling, the record
+     beside it, and a card's padding either side. */
+  --fun-max: 1040px;
 
   /* The stones. Two lacquer discs lit from the upper left, which is the whole
      of what makes them read as objects rather than filled circles — one
@@ -721,6 +811,20 @@
   --folder-front-pad: 68px;
   --text-folder-headline: 32px;
   --leading-folder-headline: 1.25;
+
+  /* /work on the bento. The headline is a step down from the folder's: in the
+     cards view it is set inside a card a quarter of the page wide, not across
+     a folder. The drawer is capped because it is drawn at a page width — at
+     the bento's full 1680 the fan would be a mile of folder either side of a
+     sentence — and the strip length is where the sentence stops shrinking and
+     starts wrapping, on the one line the drawer view lays the head card out
+     as. */
+  --text-work-title: 24px;
+  /* /life's h1, inside a card a quarter of the page wide rather than across a
+     full column of prose. */
+  --text-life-heading: 28px;
+  --work-drawer-max: 1120px;
+  --work-strip-line: 420px;
 
   /* One duration for every state change, because they are all the same move.
      Out fast, settling long — a drawer runner, not a fade. */
@@ -1159,6 +1263,24 @@ sup.marker { font-size: var(--text-label); }
 }
 .widget--lg { padding: var(--card-padding-lg); }
 
+/* On a bento page a widget is an .hcard that happens to be built by a
+   component: same surface, same corner, same padding, and the same head line.
+   Declared here rather than in each widget so the components stay unaware of
+   which grid they are standing on — a desk label is tracked capitals in the
+   muted ink, and next to "What I do now" on the card beside it that reads as a
+   different kind of card rather than the same one. */
+.frame[data-bento] .widget {
+  border-radius: var(--bento-radius);
+  padding: var(--bento-card-pad);
+}
+.frame[data-bento] .widget-label {
+  font-family: var(--font-sans);
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--color-ink);
+  margin-bottom: var(--space-3);
+}
+
 .widget-label {
   font-family: var(--font-label);
   font-size: var(--text-label);
@@ -1208,51 +1330,112 @@ main > .fun:first-child { margin-top: 0; }
   object-fit: cover;
 }
 
-/* ---------- Home ---------- */
+/* ---------- The bento ---------- */
 
-/* After dannpetty.com, in the site's own paper, white and gradient: no nav
-   capsule, no stamp, a tight gutter, and cards in three tracks — the profile
-   down the left, photographs in the middle, where-and-what down the right.
+/* The grid every page but the case study and the gallery is laid out on: the
+   site's own paper, white cards and one gradient, edge to edge at a gutter
+   tighter than the rest of the site's. It was the home page's idea; it is now
+   the house style, which is why the rules below key off a flag
+   (components/PageFrame.tsx, `bento`) rather than off `data-page`.
 
-   Phone first: one column, in the order components/Desk.tsx writes it. A
-   tablet puts the two outer tracks side by side over the middle one; a laptop
-   gets the four columns, and when it is tall enough the page is fixed to the
-   viewport (the block at the end of this section) so nothing scrolls. */
-.frame[data-page='home'] {
-  max-width: var(--home-max);
-  padding: var(--home-pad);
+   A page opts in and gets three things: the wide frame, the tight gutter, and
+   a nav capsule that stays where it sits on every other route. What it does
+   with the space is its own section further down. */
+.frame[data-bento] {
+  max-width: var(--bento-max);
+  padding: var(--bento-pad);
 }
 
 /* The nav capsule sits where it sits on every other route: --frame-pad-top
-   from the top of the viewport, at every width. Home cannot inherit that by
-   having the same padding — its gutter is the bento's --home-pad, which is
+   from the top of the viewport, at every width. A bento page cannot inherit
+   that by having the same padding — its gutter is --bento-pad, which is
    tighter than the rest of the site — so the capsule is pushed the
    difference instead, and the two stay in step wherever --frame-pad-top is
    restated.
 
    Where the page scrolls — a phone, a tablet, a short screen — this is the
-   site's own sticky capsule, one card-gap above the grid; on a laptop it
-   floats over the photograph instead (the fit block below). */
-.frame[data-page='home'] > .nav-wrap {
-  margin-top: calc(var(--frame-pad-top) - var(--home-pad));
-  margin-bottom: var(--home-gap);
+   site's own sticky capsule, one card-gap above the grid; on home at laptop
+   size it floats over the photograph instead (the fit block below). */
+.frame[data-bento] > .nav-wrap {
+  margin-top: calc(var(--frame-pad-top) - var(--bento-pad));
+  margin-bottom: var(--bento-gap);
 }
+
+/* The corner whisper rides the capsule's row rather than the frame's corner:
+   at this gutter the frame's corner is the screen's, and the aside would sit
+   on the first card. The row is the capsule's height, and the whisper is
+   centred in it. */
+.frame[data-bento] > .whisper {
+  top: var(--frame-pad-top);
+  right: var(--bento-pad);
+  height: var(--nav-height);
+  align-items: center;
+}
+
+/* Two pages cap their content narrower than the frame (/fun, because the
+   board has a ceiling; /contact, because the stage is bound by height). Their
+   foot lines up with the cards above it rather than with the frame's edge,
+   which is most of a screen away. */
+.frame[data-page='fun'] > .stamp,
+.frame[data-page='contact'] > .stamp {
+  width: 100%;
+  margin-inline: auto;
+}
+.frame[data-page='fun'] > .stamp { max-width: var(--fun-max); }
+.frame[data-page='contact'] > .stamp { max-width: var(--page-max); }
+
+/* The record's disc hangs off the left edge of its card by a fixed 48px, which
+   was a safe overhang when every page had a 40px gutter and a 1200px frame
+   inside a wider screen. On the bento the frame *is* the screen, so a card in
+   the first track is 20px from the edge and 28px of the disc was being cut off
+   by the viewport. Here it hangs by exactly the gutter instead: flush with the
+   frame's edge at any width, and it follows --bento-pad down on a phone
+   without being told to. The card's own padding is the bento's too, so the
+   pull is measured from that rather than from the desk's. */
+.frame[data-bento] .vinyl {
+  margin-top: calc(var(--bento-card-pad) * -1 - var(--disc-overhang-y));
+  margin-left: calc(var(--bento-card-pad) * -1 - var(--bento-pad));
+}
+
+/* The foot, on a page that has one. Home is `bare` and has neither.
+
+   One line rather than two, and held to the left: at this gutter the right
+   end of the page is where /work's view switch floats, and a copyright line
+   pushed into that corner lands underneath it. */
+.frame[data-bento] > .stamp {
+  margin-top: var(--bento-gap);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  padding: 0 var(--space-1);
+}
+
+/* ---------- Home ---------- */
+
+/* After dannpetty.com: no stamp, no whisper, and cards in three tracks — the
+   profile down the left, photographs in the middle, where-and-what down the
+   right.
+
+   Phone first: one column, in the order components/Desk.tsx writes it. A
+   tablet puts the two outer tracks side by side over the middle one; a laptop
+   gets the four columns, and when it is tall enough the page is fixed to the
+   viewport (the block at the end of this section) so nothing scrolls. */
 
 .home {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--home-gap);
+  gap: var(--bento-gap);
 }
 .home-col {
   display: flex;
   flex-direction: column;
-  gap: var(--home-gap);
+  gap: var(--bento-gap);
   min-height: 0;
 }
 .home-mid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--home-gap);
+  gap: var(--bento-gap);
   min-height: 0;
 }
 
@@ -1262,8 +1445,8 @@ main > .fun:first-child { margin-top: 0; }
   display: flex;
   flex-direction: column;
   background: var(--color-card);
-  border-radius: var(--home-radius);
-  padding: var(--home-card-pad);
+  border-radius: var(--bento-radius);
+  padding: var(--bento-card-pad);
   box-shadow: var(--shadow-card);
   color: var(--color-ink);
   font-size: var(--text-body);
@@ -1285,6 +1468,8 @@ a.hcard:active { transform: scale(var(--press-scale-card)); }
   line-height: var(--leading-label);
 }
 .hcard-head > :last-child { color: var(--color-muted); }
+/* …unless it is the only child, in which case it is the label itself. */
+.hcard-head > :only-child { color: inherit; }
 
 /* The one gradient surface on this page. */
 .hcard--gradient {
@@ -1293,6 +1478,7 @@ a.hcard:active { transform: scale(var(--press-scale-card)); }
   color: var(--color-on-dark);
 }
 .hcard--gradient .hcard-head > :last-child { color: var(--color-on-dark-muted); }
+.hcard--gradient .hcard-head > :only-child { color: var(--color-on-dark); }
 .hcard--gradient .cooking-headline {
   font-size: var(--text-card-title);
   line-height: var(--leading-card-title);
@@ -1339,7 +1525,9 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   height: var(--avatar-size);
   border-radius: var(--radius-pill);
   overflow: hidden;
-  margin-bottom: var(--space-3);
+  /* The gap under the portrait belongs to .profile-portrait below, not here:
+     this box is what the ring is drawn around, so it has to be the circle and
+     nothing but the circle, or the ring comes out an oval. */
   background: var(--color-panel);
 }
 /* The portrait is a landscape print of a person by the water; the avatar is
@@ -1354,6 +1542,62 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   transform-origin: var(--avatar-focus);
   filter: grayscale(1);
 }
+
+/* What the portrait sits in: a plain span most of the time, and the link to
+   the story when one is live (components/StoryRing.tsx). It carries the gap
+   under the portrait that used to be the avatar's own, so that the ring —
+   which is drawn outside the circle, in the margin — changes nothing about
+   where the name below it sits. The card reads identically on the days
+   nothing is live. */
+.profile-portrait {
+  display: block;
+  position: relative;
+  /* The card is a flex column, so without this the wrapper stretches to the
+     card's full width and, on the days it is a link, the target with it. */
+  align-self: start;
+  border-radius: var(--radius-pill);
+  margin-bottom: var(--space-3);
+}
+
+/* Live, it is a button that opens the reel — so it has to stop looking like
+   one. Everything a button brings of its own goes; what is left is the circle
+   and the ring, and the pointer that says both can be tapped. */
+.profile-portrait--live {
+  appearance: none;
+  border: none;
+  padding: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.profile-portrait--live::before {
+  content: "";
+  position: absolute;
+  inset: calc(-1 * (var(--story-ring) + var(--story-gap)));
+  border-radius: inherit;
+  background: var(--story-paint);
+  /* Paint the band and nothing else: the middle is punched out so what shows
+     in the gap is the card's own paper, rather than a second disc of white
+     that would have to be told the card's colour to stay right. */
+  padding: var(--story-ring);
+  -webkit-mask: linear-gradient(black 0 0) content-box, linear-gradient(black 0 0);
+  mask: linear-gradient(black 0 0) content-box, linear-gradient(black 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  /* The ring cannot be in the first paint — the answer it stands on arrives
+     after the page does — so it dissolves in instead of appearing between two
+     frames. Opacity only: nothing travels, which is why the reduced-motion
+     block at the foot of this file lets it keep its time. */
+  animation: story-ring-in var(--dur-mid) var(--ease-hover) both;
+}
+
+@keyframes story-ring-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 .profile-name {
   font-size: var(--text-name);
   font-weight: var(--weight-semibold);
@@ -1433,7 +1677,7 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
 .hc {
   position: relative;
   aspect-ratio: 4 / 3;
-  border-radius: var(--home-radius);
+  border-radius: var(--bento-radius);
   overflow: hidden;
   background: var(--color-panel);
   box-shadow: var(--shadow-card);
@@ -1569,7 +1813,7 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   margin-bottom: var(--space-4);
 }
 
-/* ---- @whatabhisaw ---- */
+/* ---- @mehunabhi ---- */
 
 .insta-handle { color: var(--color-ink); }
 .insta-handle:hover { color: var(--color-accent); }
@@ -1605,8 +1849,8 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
 
 .desk-quote {
   background: var(--color-card);
-  border-radius: var(--home-radius);
-  padding: var(--home-card-pad);
+  border-radius: var(--bento-radius);
+  padding: var(--bento-card-pad);
   box-shadow: var(--shadow-card);
 }
 .desk-quote .micro-label { display: block; margin-bottom: var(--space-3); }
@@ -1632,10 +1876,176 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
 }
 .location-city { font-weight: var(--weight-semibold); }
 .location-from,
+.location-weather,
 .local-time {
   font-size: var(--text-label);
   color: var(--color-muted);
   font-variant-numeric: tabular-nums;
+}
+
+/* ---- The sky ---- */
+
+/* What the weather looks like, in the half of the location card the words do
+   not use (components/WeatherSky.tsx). The reading names one of nine
+   paintings and whether the sun is up; everything else is here.
+
+   Each one is the same two things in different weather: a vertical wash for
+   the air, and above it whatever that air is doing — a sun, a moon, cloud
+   mass, rain, fog bands, flakes, wisps. Gradients only, so there is nothing
+   to load and nothing to go stale, and the whole set costs less than one
+   photograph of a cloud.
+
+   It paints under the dotted ground rather than instead of it: the dots are
+   held back to --sky-dots while a sky is there, and what is left reads as the
+   card's own stipple over the weather. The words keep plain paper under them:
+   the mask does not begin until --sky-fade-in, which is set past the end of
+   the longest line the card can hold — "11° and raining on and off". */
+.sky {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent var(--sky-fade-in),
+    black var(--sky-fade-full)
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent var(--sky-fade-in),
+    black var(--sky-fade-full)
+  );
+}
+/* The card's own children are not positioned, so they would paint under the
+   sky; this puts them back on top of it. */
+.location > :not(.sky) { position: relative; }
+.location:has(.sky)::after { opacity: var(--sky-dots); }
+
+/* Clear: the wash, and the sun high on the right. At night the same sky in
+   indigo with the moon where the sun was. */
+.sky[data-sky='clear'] {
+  background:
+    radial-gradient(circle at 82% 20%, var(--sky-sun), transparent 38%),
+    linear-gradient(200deg, var(--sky-day-a), var(--sky-day-b));
+}
+.sky[data-sky='clear'][data-night] {
+  background:
+    radial-gradient(circle at 82% 22%, var(--sky-moon), transparent 32%),
+    linear-gradient(200deg, var(--sky-night-a), var(--sky-night-b));
+}
+
+/* Partly cloudy: the clear sky with two soft masses drifted across it. */
+.sky[data-sky='partly'] {
+  background:
+    radial-gradient(58% 44% at 84% 64%, var(--sky-cloud), transparent 72%),
+    radial-gradient(42% 32% at 61% 46%, var(--sky-cloud), transparent 72%),
+    radial-gradient(circle at 86% 17%, var(--sky-sun), transparent 42%),
+    linear-gradient(200deg, var(--sky-day-a), var(--sky-day-b));
+}
+.sky[data-sky='partly'][data-night] {
+  background:
+    radial-gradient(58% 44% at 84% 64%, var(--sky-cloud-dim), transparent 72%),
+    radial-gradient(42% 32% at 61% 46%, var(--sky-cloud-dim), transparent 72%),
+    radial-gradient(circle at 86% 17%, var(--sky-moon), transparent 30%),
+    linear-gradient(200deg, var(--sky-night-a), var(--sky-night-b));
+}
+
+/* Overcast: no sun to find, and the masses grown into each other. */
+.sky[data-sky='cloudy'] {
+  background:
+    radial-gradient(64% 52% at 78% 66%, var(--sky-cloud), transparent 76%),
+    radial-gradient(52% 40% at 55% 38%, var(--sky-cloud), transparent 76%),
+    linear-gradient(200deg, var(--sky-cloud-a), var(--sky-cloud-b));
+}
+.sky[data-sky='cloudy'][data-night] {
+  background:
+    radial-gradient(64% 52% at 78% 66%, var(--sky-cloud-dim), transparent 76%),
+    radial-gradient(52% 40% at 55% 38%, var(--sky-cloud-dim), transparent 76%),
+    linear-gradient(200deg, var(--sky-cloud-night-a), var(--sky-cloud-night-b));
+}
+
+/* Fog, haze, smoke: what fog does to a view is take the depth out of it, so
+   this is the one sky with nothing in focus — three smears lying across each
+   other and no edge anywhere. (Drawn as even bands first, which read as a
+   window blind: fog has no repeat in it.) */
+.sky[data-sky='fog'] {
+  background:
+    radial-gradient(92% 26% at 62% 32%, var(--sky-fog-band), transparent 78%),
+    radial-gradient(78% 20% at 80% 60%, var(--sky-fog-band), transparent 78%),
+    radial-gradient(68% 16% at 56% 86%, var(--sky-fog-band), transparent 78%),
+    linear-gradient(200deg, var(--sky-fog-a), var(--sky-fog-b));
+}
+
+/* Rain: a cloud over a grey-blue wash, falling in fine lines slightly off
+   vertical, the way rain is seen through glass. */
+.sky[data-sky='rain'] {
+  background:
+    repeating-linear-gradient(
+      104deg,
+      var(--sky-rain-streak) 0,
+      var(--sky-rain-streak) var(--sky-streak),
+      transparent var(--sky-streak),
+      transparent var(--sky-streak-gap)
+    ),
+    radial-gradient(58% 44% at 74% 28%, var(--sky-cloud), transparent 74%),
+    linear-gradient(200deg, var(--sky-rain-a), var(--sky-rain-b));
+}
+
+/* Sleet and freezing rain: rain with something solid in it. */
+.sky[data-sky='sleet'] {
+  background:
+    radial-gradient(var(--sky-flake) var(--sky-flake-size), transparent var(--sky-flake-size)),
+    radial-gradient(var(--sky-flake-dim) var(--sky-flake-small), transparent var(--sky-flake-small)),
+    repeating-linear-gradient(
+      104deg,
+      var(--sky-rain-streak) 0,
+      var(--sky-rain-streak) var(--sky-streak),
+      transparent var(--sky-streak),
+      transparent var(--sky-streak-gap)
+    ),
+    linear-gradient(200deg, var(--sky-rain-a), var(--sky-rain-b));
+  background-size: var(--sky-flake-grid) var(--sky-flake-grid),
+    var(--sky-flake-grid-2) var(--sky-flake-grid-2), auto auto, auto auto;
+  background-position: 0 0, var(--sky-flake-offset) var(--sky-flake-offset), 0 0, 0 0;
+}
+
+/* Snow: the palest sky of the nine, falling in flakes rather than lines. */
+.sky[data-sky='snow'] {
+  background:
+    radial-gradient(var(--sky-flake) var(--sky-flake-size), transparent var(--sky-flake-size)),
+    radial-gradient(var(--sky-flake-dim) var(--sky-flake-small), transparent var(--sky-flake-small)),
+    radial-gradient(58% 44% at 74% 26%, var(--sky-cloud), transparent 74%),
+    linear-gradient(200deg, var(--sky-snow-a), var(--sky-snow-b));
+  background-size: var(--sky-flake-grid) var(--sky-flake-grid),
+    var(--sky-flake-grid-2) var(--sky-flake-grid-2), auto auto, auto auto;
+  background-position: 0 0, var(--sky-flake-offset) var(--sky-flake-offset), 0 0, 0 0;
+}
+
+/* Thunder: rain's sky with the light taken out of it. No drawn bolt — a
+   lightning stroke held still is a scratch on the card, not weather. */
+.sky[data-sky='storm'] {
+  background:
+    repeating-linear-gradient(
+      104deg,
+      var(--sky-rain-streak) 0,
+      var(--sky-rain-streak) var(--sky-streak),
+      transparent var(--sky-streak),
+      transparent var(--sky-streak-gap)
+    ),
+    radial-gradient(70% 54% at 74% 30%, var(--sky-cloud), transparent 70%),
+    linear-gradient(200deg, var(--sky-storm-a), var(--sky-storm-b));
+}
+
+/* Wind: nothing falling, the air itself drawn out sideways. */
+.sky[data-sky='wind'] {
+  background:
+    repeating-linear-gradient(
+      182deg,
+      var(--sky-wisp) 0,
+      var(--sky-wisp) var(--sky-wisp-h),
+      transparent var(--sky-wisp-h),
+      transparent var(--sky-wisp-gap)
+    ),
+    linear-gradient(200deg, var(--sky-wind-a), var(--sky-wind-b));
 }
 
 /* ---- Work covers ---- */
@@ -1715,7 +2125,7 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
    height from a short laptop to a desktop monitor. */
 @media (min-width: 1000px) and (min-height: 680px) {
   .home {
-    height: calc(100dvh - var(--home-pad) * 2);
+    height: calc(100dvh - var(--bento-pad) * 2);
     grid-template-rows: minmax(0, 1fr);
   }
   .home-mid { grid-template-rows: minmax(0, 1fr) auto; }
@@ -1782,7 +2192,7 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   .cover { order: 10; }
 }
 @media (max-width: 640px) {
-  .frame[data-page='home'] { --home-pad: var(--space-4); }
+  .frame[data-bento] { --bento-pad: var(--space-4); }
   .hc-shot { display: none; }
   /* A phone's frame is too narrow for a long dot row and a caption on the one
      edge, so the row takes the opposite corner and gives the caption the whole
@@ -2546,21 +2956,44 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   flex: none;
 }
 
-/* ---------- Work: the switch, and the cards ---------- */
+/* ---------- Work: the bento, the switch, and the cards ---------- */
 
-/* The cards' head: the headline the front folder would otherwise carry. The
-   drawer has no head at all — its h1 is off the page. */
-.work-head { margin-bottom: var(--space-8); }
+/* /work on the house grid. Both views hang off one grid, so the route reads
+   the same whichever is showing: a head card that names it, and then either
+   the drawer — one wide cell, the set piece kept whole — or the nine projects,
+   a card each, filling the tracks the way home's cards do.
+
+   The head card carries the page's only copy that is not a project. In the
+   cards view it sets the headline, because nothing else on the page says it;
+   in the drawer view the front folder says it, so the card keeps the label and
+   the sentence and lets the folder have the words. */
+.work-bento {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bento-gap);
+  /* Stretch, not start: every card in a row stands at the row's height, and
+     the foot inside it is held to the bottom edge by its own `margin-top`.
+     That is what lands a row of covers on one baseline when one of the nine
+     needs a third line to say what it was. */
+  align-items: stretch;
+}
+
+/* ---- The head card ---- */
+
+/* `.hcard` brings the surface; this sets the rhythm inside it. It is a flex
+   column already, so the parts are spaced by one gap rather than by a margin
+   each. */
+.work-head { gap: var(--space-3); }
 
 /* The same words the front folder sets, in the page's ink instead of the
-   folder's. */
+   folder's. Smaller here than on bare paper: it is in a card now, and a card's
+   width is the measure. */
 .work-title {
-  font-size: var(--text-folder-headline);
+  font-size: var(--text-work-title);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-folder-headline);
   letter-spacing: var(--tracking-display);
   color: var(--color-ink);
-  margin-bottom: var(--space-3);
   text-wrap: balance;
 }
 .work-title-sub {
@@ -2572,15 +3005,42 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   font-size: var(--text-body);
   line-height: var(--leading-body);
   color: var(--color-body);
-  max-width: var(--reading-max);
 }
 
-/* The switch: one round button pinned to the corner of the viewport, in the
-   nav's dress — card white, pill, the card shadow — carrying the mark of the
-   view it goes to. Fixed rather than in the page because the two views are
-   very different heights, and the way back should be in the same place at
-   the top of the drawer as at the foot of the ninth card. Above the drawer's
-   stacking, below the lightbox. */
+/* The fields, as chips: what the nine are about, read off the projects' own
+   tags. A row of them is the card's foot, and it is the one place on the page
+   the accent appears while the drawer is shut. */
+.work-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: auto;
+  padding-top: var(--space-2);
+}
+
+/* ---- The drawer, seated ---- */
+
+/* The drawer spans the whole grid and is capped: it is drawn at a page width,
+   and at the bento's full 1680 the fan would be a mile of folder either side
+   of a sentence. Centred in the span, with the head card above it. */
+.work-seat {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: var(--work-drawer-max);
+  margin-inline: auto;
+  /* The front folder is drawn past the bottom of the drawer's own box, so the
+     foot of the page needs telling where the drawer really ends. */
+  padding-bottom: var(--space-8);
+}
+
+/* ---- The switch ---- */
+
+/* One round button pinned to the corner of the viewport, in the nav's dress —
+   card white, pill, the card shadow — carrying the mark of the view it goes
+   to. Fixed rather than in the page because the two views are very different
+   heights, and the way back should be in the same place at the top of the
+   drawer as at the foot of the ninth card. Above the drawer's stacking, below
+   the lightbox. */
 .view-fab {
   position: fixed;
   right: var(--space-6);
@@ -2612,52 +3072,50 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   stroke-linejoin: round;
 }
 
-/* Two columns of the desk's cards. The whole card is the link, and the title
-   answers the hover the way the featured card's does. */
-.work-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--grid-gutter);
-}
-/* No panel and no shadow: the card is the stage plus the words under it, and
-   the only drawn surface is the recess the cover sits in. */
-.work-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  color: var(--color-ink);
-  transition: transform var(--dur-press) var(--ease);
-}
+/* ---- A project, as a card ---- */
+
+/* The home page's product card, nine times: the shot in a tinted recess at the
+   top, then the name and the line about it on the card's own white. The recess
+   is what the old cards view drew on bare paper — a product shot photographed
+   on a sweep rather than pasted onto a page — and it is tinted rather than
+   matched to the covers because the nine come in on three different grounds
+   (white, warm grey, and one gradient), so no single colour could make all
+   nine dissolve into their frame. */
+.work-card { gap: var(--space-1); }
+.work-card .hcard-head { margin-bottom: var(--space-3); }
 .work-card:hover .card-title { color: var(--color-accent); }
-.work-card:active { transform: scale(var(--press-scale-card)); }
 
 .work-stage {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+  display: block;
+  aspect-ratio: 16 / 10;
+  margin-bottom: var(--space-3);
+  border-radius: var(--home-inner-radius);
+  overflow: hidden;
   background: var(--work-stage);
-  border-radius: var(--radius-card);
-  padding: var(--work-stage-pad);
 }
-/* Every shot is 16:10 whatever it was shot at, so the two columns stay level. */
 .work-shot {
   width: 100%;
-  aspect-ratio: 16 / 10;
+  height: 100%;
   object-fit: cover;
-  border-radius: var(--radius-image);
-  box-shadow: var(--shadow-stage);
 }
-/* The caption line, and the chip if the project carries one — the chip stays
-   on the right so a row of stages has its tags in a column down the page. */
-.work-stage-foot {
+
+.work-card-desc {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-body);
+}
+
+/* The facts of the thing, set small and quiet on the card's foot — and the tag
+   on the right, so a column of cards has its tags in a line down the page.
+   `margin-top: auto` holds it to the bottom edge however long the line above
+   it runs, which is what lands a row of cards on one baseline. */
+.work-card-foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  /* The shot is padded off the recess on three sides and the caption takes
-     the fourth, so the two share one optical margin rather than stacking a
-     gap on top of a pad. */
-  padding: 0 var(--space-1);
+  margin-top: auto;
+  padding-top: var(--space-4);
 }
 .work-stage-caption {
   font-family: var(--font-label);
@@ -2667,20 +3125,50 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   color: var(--color-muted);
 }
 
-/* Name then line, on one baseline. It wraps on a narrow column, which is the
-   one place this parts company with a fixed two-word descriptor — the names
-   are short and the lines are sentences, and a sentence that wraps under its
-   own name still reads as one thought. */
-.work-card-head {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: var(--space-1) var(--space-3);
+/* ---- Wider than a phone ---- */
+
+/* Two tracks, then four — the same steps home takes, for the same reason: the
+   card is the unit and the page fits as many of them across as read well. The
+   head card takes the first cell and the nine fall in after it. */
+@media (min-width: 680px) {
+  .work-bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-.work-card-desc {
-  font-size: var(--text-body);
-  line-height: var(--leading-body);
-  color: var(--color-muted);
+@media (min-width: 1000px) {
+  .work-bento { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1360px) {
+  .work-bento { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* In the drawer view the head card is a strip across the top rather than a
+   cell beside nothing: there are no sibling cards in that row to square it
+   against, and a lone card a quarter of the page wide over a full-width
+   drawer reads as a mistake. */
+.work-bento[data-view='folders'] .work-head { grid-column: 1 / -1; }
+
+/* Wide enough and the strip lies down: the label and the count, the sentence,
+   then the chips, all on one line. A row rather than a grid, because the card
+   has four children and one of them — the h1 — is off the page and must not
+   be given a cell to sit in. */
+@media (min-width: 1000px) {
+  .work-bento[data-view='folders'] .work-head {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3) var(--space-6);
+  }
+  .work-bento[data-view='folders'] .work-head .hcard-head {
+    flex: none;
+    margin-bottom: 0;
+    gap: var(--space-4);
+  }
+  /* The sentence takes the slack and is the first thing to wrap. */
+  .work-bento[data-view='folders'] .work-line { flex: 1 1 var(--work-strip-line); }
+  .work-bento[data-view='folders'] .work-fields {
+    flex: none;
+    margin-top: 0;
+    padding-top: 0;
+  }
 }
 
 /* ---------- Gallery ---------- */
@@ -2911,6 +3399,150 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   font-variant-numeric: tabular-nums;
 }
 
+/* ---------- The story reel ----------
+
+   components/StoryViewer.tsx, opened by the ring on the profile card. It
+   borrows the lightbox's scrim and its close control outright — a modal on
+   this site should not behave two different ways depending on which one was
+   opened — and adds what a reel needs that a photograph does not: the
+   segments along the top, and the two halves of the frame that step it. */
+
+.story {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--color-scrim);
+  -webkit-backdrop-filter: var(--scrim-blur);
+  backdrop-filter: var(--scrim-blur);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  animation: lightbox-in var(--dur-mid) var(--ease) both;
+}
+
+/* The frame is sized before anything has loaded, so the segments and the date
+   are not a thin strip that jumps into place when the picture lands. 9:16 is
+   nearly every story; the odd one that is not is contained inside it rather
+   than cropped, which leaves the frame's own ink showing at the ends. */
+.story-frame {
+  position: relative;
+  aspect-ratio: 9 / 16;
+  height: min(var(--story-frame-h), calc(var(--story-frame-w) * 16 / 9));
+  max-width: var(--story-frame-w);
+  border-radius: var(--radius-image);
+  background: var(--color-ink);
+  overflow: hidden;
+  animation: lightbox-figure-in var(--dur-mid) var(--ease) var(--delay-lightbox-figure) both;
+}
+
+.story-media {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* The row of segments, one per frame: Instagram's, and the only thing on
+   screen that says how long this lasts and how much of it is left. */
+.story-segments {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  right: var(--space-3);
+  z-index: 2;
+  display: flex;
+  gap: var(--story-segment-gap);
+}
+
+.story-segment {
+  flex: 1 1 0;
+  height: var(--story-segment-h);
+  border-radius: var(--radius-pill);
+  background: var(--color-control);
+  overflow: hidden;
+}
+
+/* Scaled rather than widened: a transform is the one way to move this sixty
+   times a second without asking the browser to lay the row out again. The
+   number comes from the clock in StoryViewer.tsx, frame by frame. */
+.story-segment-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-on-dark);
+  transform-origin: left center;
+}
+
+/* The date and the way out, over the top of the frame. Both sit above the tap
+   zones so the link can actually be clicked. */
+.story-when {
+  position: absolute;
+  top: calc(var(--space-3) + var(--story-segment-h) + var(--space-3));
+  left: var(--space-3);
+  right: var(--space-3);
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-family: var(--font-label);
+  font-size: var(--text-label);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-label);
+}
+.story-ago { color: var(--color-on-dark-muted); }
+.story-out {
+  color: var(--color-on-dark);
+  text-decoration: underline;
+  text-decoration-thickness: var(--hairline);
+  text-underline-offset: var(--underline-offset);
+}
+.story-out:hover { color: var(--color-on-dark-muted); }
+
+/* A frame that could not be fetched — usually a story that expired between
+   the page loading and the ring being tapped. */
+.story-gone {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  color: var(--color-on-dark-muted);
+  text-align: center;
+  text-wrap: pretty;
+}
+
+/* Instagram's proportions: a third of the frame steps back, the rest forward.
+   Invisible, but real buttons — they are what a keyboard and a screen reader
+   use to move through the reel, and the only labels either one gets. */
+.story-tap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  border: none;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+.story-tap--back { left: 0; width: 33%; }
+.story-tap--next { right: 0; width: 67%; }
+/* The outline is the only thing either of these has to show for itself, so it
+   is drawn inside the frame rather than outside it, where the frame's own
+   corners would clip it away. */
+.story-tap:focus-visible { outline-offset: calc(-1 * var(--focus-ring) * 2); }
+
+/* Held, the frame is just the picture: the chrome steps back the way
+   Instagram's does, so a held frame can actually be looked at. A fade, not a
+   move — which is why it keeps its time under reduced motion. */
+.story-frame[data-held] .story-segments,
+.story-frame[data-held] .story-when { opacity: 0; }
+.story-segments,
+.story-when { transition: opacity var(--dur-fast) var(--ease-hover); }
+
 /* ---------- Contact ---------- */
 
 /* The contact page is a writing desk. Two props are rendered in WebGL — a
@@ -2925,7 +3557,28 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
    components/ContactStudio.tsx switches the stage to `scene` only once three.js
    has loaded and a WebGL context actually exists. */
 
-.contact { max-width: var(--page-max); margin-top: var(--section-gap-lg); }
+/* Capped and centred on the bento rather than run out to its full width. The
+   stage is bound by height, not width — it is one viewport tall and keeps its
+   ratio — so widening the frame past this buys no more desk, only more paper
+   either side of a head card with four words on it. */
+.contact {
+  width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
+}
+
+/* The head and the foot, as cards. The desk between them stays on the paper:
+   it is the page's one set piece, and a typewriter in a white box is a
+   photograph of a typewriter rather than a thing on a desk. The words above
+   and below it are the same head card and the same foot row every other bento
+   page carries. */
+.studio-head,
+.studio-foot {
+  background: var(--color-card);
+  border-radius: var(--bento-radius);
+  padding: var(--bento-card-pad);
+  box-shadow: var(--shadow-card);
+}
 
 /* One screen, no scroll.
 
@@ -2980,12 +3633,7 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
      its reading measure too: on a page this wide it was wrapping to two lines
      and charging the desk thirty pixels for the second. */
   .frame[data-page='contact'] > .nav-wrap { margin-bottom: var(--space-4); }
-  .frame[data-page='contact'] .studio-head {
-    max-width: none;
-    margin-bottom: var(--space-4);
-  }
   .frame[data-page='contact'] .studio-line { max-width: none; }
-  .frame[data-page='contact'] .studio-foot { margin-top: var(--space-5); }
   .frame[data-page='contact'] .stamp { margin-top: var(--space-4); }
 
   /* The stage is the give in the layout: aspect-ratio hands over to the flex,
@@ -3015,7 +3663,15 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   }
 }
 
-.studio-head { max-width: var(--reading-max); margin-bottom: var(--space-8); }
+/* Label and line on one row, the way /work's and /fun's heads sit. */
+.studio-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-6);
+  margin-bottom: var(--bento-gap);
+}
+.studio-head .widget-label { flex: none; margin-bottom: 0; }
 
 .studio-line {
   font-size: var(--text-lead);
@@ -3817,7 +4473,7 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   align-items: center;
   flex-wrap: wrap;
   gap: var(--studio-gap);
-  margin-top: var(--space-8);
+  margin-top: var(--bento-gap);
 }
 
 .btn-ink[disabled] { opacity: 0.55; cursor: default; }
@@ -3923,22 +4579,38 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
    The board itself is in components/Gomoku.tsx; its own rules start a few
    screens down. What is above them is the page around it. */
 
-.fun { max-width: var(--page-max); margin-top: var(--section-gap-lg); }
+/* On the house bento: a head card that names the route, the board on its own
+   card, and the record on a third. Three cards rather than three bare blocks
+   on paper — the page hands the desk over, but it is still this desk. */
+.fun {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bento-gap);
+  /* Narrower than the bento it stands on, and centred in it. The board has a
+     ceiling of its own (--goban-max: any bigger and a 15×15 grid is a table
+     rather than a board you can take in at a glance), so a card run out to
+     1680 would be a 560px board with a third of a metre of white either side.
+     Every other bento page has enough cards to fill that width; this one has
+     one square object and a tally. */
+  width: 100%;
+  max-width: var(--fun-max);
+  margin-inline: auto;
+}
 
-.fun-head { max-width: var(--reading-max); margin-bottom: var(--space-6); }
+/* The head card. The same shape /work opens with: the label and a quiet fact,
+   then the line in the lead face. */
+.fun-head { gap: var(--space-2); }
 
-/* The lead face, exactly as /contact sets it — same size, same weight, same
-   measure. Two pages that are built the same way should read the same way. */
+/* The lead face, exactly as /contact sets it — same size, same weight. Two
+   pages that are built the same way should read the same way. */
 .fun-line {
   font-size: var(--text-lead);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-lead);
   letter-spacing: var(--tracking-lead);
   color: var(--color-ink);
-  max-width: var(--contact-max);
 }
 .fun-note {
-  margin-top: var(--space-2);
   font-size: var(--text-body);
   line-height: var(--leading-body);
   color: var(--color-body);
@@ -3950,15 +4622,23 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
 .fun-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--card-gap);
+  gap: var(--bento-gap);
   align-items: stretch;
 }
 
+/* The board's card. The surface is declared here rather than by adding
+   `.hcard` in the component, because the desk is also the flex chain that
+   passes the page's height down to the board and the two want saying in one
+   place. */
 .gomoku-desk {
   display: flex;
   flex-direction: column;
   min-height: 0;
   gap: var(--space-4);
+  background: var(--color-card);
+  border-radius: var(--bento-radius);
+  padding: var(--bento-card-pad);
+  box-shadow: var(--shadow-card);
 }
 
 /* ---------- Gomoku ---------- */
@@ -4192,9 +4872,10 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   flex-direction: column;
   min-height: 0;
   gap: var(--space-4);
-  padding: var(--panel-pad-lg);
-  background: var(--color-panel);
-  border-radius: var(--radius-panel);
+  padding: var(--bento-card-pad);
+  background: var(--color-card);
+  border-radius: var(--bento-radius);
+  box-shadow: var(--shadow-card);
 }
 .gomoku-record > .widget-label { margin-bottom: var(--space-4); }
 
@@ -4296,19 +4977,19 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   }
   .frame[data-page='fun'] .fun {
     flex: 1;
-    display: flex;
-    flex-direction: column;
     min-height: 0;
-    margin-top: var(--space-8);
   }
   /* Every gap above and below the board is height the board does not get, so
-     each one is cut to the smallest that still separates. */
-  .frame[data-page='fun'] > .nav-wrap { margin-bottom: var(--space-6); }
+     each one is cut to the smallest that still separates. The head card lies
+     down into one line here for the same reason /work's does: three short
+     things stacked is two line-heights the board could have had. */
   .frame[data-page='fun'] .fun-head {
-    max-width: none;
-    margin-bottom: var(--space-4);
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2) var(--space-6);
   }
-  .frame[data-page='fun'] .fun-line { max-width: none; }
+  .frame[data-page='fun'] .fun-head .hcard-head { margin-bottom: 0; flex: none; }
 
   /* The record takes its column, and the board takes whatever is left on both
      axes. A fixed column, because a record that grows with the window is a
@@ -4350,12 +5031,9 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
     width: min(100%, 100cqh, var(--goban-max));
   }
 
-  /* And the panel beside it keeps its own scroll rather than giving the page
+  /* And the card beside it keeps its own scroll rather than giving the page
      one. */
-  .frame[data-page='fun'] .gomoku-record {
-    padding: var(--card-padding);
-    overflow-y: auto;
-  }
+  .frame[data-page='fun'] .gomoku-record { overflow-y: auto; }
 
   .frame[data-page='fun'] .stamp { margin-top: var(--space-4); }
 }
@@ -4373,30 +5051,76 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   text-transform: uppercase;
 }
 
-/* ---------- About ---------- */
+/* The weather in it is Apple's reading (components/Weather.tsx), which arrives
+   after the page does; the component renders a space until then, so nothing
+   under the line moves when the real sky lands. The credit is WeatherKit's
+   terms rather than a link anyone is meant to follow, so it wears the foot's
+   own colour and only underlines when someone goes for it. */
+.weather-credit {
+  color: inherit;
+  text-decoration: none;
+}
+.weather-credit:hover,
+.weather-credit:focus-visible {
+  text-decoration: underline;
+}
 
-/* Stretch, not start: the side column has to know the row's height so its last
-   row can fill it, which is what lands both columns on the same bottom line. */
-.about-grid {
+/* ---------- Life ---------- */
+
+/* Life on the house bento (see "The bento"). Four tracks, split by what they
+   are for the way home's are: who I am down the left, the work beside it, the
+   two live cards after that, and what I look at and work with on the end. Every track ends level
+   with the others — see "Squaring the tracks" at the foot of this section for
+   what pays for that.
+
+   What this replaced was one tall card holding all five sections of the
+   biography at once, with the widgets parked in a column next to it — a page
+   of text with a sidebar. A section to a card is the same words, read at the
+   density the rest of the site is read at, and it gives the sticker sheet an
+   edge to hang off every few hundred pixels instead of two long ones.
+
+   Phone first: one column, in the order app/life/page.tsx writes it. */
+.life-bento {
   display: grid;
-  grid-template-columns: 55fr 45fr;
-  gap: var(--card-gap);
-  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bento-gap);
+  align-items: start;
+}
+.life-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bento-gap);
+  min-width: 0;
+}
+
+/* ---- The lead card ---- */
+
+/* The heading and the opening section on one card, the way home's profile
+   card carries the name and the bio: a page should open with a sentence, not
+   with a label.
+
+   The gap between the two is an auto margin rather than a fixed one, because
+   this is the first track's elastic card (see "Squaring the tracks"): the
+   section sits at the foot of the card and the slack opens under the title,
+   which is the one place on this page where empty space reads as typography
+   rather than as a hole. With no slack to take — a phone, a narrow tablet —
+   the auto margin is nothing and the padding is the gap it always was. */
+.life-lead .hcard-head {
+  margin-top: auto;
+  padding-top: var(--space-5);
 }
 
 .about-heading {
-  font-size: var(--text-display);
+  font-size: var(--text-life-heading);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-display);
   letter-spacing: var(--tracking-display);
   color: var(--color-ink);
-  margin-bottom: var(--space-8);
+  text-wrap: balance;
 }
 .about-heading .glyph { color: var(--color-muted); font-weight: var(--weight-medium); }
 
-.about-section { margin-bottom: var(--space-8); }
-.about-section:last-child { margin-bottom: 0; }
-.about-section .widget-label { margin-bottom: var(--space-3); }
+/* ---- A section of the biography ---- */
 
 .about-body {
   font-size: var(--text-body);
@@ -4433,6 +5157,155 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   margin-top: var(--space-3);
 }
 
+/* On the gradient the ink inverts: the prose, the links, and the aside that
+   would otherwise be set in the accent the card is already made of. */
+.hcard--gradient .about-body { color: var(--color-on-dark); }
+.hcard--gradient .about-link { color: var(--color-on-dark); }
+.hcard--gradient .about-link:hover,
+.hcard--gradient .about-link:focus-visible { color: var(--color-on-dark); }
+.hcard--gradient .about-hint,
+.hcard--gradient .about-aside { color: var(--color-on-dark-muted); }
+
+/* ---- The deck, in a card ---- */
+
+/* The dock is built as a white tray to float on the panel grey, and in a white
+   card that tray is invisible. So on this page it gives up its own surface and
+   keeps the part that matters — the ring and the name bubble under a pointer.
+
+   Without the tray there is nothing holding the icons to their tray size, and
+   seven of them wrapping at 44px left the card mostly white: five across, two
+   under, and a hole where the other two would have been. So here the deck is
+   a grid rather than a wrapping row — four to a line, each cell a quarter of
+   the track, and the icon filling its cell. Four because seven breaks evenly
+   enough into four and three; at five or six the second line is a stub again.
+   The icons grow with the track instead of sitting at a fixed size in the
+   corner of it, and the only white left is the one cell at the end. */
+.life-bento .tools-card .dock {
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(var(--deck-cols), minmax(0, 1fr));
+  gap: var(--space-2);
+  justify-items: center;
+}
+
+/* The slot stops being a 50px box and becomes the cell: square, as wide as
+   its share of the track, and held under the ceiling so a wide card does not
+   blow the icons up past the pixels they actually have. */
+.life-bento .tools-card .dock-slot {
+  width: 100%;
+  height: auto;
+  max-width: var(--deck-icon-max);
+  aspect-ratio: 1;
+  border-radius: var(--radius-app-icon);
+}
+
+/* The corner rounds with the icon: a fixed 8px that reads as a squircle at
+   44px reads as a square with the edges knocked off at twice that. The ring
+   is the slot's own radius, so it keeps hugging the shape it outlines. */
+.life-bento .tools-card .tool-icon {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+/* ---- Wider than a phone ---- */
+
+/* Two tracks, then four — the steps home takes. At two, the wrappers stay
+   wrappers and the tracks pair up; at four each is its own column. */
+@media (min-width: 760px) {
+  .life-bento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* Stretch, so a track knows its row's height and the elastic card in it
+       has something to fill. At two tracks the rows pair off and each pair
+       squares itself up; at four there is one row and the page does. */
+    align-items: stretch;
+  }
+  .life-col { min-height: 0; }
+
+  /* ---- Squaring the tracks ----
+
+     Four stacks of cards whose heights are set by how much Abhishek wrote
+     will not end level, and the gap under the shortest of them is the only
+     thing on a bento page that reads as a mistake. So every track carries one
+     card that can be any height and takes what the fixed ones leave: the
+     heading card here, the gradient in the work track, the map beside it, the
+     photograph on the end. None of them is being padded out — each is a thing
+     that is better bigger, which is what makes this a composition rather than
+     a shim.
+
+     The biography is split three and two across the first two tracks
+     (app/life/page.tsx) so that what is left over is air, not a half-empty
+     card: the elastic cards here absorb tens of pixels, not hundreds.
+
+     Two of the four have a ceiling — a picture has a shape, and past a point
+     the slack has to go somewhere else. So each of those tracks has a second
+     card behind the first: the map fills until it is square and the record
+     takes the rest, the photograph fills until it is square and the deck takes
+     the rest. The growth factors are lopsided rather than equal so that the
+     elastic card is the one that grows and the card behind it only gets what
+     is left after the ceiling, instead of the two splitting every pixel and
+     neither looking like it meant to. */
+  .life-lead,
+  .life-bento .hcard--gradient { flex: 1 1 auto; }
+  .life-bento .places,
+  .life-col .gp-frame { flex: 20 1 auto; }
+  .life-bento .listening,
+  .life-bento .tools-card { flex: 1 1 auto; }
+
+  /* The ceilings, in the track's own width: `cqw` is the card the query is
+     asked of, so these read as ratios rather than as pixel guesses. */
+  .life-bento .places { container-type: inline-size; }
+  .life-col { container-type: inline-size; }
+
+  /* The map strip takes its card's slack. 3:1 is its floor, not its ratio —
+     `aspect-ratio` sizes it before it grows — and the ceiling is a third
+     taller than it is wide, because a window on Hamburg-to-Jaipur much past
+     that is a window on the sea. */
+  .life-bento .places {
+    display: flex;
+    flex-direction: column;
+  }
+  .life-bento .places-map {
+    flex: 1 1 auto;
+    max-height: 130cqw;
+  }
+
+  /* The photograph stops at square. The gallery is two parts 3:4 to one part
+     4:3 and this is the one frame on the site that crops (§9), so the shape
+     to hold it to is the one that takes the same bite out of either: a 4:3
+     loses a quarter of its width here, a 3:4 a quarter of its height, and the
+     focus point in lib/gallery.ts decides which quarter. A frame the full
+     height of the grid was showing about a third of a landscape picture.
+
+     The floor is a shape too, not just a number of pixels: where the track
+     beside it is short — two tracks on a tablet, where the photograph shares
+     a row with two widgets rather than three — the frame was flattening to a
+     letterbox and taking half the height out of a portrait. Between the two
+     bounds it is never further than a sixth from square either way.
+
+     `.gp-tile` generates no box, so the frame itself is the flex item. */
+  .life-col .gp-frame {
+    min-height: max(var(--gp-min-h-tight), 85cqw);
+    max-height: 100cqw;
+  }
+
+  /* What the deck does with the height the photograph could not use: the
+     icons sit in the middle of it rather than against the label, so the card
+     reads as a tray with air around it. */
+  .life-bento .tools-card .dock { margin-block: auto; }
+}
+@media (min-width: 1200px) {
+  .life-bento { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* The aside on the record, in a quarter-track. At the lead size the hint wraps
+   to two lines and drops one word onto the second; a step down keeps it on
+   one. */
+.life-bento .listening-hint { font-size: var(--text-card-title); }
+
 /* ---------- Stickers ----------
 
    The desk items, stuck over the Life page and movable (components/
@@ -4452,12 +5325,35 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   initial-value: 0;
 }
 
+/* ---------- The pile ---------- */
+
+/* The stickers rest in a band along the foot of the page — nine of them tipped
+   out in two loose rows, none of them on a card (lib/stickers.ts). The cards
+   are then the page, and the stickers are a tray under it to pull from.
+
+   The band is the field's own padding, so it is always there whatever the grid
+   above it does; and the frame fills the screen with the field taking the
+   slack, so on a tall window the air opens up between the cards and the pile
+   rather than below the foot where nothing can use it. */
 .sticker-field {
-  /* The band the stickers lie in on a phone, above the cards. Declared on the
-     field, not the layer: the field is what makes room for it. */
+  /* The band the stickers lie in: under the cards on a desk, above them on a
+     phone. Declared on the field, not the layer: the field is what makes room
+     for it. */
   --sticker-band: 230px;
   position: relative;
+  padding-bottom: var(--sticker-band);
 }
+
+.frame[data-page='life'] {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.frame[data-page='life'] > main {
+  display: flex;
+  flex: 1;
+}
+.frame[data-page='life'] .sticker-field { flex: 1; }
 
 .stickers {
   /* How deep the corner folds, in px before the layout's scale. About the
@@ -4487,15 +5383,20 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   pointer-events: none;
 }
 
-/* Position is a fraction of the layer. --x/--y exist only once a sticker has
-   been moved; until then the resting spot for this layout applies, and the
-   phone breakpoint below swaps in its own. */
+/* --pos-x/--pos-y exist only once a sticker has been moved, and are lengths:
+   a dragged sticker is placed as a fraction of the whole layer, a resting one
+   off the bottom of the pile band, and the two anchors share one property
+   through the fallback. Until then the resting spot for this layout applies,
+   and the phone breakpoint below swaps in its own. */
 .sticker {
   --peel: 0;
   --d: calc(var(--peel) * var(--sticker-fold) * var(--sticker-scale));
   position: absolute;
-  left: calc(var(--x, var(--dx)) * 100%);
-  top: calc(var(--y, var(--dy)) * 100%);
+  left: var(--pos-x, calc(var(--pile-x) * 100%));
+  top: var(
+    --pos-y,
+    calc(100% - var(--sticker-band) + var(--pile-y) * var(--sticker-band))
+  );
   width: calc(var(--w) * var(--sticker-scale));
   z-index: var(--z, 0);
   transform: translate(-50%, -50%)
@@ -4577,8 +5478,11 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   --h: calc(var(--w) * var(--sticker-scale) * var(--ratio) * var(--sticker-lift));
   --off: calc(var(--h) / 2 + var(--space-4));
   position: absolute;
-  left: calc(var(--x, var(--dx)) * 100%);
-  top: calc(var(--y, var(--dy)) * 100%);
+  left: var(--pos-x, calc(var(--pile-x) * 100%));
+  top: var(
+    --pos-y,
+    calc(100% - var(--sticker-band) + var(--pile-y) * var(--sticker-band))
+  );
   z-index: 100;
   width: max-content;
   max-width: var(--note-w);
@@ -4606,33 +5510,6 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
 @keyframes note-in {
   from { opacity: 0; }
   to { opacity: 1; }
-}
-
-/* Map across the top, then the gallery tile beside the deck. The second column
-   is `auto` so the deck takes only the width its icons need and the photograph
-   gets everything else; the second row is `1fr` so the tile grows to the bottom
-   of the card beside it. */
-.side-grid {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto 1fr auto;
-  gap: var(--card-gap);
-  align-items: stretch;
-  height: 100%;
-  min-height: 0;
-}
-.side-full { grid-column: 1 / -1; grid-row: 1; }
-/* The song on, across the bottom under the tile. */
-.side-grid > .listening { grid-column: 1 / -1; grid-row: 3; }
-
-/* The deck stands the full height of the photograph beside it. Its icons keep
-   their own rhythm and centre in whatever tray height they are given, rather
-   than spreading out to fill it. */
-.side-grid > .dock {
-  grid-column: 2;
-  grid-row: 2;
-  align-self: stretch;
-  justify-content: center;
 }
 
 /* ---------- Places widget ---------- */
@@ -4719,9 +5596,12 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
 
 /* ---------- Gallery preview (Photos-style tile) ---------- */
 
-/* The tile generates no box of its own, so the frame and the deck sit as
-   siblings in one grid row and end on the same line. */
+/* The tile generates no box of its own: the frame is the thing that is laid
+   out, and on /life it is the flex item its column stretches. */
 .gp-tile { display: contents; }
+
+/* The bento's corner, like every other card standing on it. */
+.frame[data-bento] .gp-frame { border-radius: var(--bento-radius); }
 
 /* The white frame around the picture. It is the shadow and the radius that
    separate frame from ground, not the fill — the same way the reference tile
@@ -4729,8 +5609,6 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
 .gp-frame {
   position: relative;
   display: block;
-  grid-column: 1;
-  grid-row: 2;
   min-height: var(--gp-min-h);
   background: var(--color-card);
   border-radius: var(--radius-card);
@@ -4962,88 +5840,26 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   text-overflow: ellipsis;
 }
 
-/* ---------- Life: one screen ---------- */
+/* ---------- Life: the sticker clip ---------- */
 
-/* The desk is looked at, not read down: on a laptop the whole page should
-   sit on the screen without a scroll, the way the home desk and /contact
-   already do. So the frame becomes a column one viewport tall (svh, for the
-   same reason as /contact), the grid takes what is left after the nav and the
-   stamp, and each column fits itself to that.
+/* The stickers hang off the edges of the sheet, and anything hanging off the
+   page would give it a scroll for nothing but itself. Clipped at the page, on
+   both axes. `clip`, not `hidden`: it makes no scroll container, so the page
+   cannot be nudged either.
 
-   The prose card is the one thing whose height is fixed by its words, so the
-   rhythm inside it is tightened here, and if a screen is shorter still it
-   scrolls within the card rather than taking the page with it. On the side,
-   the photo tile is the give — it takes whatever the map and the record leave
-   — and the tools strip stands the full height of the stack beside all three,
-   since five icons in a column need more height than a tile alone should
-   have to be. Under the guard the page scrolls as any page does. */
-@media (min-width: 860px) and (min-height: 780px) {
-  /* `height`, not `min-height`: a minimum only ever adds, and the whole point
-     is that the frame stays the screen's size while the parts inside fit
-     themselves to it. */
-  .frame[data-page='life'] {
-    height: 100svh;
-    display: flex;
-    flex-direction: column;
-    padding-bottom: var(--space-6);
-  }
-  /* The stickers that hang off the bottom of the sheet would otherwise hang
-     off the bottom of the screen and give the page a scroll for nothing but
-     them. Clipped at the page, which is the full width of the screen, and on
-     the vertical axis only — the frame is narrower than the screen, and a
-     sticker hanging past its side must not be cut. `clip`, not `hidden`: it
-     makes no scroll container, so the page cannot be nudged either. */
-  .page:has(> .frame[data-page='life']) { overflow: visible clip; }
-  .frame[data-page='life'] > .nav-wrap { margin-bottom: var(--space-5); }
-  .frame[data-page='life'] > main,
-  .frame[data-page='life'] .sticker-field {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-  }
-  .frame[data-page='life'] .about-grid {
-    flex: 1;
-    min-height: 0;
-    /* One row, the height of the grid — minmax(0, …) so it can be shorter
-       than its content, which is what lets the prose card scroll and the
-       tile shrink instead of the row growing past the screen. */
-    grid-template-rows: minmax(0, 1fr);
-  }
-  /* The card is as tall as the screen allows, and its words are as tall as
-     they are; the difference goes into the gaps between sections, evenly, so
-     the prose sits balanced in the card rather than piled at its top. On a
-     screen with no room to spare the gaps sit at their tightened minimum. */
-  .frame[data-page='life'] .about-grid > article {
-    min-height: 0;
-    overflow-y: auto;
-    padding: var(--card-padding);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-  /* A little more of the width to the words: a line saved in a section is
-     twenty pixels the screen does not have to find. */
-  .frame[data-page='life'] .about-grid { grid-template-columns: 57fr 43fr; }
-  .frame[data-page='life'] .about-heading { margin-bottom: var(--space-4); }
-  .frame[data-page='life'] .about-section { margin-bottom: var(--space-4); }
-  .frame[data-page='life'] .about-section .widget-label { margin-bottom: var(--space-2); }
+   It used to be the vertical axis only, because the frame was narrower than
+   the screen and a sticker hanging past the frame's side had somewhere to go.
+   On the bento it does not: the frame reaches the screen's edge, so a sticker
+   past the cards is a sticker past the window, which is a horizontal scrollbar
+   and half a sticker at the end of it. Dragging is clamped to the layer
+   anyway, so nothing a visitor can do ends up outside this.
 
-  .frame[data-page='life'] .side-grid {
-    grid-template-rows: auto minmax(0, 1fr) auto;
-  }
-  .frame[data-page='life'] .gp-frame { min-height: var(--gp-min-h-tight); }
-  .frame[data-page='life'] .side-grid > .dock { grid-row: 2 / 4; }
-  .frame[data-page='life'] .side-grid > .listening { grid-column: 1; }
-
-  /* The stamp on one line: its second line was nineteen pixels of the desk. */
-  .frame[data-page='life'] .stamp {
-    margin-top: var(--space-4);
-    display: flex;
-    justify-content: space-between;
-    gap: var(--space-4);
-  }
-}
+   This also used to live inside a one-screen block that pinned the frame to
+   the viewport and fitted every card to what was left. The bento does not need
+   that: four tracks of short cards are most of a screen shorter than the one
+   tall prose card they replaced, so the page simply fits, and on a laptop that
+   cannot fit it, it scrolls like any other. */
+.page:has(> .frame[data-page='life']) { overflow: clip; }
 
 /* ---------- Case study ---------- */
 
@@ -5249,16 +6065,14 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
 }
 
 @media (max-width: 860px) {
-  /* `minmax(0, 1fr)`, not `1fr`: a grid track's floor is its content's
-     min-content width, and the deck's seven icons in a row will not shrink
-     below 404px. On a phone that widened the whole column past the screen and
-     gave the page a sideways scroll. */
-  .about-grid { grid-template-columns: minmax(0, 1fr); }
   /* One column leaves no corner free of prose, so the stickers get a band of
      their own above the cards — a loose sheet of them, smaller, overlapping —
      and stay inside it: the layer is the band, and a drag is clamped to the
      layer. */
-  .sticker-field { padding-top: calc(var(--sticker-band) + var(--card-gap)); }
+  .sticker-field {
+    padding-top: calc(var(--sticker-band) + var(--card-gap));
+    padding-bottom: 0;
+  }
   .stickers {
     --sticker-scale: 0.62;
     inset: 0 0 auto;
@@ -5266,57 +6080,22 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
   }
   .sticker,
   .sticker-note {
-    left: calc(var(--x, var(--px)) * 100%);
-    top: calc(var(--y, var(--py)) * 100%);
+    left: var(--pos-x, calc(var(--px) * 100%));
+    top: var(--pos-y, calc(var(--py) * 100%));
   }
   /* Smaller stickers, a smaller tag — and a short band, so the words shrink
      to the body size rather than covering half the sheet. */
   .sticker-note { font-size: var(--text-lead); }
-  /* One column: nothing to align a bottom edge against any more, so the tile
-     goes back to a square and the deck lies back down — a full-width standing
-     strip would be a very tall thin nothing. */
-  .side-grid {
-    /* `minmax(0, …)` for the same reason as .about-grid above: the live map's
-       view reports a min-content width of its own, and a `1fr` track will not
-       shrink under it. */
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: none;
-    height: auto;
-  }
-  /* Nothing to match a bottom edge against here, so the tile becomes an
-     ordinary box again and the frame carries its own square instead of taking
-     the height a neighbouring column leaves it. */
+}
+
+/* Nothing to match a bottom edge against in one column, so the photo tile
+   becomes an ordinary box again and carries its own square. One column, not
+   one sheet of stickers: the band above starts at 860px and the grid does not
+   fold until 760, and between the two the photograph is still squaring off a
+   track beside it. */
+@media (max-width: 759.98px) {
   .gp-tile { display: block; }
-  /* Every explicit placement has to go, or the deck's column 2 conjures an
-     implicit second track and the single column never happens. */
-  .gp-frame,
-  .side-grid > .side-full,
-  .side-grid > .dock,
-  .side-grid > .listening { grid-column: auto; grid-row: auto; }
   .gp-frame { min-height: 0; aspect-ratio: 1 / 1; }
-  .side-grid > .dock { align-self: start; justify-content: flex-start; }
-  /* And it wraps: on a narrow phone a second row of icons is a tray, a row
-     running off the card is not. */
-  .side-grid .dock[data-direction='column'] { flex-direction: row; flex-wrap: wrap; }
-  .side-grid .dock[data-direction='column'] .tool-tip {
-    top: calc(100% + var(--space-3));
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%) scale(0.92);
-    transform-origin: top center;
-  }
-  .side-grid .dock[data-direction='column'] .tool-tip::after {
-    top: calc(var(--bubble-tail) / -2);
-    left: 50%;
-    right: auto;
-    margin-left: calc(var(--bubble-tail) / -2);
-    margin-top: 0;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    .side-grid .dock[data-direction='column'] .dock-slot:hover .tool-tip {
-      transform: translateX(-50%) scale(1);
-    }
-  }
 }
 
 @media (max-width: 820px) {
@@ -5360,16 +6139,21 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
    room to be careless with it. A board needs a thumb. So the gate is gone, and
    the only thing left to do at this width is hand the board the whole screen.
 
-   The grid is already one column here; what it cannot do by itself is let the
-   board use the page's gutter. On a 320px phone the frame's padding takes 48px
-   off a 15-wide grid, which is the difference between a 19px cell and a 16px
-   one — and 16px is where a thumb starts missing. So the board alone breaks
-   out of the gutter, and nothing else on the page moves. */
+   The grid is already one column here; what it cannot do by itself is give the
+   board the padding around it. Every pixel taken off a 15-wide grid is a third
+   of a pixel off every cell, and 16px is where a thumb starts missing. So the
+   board alone breaks out, and nothing else on the page moves.
+
+   Out of the card's padding, not the page's gutter: the board sits on a card
+   now, and a board that cleared the gutter would be laying wood across the
+   card's edge. It needs no clipping to do this — the board is a band across
+   the card's middle, and the card's sides are straight everywhere but the
+   corners, which the head above and the legend below keep it clear of. */
 @media (max-width: 759.98px) {
   .gomoku-stage {
-    margin-inline: calc(var(--frame-pad-x) * -1);
+    margin-inline: calc(var(--bento-card-pad) * -1);
   }
-  /* Edge to edge, so a radius would be cutting the corners off the screen. */
+  /* Edge to edge of the card, so a radius would be cutting its own corners. */
   .goban { border-radius: 0; }
 
   /* Everything in the record reads down the page now rather than beside the
@@ -5440,7 +6224,21 @@ a.hcard:hover .pill--ink { background: var(--color-ink-hover); }
      from within keeps its fade, which moves nothing. */
   .nav-capsule[data-pressed] { transform: none; }
   .nav-capsule::after { transition-duration: var(--dur-mid) !important; }
-  /* The squares in the @whatabhisaw row stop leaning in and dim instead —
+  /* The reel's chrome fades out under a press rather than sliding away, and
+     the frame itself arrives on the lightbox's own fade instead of rising
+     into place, exactly as the gallery's figure does just above. Both are
+     opacity: nothing travels, so both keep their time. */
+  .story-segments,
+  .story-when { transition-duration: var(--dur-fast) !important; }
+  .story-frame {
+    animation-name: lightbox-in !important;
+    animation-duration: var(--dur-mid) !important;
+  }
+  /* The ring around the portrait appears a moment after the page, so it has
+     a fade to arrive on rather than a frame to pop in at. It is opacity on a
+     thing that is not there yet — nothing travels — so it keeps its time. */
+  .profile-portrait--live::before { animation-duration: var(--dur-mid) !important; }
+  /* The squares in the @mehunabhi row stop leaning in and dim instead —
      still an answer to the pointer, with nothing travelling. */
   .insta-tile:hover img { transform: none; opacity: var(--insta-dim); }
   .insta-tile img { transition: opacity var(--dur-fast) var(--ease-hover) !important; }
