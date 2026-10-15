@@ -132,12 +132,31 @@ const line = (tempC: number, phrase: string) =>
 const base64url = (input: string | Buffer) =>
   Buffer.from(input).toString("base64url");
 
+/** A .p8 in the shape OpenSSL will actually take.
+
+    A key pasted into a dashboard field rarely survives as a file: the line
+    breaks come back as "\n", or as spaces, or as nothing at all, and a PEM
+    whose header runs into its body is one Node refuses outright —
+    ERR_OSSL_UNSUPPORTED, "DECODER routines::unsupported", thrown at the
+    signature rather than at the paste, which is a long way from the mistake.
+    So the lines are put back here: the armour off, the whitespace out, the
+    body re-wrapped at the 64 characters PEM has always used. A key that
+    arrived intact matches the first test and is handed straight back. */
+function pem(raw: string): string {
+  const text = raw.trim().replace(/^['"]|['"]$/g, "").replace(/\\n/g, "\n");
+  if (/-----BEGIN [A-Z ]+-----\r?\n/.test(text)) return text;
+  const label = text.match(/-----BEGIN ([A-Z ]+)-----/)?.[1].trim() ?? "PRIVATE KEY";
+  const body = text.replace(/-----[^-]*-----/g, "").replace(/\s+/g, "");
+  const lines = body.match(/.{1,64}/g) ?? [];
+  return `-----BEGIN ${label}-----\n${lines.join("\n")}\n-----END ${label}-----\n`;
+}
+
 /** The key, from the env var or the .p8 in the project root. Null if neither. */
 async function privateKey(keyId: string): Promise<string | null> {
   const fromEnv = process.env.WEATHERKIT_PRIVATE_KEY;
-  if (fromEnv) return fromEnv.replace(/\\n/g, "\n");
+  if (fromEnv) return pem(fromEnv);
   try {
-    return await readFile(`AuthKey_${keyId}.p8`, "utf8");
+    return pem(await readFile(`AuthKey_${keyId}.p8`, "utf8"));
   } catch {
     return null;
   }
